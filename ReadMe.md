@@ -9,8 +9,8 @@ Welcome to our project repository!
 - Member 2
     Hello! My name is Byron, my favorite hobby is playing board games. I'm excited to get working on this class with all of you!
 - Member 3
-- Member 4
-- Member 5
+- Matias
+    Hello my name is Matias Vondemknesebeck and I'm a computer science major at Weber State University. I enjoy gardening, baking, and jogging. I am excited to work with you all and gain experience making projects with a team. Let's have a great semester.
 - Nischal
   Hi, I'm Nischal Shrestha, a senior computer science student at Weber State University.
 - Kylie Olney
