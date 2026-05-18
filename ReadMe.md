@@ -10,3 +10,5 @@ Welcome to our project repository!
 - Member 4
 - Member 5
 - Member 6
+
+  Hi, I'm Nischal Shrestha, a senior computer science student at Weber State University.
