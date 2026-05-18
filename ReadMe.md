@@ -6,6 +6,7 @@ Welcome to our project repository!
 
 - Member 1
 - Member 2
+    Hello! My name is Byron, my favorite hobby is playing board games. I'm excited to get working on this class with all of you!
 - Member 3
 - Member 4
 - Member 5
