@@ -15,3 +15,5 @@ Welcome to our project repository!
   Hi, I'm Nischal Shrestha, a senior computer science student at Weber State University.
 - Kylie Olney
 	Hi! I'm Kylie. Excited to be working with you guys. I enjoy knitting and crocheting in my free time. 
+- Colton
+    Hello my name is Colton Anderson and I'm excited to be apart of the team. Some things I like are lifting, gaming and horror movies. 
