@@ -8,7 +8,8 @@ Welcome to our project repository!
 > I am Mahlon Stephenson and this is my second year at Weber State. I am majoring in computer science and will graduate this fall. My hobbies are writing, hiking and video games. Some of my favorite things are horror movies, turkey subs and temperate rainforests. I'm also interested in British mythology and Old English literature.
 - Member 2
     Hello! My name is Byron, my favorite hobby is playing board games. I'm excited to get working on this class with all of you!
-- Member 3
+- Ben
+	Hi, I'm Ben Alyk and I'm a CS Major at WSU. I enjoy creative hobbies like music and photography/videography, and I'm excited to put some creative energy into this project!
 - Matias
     Hello my name is Matias Vondemknesebeck and I'm a computer science major at Weber State University. I enjoy gardening, baking, and jogging. I am excited to work with you all and gain experience making projects with a team. Let's have a great semester.
 - Nischal
