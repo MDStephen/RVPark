@@ -1,3 +1,4 @@
+/**
 public class Userlogic {
     private DatabaseWrapper dw;
     private List<User> userList;
@@ -23,3 +24,4 @@ public class Userlogic {
     public List<User> GetUserList() {return userList;}
 
 }
+**/
