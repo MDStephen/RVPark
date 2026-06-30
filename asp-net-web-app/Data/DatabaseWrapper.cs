@@ -15,5 +15,17 @@ namespace asp_net_web_app.Data
             modelBuilder.Entity<Users>().ToTable("Users"); 
         }
 
+        public void AddUser(string username)
+        {
+            Users.Add(new Users
+            {
+                firstName = username,
+                lastName = "",
+                emailAddress = "",
+                phoneNumber = "",
+                address = ""
+            });
+            SaveChanges();
+        }
     }
 }
