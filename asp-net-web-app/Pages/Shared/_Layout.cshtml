@@ -1,29 +1,60 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - asp_net_web_app</title>
+    <title>@ViewData["Title"] - Reservation Manager</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/asp_net_web_app.styles.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+<body class="app-shell">
 
-    <footer class="border-top footer text-muted">
-    </footer>
+    <!-- ── Sidebar ───────────────────────────────────────── -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <i class="bi bi-clipboard2-check brand-icon"></i>
+            <span class="brand-text">Reservation<br>Manager</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/Index" class="nav-item @(ViewData["Page"]?.ToString() == "Dashboard" ? "active" : "")">
+                <i class="bi bi-grid nav-icon"></i> Dashboard
+            </a>
+            <a href="/Reservations" class="nav-item @(ViewData["Page"]?.ToString() == "Reservations" ? "active" : "")">
+                <i class="bi bi-calendar3 nav-icon"></i> Reservations
+            </a>
+            <a href="/Customers" class="nav-item @(ViewData["Page"]?.ToString() == "Customers" ? "active" : "")">
+                <i class="bi bi-person nav-icon"></i> Customers
+            </a>
+            <a href="/Sites" class="nav-item @(ViewData["Page"]?.ToString() == "Sites" ? "active" : "")">
+                <i class="bi bi-geo-alt nav-icon"></i> Sites
+            </a>
+            <a href="/Reports" class="nav-item @(ViewData["Page"]?.ToString() == "Reports" ? "active" : "")">
+                <i class="bi bi-bar-chart nav-icon"></i> Reports
+            </a>
+            <a href="/Users" class="nav-item @(ViewData["Page"]?.ToString() == "Users" ? "active" : "")">
+                <i class="bi bi-people nav-icon"></i> Users
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="avatar-circle">
+                <i class="bi bi-person-circle"></i>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── Main content ──────────────────────────────────── -->
+    <main class="main-content" role="main">
+        @RenderBody()
+    </main>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

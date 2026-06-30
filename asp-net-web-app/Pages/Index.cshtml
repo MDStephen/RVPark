@@ -2,30 +2,37 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
+    ViewData["Page"]  = "Dashboard";
 }
 
-<h2>Add User</h2>
-<form method="post">
-    <div>
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Enter username"/>
-    </div>
-    <div>
-        <button type="submit">Add User</button>
-    </div>
-</form>
-<h2>Current Users</h2>
-<table class="border table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>1</td>
-            <td>test</td>
-        </tr>
-    </tbody>
-</table>
+<div class="page-header">
+    <div class="page-title">Add User</div>
+</div>
+
+<div class="card mb-3">
+    <form method="post">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" name="username" class="form-control" placeholder="Enter username" />
+        </div>
+        <button type="submit" class="btn btn-primary">Add User</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-title">Current Users</div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>test</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,31 +1,267 @@
-html {
-  font-size: 14px;
+/* ── Reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg-page:        #15171a;
+    --bg-sidebar:     #111316;
+    --bg-card:        #1d2024;
+    --bg-input:       #25282d;
+    --bg-hover:       #23262b;
+    --accent:         #3b82f6;
+    --accent-danger:  #ef4444;
+    --text-primary:   #e8eaed;
+    --text-secondary: #9aa0ab;
+    --text-muted:     #5f6774;
+    --border:         #2a2d32;
+    --radius:         8px;
+    --radius-lg:      10px;
+    --sidebar-w:       220px;
+
+    --icon-dashboard:    #a78bfa;
+    --icon-reservations: #818cf8;
+    --icon-customers:    #a78bfa;
+    --icon-sites:        #f472b6;
+    --icon-reports:      #4ade80;
+    --icon-users:        #a78bfa;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+/*
+   Scope everything below to body.app-shell so we never have to
+   fight Bootstrap with !important — our rules simply sit at a
+   more specific selector than Bootstrap's own defaults.
+*/
+body.app-shell {
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    display: flex;
+    min-height: 100vh;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+/* ── Sidebar ──────────────────────────────────────────────────── */
+body.app-shell .sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg-sidebar);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+body.app-shell .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 22px 18px 26px;
+    border-bottom: 1px solid var(--border);
 }
 
-body {
-  margin-bottom: 60px;
+body.app-shell .brand-icon {
+    font-size: 22px;
+    color: var(--text-primary);
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+body.app-shell .brand-text {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+body.app-shell .sidebar-nav {
+    flex: 1;
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
+
+body.app-shell .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+body.app-shell .nav-item:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+body.app-shell .nav-item.active {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+body.app-shell .nav-item:nth-child(1) .nav-icon { color: var(--icon-dashboard); }
+body.app-shell .nav-item:nth-child(2) .nav-icon { color: var(--icon-reservations); }
+body.app-shell .nav-item:nth-child(3) .nav-icon { color: var(--icon-customers); }
+body.app-shell .nav-item:nth-child(4) .nav-icon { color: var(--icon-sites); }
+body.app-shell .nav-item:nth-child(5) .nav-icon { color: var(--icon-reports); }
+body.app-shell .nav-item:nth-child(6) .nav-icon { color: var(--icon-users); }
+body.app-shell .nav-item.active .nav-icon       { color: var(--accent); }
+
+body.app-shell .nav-icon {
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+}
+
+body.app-shell .sidebar-footer {
+    padding: 18px;
+    border-top: 1px solid var(--border);
+}
+
+body.app-shell .avatar-circle {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--bg-input);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    color: var(--text-secondary);
+}
+
+/* ── Main content ─────────────────────────────────────────────── */
+body.app-shell .main-content {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 36px;
+    min-height: 100vh;
+}
+
+body.app-shell .page-header { margin-bottom: 22px; }
+body.app-shell .page-title  { font-size: 22px; font-weight: 600; }
+
+/* ── Card — the missing piece causing the unstyled look ─────────── */
+body.app-shell .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    max-width: 520px;
+}
+
+body.app-shell .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 18px;
+}
+
+/* ── Forms — scoped overrides, no !important needed ─────────────── */
+body.app-shell .form-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+body.app-shell .form-control,
+body.app-shell .form-select {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 13.5px;
+    padding: 8px 12px;
+}
+
+body.app-shell .form-control:focus,
+body.app-shell .form-select:focus {
+    background-color: var(--bg-input);
+    border-color: var(--accent);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.15rem rgba(59, 130, 246, 0.25);
+}
+
+body.app-shell .form-control::placeholder {
+    color: var(--text-muted);
+}
+
+body.app-shell .mb-3 { margin-bottom: 16px; }
+
+/* ── Buttons — scoped, real Bootstrap classes restyled ──────────── */
+body.app-shell .btn-primary {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-size: 13.5px;
+    padding: 8px 18px;
+    border-radius: 6px;
+}
+
+body.app-shell .btn-primary:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+body.app-shell .btn-danger {
+    background-color: var(--accent-danger);
+    border-color: var(--accent-danger);
+    color: #fff;
+    font-size: 13.5px;
+    padding: 8px 18px;
+    border-radius: 6px;
+}
+
+/* ── Tables — real <table> elements, no custom markup needed ────── */
+body.app-shell .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-primary);
+    --bs-table-border-color: var(--border);
+    --bs-table-hover-bg: var(--bg-hover);
+    color: var(--text-primary);
+    font-size: 13.5px;
+    margin-bottom: 0;
+}
+
+body.app-shell .table thead th {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom-width: 1px;
+    padding: 8px 10px;
+}
+
+body.app-shell .table td {
+    padding: 9px 10px;
+}
+
+/* ── Badges (Bootstrap's own .badge, just recolored) ─────────────── */
+body.app-shell .badge.text-bg-success { background-color: rgba(34,197,94,.15)  !important; color: #4ade80; }
+body.app-shell .badge.text-bg-warning { background-color: rgba(234,179,8,.15)  !important; color: #facc15; }
+body.app-shell .badge.text-bg-danger  { background-color: rgba(239,68,68,.15) !important; color: #f87171; }
+body.app-shell .badge.text-bg-primary { background-color: rgba(59,130,246,.15) !important; color: #60a5fa; }
+
+/* ── Stat cards (dashboard) ───────────────────────────────────────── */
+body.app-shell .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 26px;
+}
+
+body.app-shell .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+}
+
+body.app-shell .stat-label {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+body.app-shell .stat-value { font-size: 26px; font-weight: 700; }
