@@ -482,5 +482,6 @@ $RECYCLE.BIN/
 *.swp
 
 # Other
+*.db
 *.db-shm
 *.db-wal
