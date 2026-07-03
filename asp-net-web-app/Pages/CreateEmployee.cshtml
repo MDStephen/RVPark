@@ -1,0 +1,53 @@
+@page
+<!-- Add the model class for database access -->
+@{
+    ViewData["Title"] = "Employee";
+    ViewData["Page"]  = "Create Employee";
+}
+
+<body class="app-shell">
+    <!-- Main content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Create Employee Account</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Employee Details</div>
+
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input class="form-control" placeholder="John Doe" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input  class="form-control" placeholder="john@example.com" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input class="form-control" placeholder="jdoe" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input  type="password" class="form-control" placeholder="••••••••" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <select class="form-select">
+                        <option value="">Select role...</option>
+                        <option>Manager</option>
+                        <option>Supervisor</option>
+                        <option>Staff</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Account</button>
+            </form>
+        </div>
+    </div>
+</body>
