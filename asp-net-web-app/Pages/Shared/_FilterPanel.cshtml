@@ -9,14 +9,12 @@
                 <div class="Dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">FilterName</button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Item_1</a></li>
-                        <li><a class="dropdown-item" href="#">Item_2</a></li>
-                        <li><a class="dropdown-item" href="#">Item_3</a></li>
+                        @foreach (var rows in Model.)
                     </ul>
                 </div>
                 break;
 
-            case FilterType.StartDate:
+            case "StartDate":
 
                 <div class="Dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">FilterName</button>
@@ -28,7 +26,7 @@
                 </div>
                 break;
 
-            case FilterType.EndDate:
+            case "EndDate":
                 break;
         }
     }
