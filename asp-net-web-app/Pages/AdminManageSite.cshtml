@@ -1,0 +1,40 @@
+﻿@page
+@model AdminManageSiteModel
+@{
+    ViewData["Title"] = "Manage Sites";
+    ViewData["Page"]  = "Admin";
+}
+
+<h2>Add Site</h2>
+@* TODO: once Site.cs has real fields (siteNumber, hookupType, etc.),
+   add matching <input> fields here, same as Index.cshtml does for Users. *@
+<form method="post" asp-page-handler="Create">
+    <div>
+        <button type="submit">Add Site</button>
+    </div>
+</form>
+
+<h2>Current Sites</h2>
+<table class="border table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var s in Model.SiteList)
+    {
+        <tr>
+            <td>@s.Id</td>
+            <td>
+                @* TODO: real edit form goes here once Site has fields *@
+                <form method="post" asp-page-handler="Delete" style="display:inline">
+                    <input type="hidden" name="id" value="@s.Id" />
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
