@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<DatabaseWrapper>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<UserLogic>();
+builder.Services.AddScoped<EmployeeLogic>();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
