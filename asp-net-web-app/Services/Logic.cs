@@ -23,4 +23,9 @@ public class UserLogic
         }
         return "empty";
     }
+
+    public void AddReservation(string s)
+    {
+        _db.AddReservation(s);
+    }
 }

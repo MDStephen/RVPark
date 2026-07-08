@@ -1,34 +1,55 @@
+@model asp_net_web_app.Models.IFilterableListPage
 
-
-<div class="container">
-    @foreach (var filter in Model.Filters)
-    {
-        switch (filter)
+<form method="get">
+    <div class="container d-flex gap-3 flex-wrap align-items-end">
+        @foreach (var filter in Model.Filters)
         {
-            case "Dropdown":
-                <div class="Dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">FilterName</button>
-                    <ul class="dropdown-menu">
-                        @foreach (var rows in Model.)
-                    </ul>
-                </div>
-                break;
+            switch (filter.Type)
+            {
+                case "Dropdown":
+                    <div class="Dropdown">
+                        <label class="form-label">@filter.Name</label>
+                        <select class="form-select" name="@filter.Name">
+                            <option value="">-- All --</option>
+                            @foreach (var value in filter.Data)
+                            {
+                                <option value="@value" selected="@(Context.Request.Query[filter.Name] == value)">@value</option>
+                            }
+                        </select>
+                    </div>
+                    break;
 
-            case "StartDate":
+                case "StartDate":
+                    <div class="StartDate">
+                        <label class="form-label">@filter.Name (from)</label>
+                        <input type="date" class="form-control"
+                               name="@($"{filter.Name}_StartDate")"
+                               value="@Context.Request.Query[$"{filter.Name}_StartDate"]" />
+                    </div>
+                    break;
 
-                <div class="Dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">FilterName</button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Item_1</a></li>
-                        <li><a class="dropdown-item" href="#">Item_2</a></li>
-                        <li><a class="dropdown-item" href="#">Item_3</a></li>
-                    </ul>
-                </div>
-                break;
+                case "EndDate":
+                    <div class="EndDate">
+                        <label class="form-label">@filter.Name (to)</label>
+                        <input type="date" class="form-control"
+                               name="@($"{filter.Name}_EndDate")"
+                               value="@Context.Request.Query[$"{filter.Name}_EndDate"]" />
+                    </div>
+                    break;
 
-            case "EndDate":
-                break;
+                case "Search":
+                    <div class="Search">
+                        <label class="form-label">@filter.Name</label>
+                        <input type="text" class="form-control"
+                               name="@filter.Name"
+                               value="@Context.Request.Query[filter.Name]"
+                               placeholder="Search @filter.Name..." />
+                    </div>
+                    break;
+            }
         }
-    }
-</div>
-
+        <div>
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </div>
+    </div>
+</form>

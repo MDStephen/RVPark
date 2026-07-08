@@ -1,19 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using asp_net_web_app.Data;
+using asp_net_web_app.Models;
 
 namespace asp_net_web_app.Pages;
 
-public class AdminReportGeneratorModel : PageModel
+public class AdminReportGeneratorModel : FilterableListPageModel<Reservations> // TODO swap out with input from a dropdown list of available tables
 {
-    private readonly DatabaseWrapper _db;
-    public List<string> Filters = [];
+    public AdminReportGeneratorModel(DatabaseWrapper db) : base(db) { }
 
-    public AdminReportGeneratorModel(DatabaseWrapper db)
-    {
-        _db = db;
-        Filters = ["Dropdown", "Dropdown", "Dropdown"];
-    }
-
+    protected override IEnumerable<Reservations> GetTable() => Db.Set<Reservations>();
 }

@@ -1,0 +1,39 @@
+@model asp_net_web_app.Models.IFilterableListPage
+
+<form method="post">
+    <div class="container mt-3">
+        @if (Model.Rows.Count == 0)
+        {
+            <p class="text-muted">No matches</p>
+        }
+        else
+        {
+            <table class="table table-striped table-dark">
+                <thead>
+                    <tr>
+                        <th></th>
+                        @foreach (var prop in Model.Rows[0].GetType().GetProperties())
+                        {
+                            <th>@prop.Name</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Rows)
+                    {
+                        var idProp = row.GetType().GetProperty(Model.IdPropertyName);
+                        var idValue = idProp?.GetValue(row)?.ToString();
+                        <tr>
+                            <td><input type="radio" name="SelectedId" value="@idValue" /></td>
+                            @foreach (var prop in row.GetType().GetProperties())
+                            {
+                                <td>@prop.GetValue(row)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-secondary">Select Row</button>
+        }
+    </div>
+</form>
