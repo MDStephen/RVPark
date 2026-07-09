@@ -40,29 +40,12 @@
         overflow: hidden;
     }
 
-    /* Left panel: mode menu + staff list */
+    /* Left panel: staff list */
     .staff-left {
         width: 280px;
         border-right: 1px solid #3a4048;
         padding: 16px 0;
         flex-shrink: 0;
-    }
-
-    .mode-link {
-        display: block;
-        padding: 10px 20px;
-        color: #e4e6eb;
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .mode-link.active-mode {
-        color: #4d9fff;
-    }
-
-    .mode-link:hover {
-        background-color: #343a43;
-        color: #4d9fff;
     }
 
     .staff-list-item {
@@ -214,23 +197,12 @@
 
         <div class="staff-panel">
 
-            <!-- ===================== LEFT PANEL ===================== -->
+            <!-- ===================== LEFT PANEL: staff list ===================== -->
             <div class="staff-left">
-                <a class="mode-link @(Model.Mode == "edit" ? "active-mode" : "")"
-                   asp-page="/AdminManageStaff" asp-route-mode="edit">
-                    &#9998; Edit Staff
-                </a>
-                <a class="mode-link @(Model.Mode == "create" ? "active-mode" : "")"
-                   asp-page="/AdminManageStaff" asp-route-mode="create">
-                    &#43; Create Staff
-                </a>
-
-                <hr style="border-color:#3a4048;" />
-
                 @foreach (var emp in Model.Employees)
                 {
                     <a class="staff-list-item @(Model.Selected != null && Model.Selected.employeeId == emp.employeeId ? "selected" : "")"
-                       asp-page="/AdminManageStaff" asp-route-mode="edit" asp-route-id="@emp.employeeId">
+                       asp-page="/AdminManageStaff" asp-route-id="@emp.employeeId">
                         <span class="avatar-circle">@emp.firstName.Substring(0,1)@emp.lastName.Substring(0,1)</span>
                         @emp.firstName @emp.lastName
                         @if (emp.isLocked)
@@ -242,53 +214,17 @@
 
                 @if (Model.Employees.Count == 0)
                 {
-                    <p class="hint-text" style="padding: 12px 20px;">No staff yet. Use Create Staff.</p>
+                    <p class="hint-text" style="padding: 12px 20px;">
+                        No staff accounts yet. Staff accounts are created on the Create Staff Account page.
+                    </p>
                 }
             </div>
 
-            <!-- ===================== RIGHT PANEL ===================== -->
+            <!-- ===================== RIGHT PANEL: edit form ===================== -->
             <div class="staff-right">
 
-                @if (Model.Mode == "create")
+                @if (Model.Selected != null)
                 {
-                    <!-- ============ CREATE STAFF (mockup 2) ============ -->
-                    <div class="avatar-large">&#128100;</div>
-
-                    <form method="post" asp-page-handler="Create" class="staff-form" style="max-width:420px; width:100%;">
-                        <div class="mb-3">
-                            <label>First Name</label>
-                            <input class="form-control" name="firstName" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Last Name</label>
-                            <input class="form-control" name="lastName" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Date Of Birth</label>
-                            <input class="form-control" type="date" name="dateOfBirth" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Role (Access Level)</label>
-                            <select class="form-select" name="role">
-                                <option value="Employee">Employee</option>
-                                <option value="Admin">Admin</option>
-                            </select>
-                        </div>
-
-                        <p class="hint-text">
-                            Username (First Initial - Last Name) is generated automatically.<br />
-                            Password (Employee ID) is assigned automatically.
-                        </p>
-
-                        <button type="submit" class="btn-save">Create User</button>
-                    </form>
-                }
-                else if (Model.Selected != null)
-                {
-                    <!-- ============ EDIT STAFF (mockup 1) ============ -->
                     <div class="avatar-large">
                         @Model.Selected.firstName.Substring(0,1)@Model.Selected.lastName.Substring(0,1)
                     </div>
@@ -362,7 +298,7 @@
                 }
                 else
                 {
-                    <p class="hint-text">Select a staff member from the list to edit, or click Create Staff.</p>
+                    <p class="hint-text">Select a staff member from the list to view and edit their details.</p>
                 }
             </div>
         </div>
