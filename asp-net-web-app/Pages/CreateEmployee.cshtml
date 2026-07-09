@@ -1,5 +1,5 @@
 @page
-<!-- Add the model class for database access -->
+@model asp_net_web_app.Pages.CreateModel
 @{
     ViewData["Title"] = "Employee";
     ViewData["Page"]  = "Create Employee";
@@ -16,37 +16,49 @@
             <div class="card-title">Employee Details</div>
 
             <form method="post">
+
                 <div class="mb-3">
-                    <label class="form-label">Full Name</label>
-                    <input class="form-control" placeholder="John Doe" />
+                    <label asp-for="Employee.firstName" class="form-label">First Name</label>
+                    <input asp-for="Employee.firstName" class="form-control" placeholder="John" />
+                    <span asp-validation-for="Employee.firstName" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input  class="form-control" placeholder="john@example.com" />
+                    <label asp-for="Employee.lastName" class="form-label">Last Name</label>
+                    <input asp-for="Employee.lastName" class="form-control" placeholder="Doe" />
+                    <span asp-validation-for="Employee.lastName" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Username</label>
-                    <input class="form-control" placeholder="jdoe" />
+                    <label asp-for="Employee.dateOfBirth" class="form-label">Date of Birth</label>
+                    <input asp-for="Employee.dateOfBirth" type="date" class="form-control" />
+                    <span asp-validation-for="Employee.dateOfBirth" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input  type="password" class="form-control" placeholder="••••••••" />
+                    <label asp-for="Employee.username" class="form-label">Username</label>
+                    <input asp-for="Employee.username" class="form-control" placeholder="jdoe" />
+                    <span asp-validation-for="Employee.username" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Role</label>
-                    <select class="form-select">
+                    <label asp-for="Employee.password" class="form-label">Password</label>
+                    <input asp-for="Employee.password" type="password" class="form-control" placeholder="••••••••" />
+                    <span asp-validation-for="Employee.password" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Employee.role" class="form-label">Role</label>
+                    <select asp-for="Employee.role" class="form-select">
                         <option value="">Select role...</option>
-                        <option>Manager</option>
-                        <option>Supervisor</option>
-                        <option>Staff</option>
+                        <option>Admin</option>
+                        <option>Employee</option>
                     </select>
+                    <span asp-validation-for="Employee.role" class="text-danger"></span>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Create Account</button>
+                <a href="/Employees" class="btn btn-danger">Cancel</a>
             </form>
         </div>
     </div>
