@@ -27,7 +27,17 @@ namespace asp_net_web_app.Repositories
 
         public async Task UpdateAsync(Users user)
         {
-            _db.Users.Update(user);
+            var existing = await _db.Users.FindAsync(user.userId);
+            if (existing == null) return;
+
+            existing.firstName    = user.firstName;
+            existing.lastName     = user.lastName;
+            existing.emailAddress = user.emailAddress;
+            existing.phoneNumber  = user.phoneNumber;
+            existing.address      = user.address;
+            existing.middleInitial = user.middleInitial;
+            existing.aptSuite      = user.aptSuite;
+
             await _db.SaveChangesAsync();
         }
 

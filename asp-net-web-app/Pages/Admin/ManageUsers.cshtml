@@ -187,6 +187,16 @@
         box-shadow: 0 0 0 2px rgba(59,130,246,.2);
     }
     .um-field input::placeholder { color: var(--text-muted); }
+    .um-field input.input-validation-error {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 2px rgba(239,68,68,.2);
+    }
+    .um-field .field-validation-error {
+        color: #f87171;
+        font-size: 11px;
+        margin-top: 4px;
+        display: block;
+    }
 
     /* Action buttons */
     .um-form-actions {
@@ -247,7 +257,7 @@
 <!-- Tab strip: Customers | Staff -->
 <div class="um-tabs">
     <a href="/Admin/ManageUsers" class="um-tab active">Customers</a>
-    <a href="/AdminManageStaff" class="um-tab">Staff</a>
+    <a href="#" class="um-tab">Staff</a>
 </div>
 
 @if (!string.IsNullOrEmpty(statusMsg))
@@ -314,14 +324,16 @@
                     <div class="um-field">
                         <label>First Name</label>
                         <input asp-for="SelectedUser.firstName" placeholder="First name" />
+                        <span asp-validation-for="SelectedUser.firstName"></span>
                     </div>
                     <div class="um-field">
                         <label>Last Name</label>
                         <input asp-for="SelectedUser.lastName" placeholder="Last name" />
+                        <span asp-validation-for="SelectedUser.lastName"></span>
                     </div>
                     <div class="um-field">
                         <label>M.I.</label>
-                        <input disabled placeholder="—" title="Not stored in model" />
+                        <input asp-for="SelectedUser.middleInitial" placeholder="M.I." maxlength="1" />
                     </div>
                 </div>
 
@@ -330,10 +342,11 @@
                     <div class="um-field">
                         <label>Address</label>
                         <input asp-for="SelectedUser.address" placeholder="Street address" />
+                        <span asp-validation-for="SelectedUser.address"></span>
                     </div>
                     <div class="um-field">
                         <label>Apt/Suite</label>
-                        <input disabled placeholder="—" title="Not stored in model" />
+                        <input asp-for="SelectedUser.aptSuite" placeholder="Apt/Suite" />
                     </div>
                 </div>
 
@@ -342,10 +355,12 @@
                     <div class="um-field">
                         <label>Phone</label>
                         <input asp-for="SelectedUser.phoneNumber" placeholder="(555) 000-0000" />
+                        <span asp-validation-for="SelectedUser.phoneNumber"></span>
                     </div>
                     <div class="um-field">
                         <label>Email</label>
                         <input asp-for="SelectedUser.emailAddress" type="email" placeholder="email@example.com" />
+                        <span asp-validation-for="SelectedUser.emailAddress"></span>
                     </div>
                 </div>
 
@@ -376,3 +391,7 @@
     }
 
 </div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

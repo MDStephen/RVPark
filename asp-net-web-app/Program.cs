@@ -15,7 +15,17 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    scope.ServiceProvider.GetRequiredService<DatabaseWrapper>().Database.Migrate();
+    var db = scope.ServiceProvider.GetRequiredService<DatabaseWrapper>();
+    db.Database.Migrate();
+    if (!db.Users.Any())
+    {
+        db.Users.AddRange(
+            new Users { firstName = "Jane", lastName = "Doe", emailAddress = "jane@example.com", phoneNumber = "555 555-1234", address = "123 Main St" },
+            new Users { firstName = "John", lastName = "Smith", emailAddress = "john@example.com", phoneNumber = "555 555-5678", address = "456 Oak Ave" },
+            new Users { firstName = "Bob", lastName = "Johnson", emailAddress = "bob@example.com", phoneNumber = "555 555-2468", address = "987 Center St" }
+        );
+        db.SaveChanges();
+    }
 }
 
 // Configure the HTTP request pipeline.
