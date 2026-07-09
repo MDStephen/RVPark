@@ -8,7 +8,7 @@ builder.Services.AddDbContext<DatabaseWrapper>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<UserLogic>();
 builder.Services.AddRazorPages();
-builder.Services.AddScoped<SiteLogic>();
+
 
 var app = builder.Build();
 
