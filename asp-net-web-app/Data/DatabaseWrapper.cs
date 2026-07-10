@@ -1,4 +1,7 @@
-using Microsoft.EntityFrameworkCore;
+That's exactly what GitHub predicted — 2 real conflicts. Now let's resolve them.
+1. Data/DatabaseWrapper.cs
+Select all, delete, paste this combined version:
+csharpusing Microsoft.EntityFrameworkCore;
 
 namespace asp_net_web_app.Data
 {
@@ -9,7 +12,8 @@ namespace asp_net_web_app.Data
         }
 
         public DbSet<Users> Users { get; set; }
-        
+        public DbSet<Employee> Employees { get; set; }
+
         public DbSet<DbSite> Sites { get; set; }
         public DbSet<DbSitePhoto> SitePhotos { get; set; }
         public DbSet<DbSitePrice> SitePrices { get; set; }
@@ -17,8 +21,10 @@ namespace asp_net_web_app.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Users>().ToTable("Users");
-            
+
             modelBuilder.Entity<DbSite>().ToTable("Sites");
             modelBuilder.Entity<DbSitePhoto>().ToTable("SitePhotos");
             modelBuilder.Entity<DbSitePrice>().ToTable("SitePrices");
@@ -45,7 +51,7 @@ namespace asp_net_web_app.Data
         public string SiteNumber { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
         public bool IsAvailable { get; set; } = true;
-        
+
         public List<DbSitePhoto> Photos { get; set; } = new();
         public List<DbSitePrice> PriceRules { get; set; } = new();
     }

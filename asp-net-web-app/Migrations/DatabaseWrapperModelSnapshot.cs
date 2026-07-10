@@ -17,6 +17,7 @@ namespace asp_net_web_app.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
 
+<<<<<<< HEAD
             modelBuilder.Entity("asp_net_web_app.Data.DbSite", b =>
                 {
                     b.Property<int>("Id")
@@ -112,6 +113,43 @@ namespace asp_net_web_app.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Reservations", (string)null);
+=======
+            modelBuilder.Entity("asp_net_web_app.Data.Employee", b =>
+                {
+                    b.Property<int>("employeeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("dateOfBirth")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("firstName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("isLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("lastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("employeeId");
+
+                    b.ToTable("Employees");
+>>>>>>> origin/main
                 });
 
             modelBuilder.Entity("asp_net_web_app.Data.Users", b =>
