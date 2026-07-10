@@ -138,271 +138,272 @@ namespace asp_net_web_app.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("Site");
 
                     b.UseTphMappingStrategy();
-            modelBuilder.Entity("asp_net_web_app.Data.DbSite", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    modelBuilder.Entity("asp_net_web_app.Data.DbSite", b =>
+                        {
+                            b.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("Category")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("INTEGER");
+                            b.Property<bool>("IsAvailable")
+                                .HasColumnType("INTEGER");
 
-                    b.Property<string>("SiteNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("SiteNumber")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                            b.HasKey("Id");
 
-                    b.ToTable("Sites", (string)null);
-                });
+                            b.ToTable("Sites", (string)null);
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.DbSitePhoto", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    modelBuilder.Entity("asp_net_web_app.Data.DbSitePhoto", b =>
+                        {
+                            b.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
 
-                    b.Property<int>("DbSiteId")
-                        .HasColumnType("INTEGER");
+                            b.Property<int>("DbSiteId")
+                                .HasColumnType("INTEGER");
 
-                    b.Property<string>("PhotoUrl")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("PhotoUrl")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                            b.HasKey("Id");
 
-                    b.HasIndex("DbSiteId");
+                            b.HasIndex("DbSiteId");
 
-                    b.ToTable("SitePhotos", (string)null);
-                });
+                            b.ToTable("SitePhotos", (string)null);
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.DbSitePrice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    modelBuilder.Entity("asp_net_web_app.Data.DbSitePrice", b =>
+                        {
+                            b.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("TEXT");
+                            b.Property<decimal>("Cost")
+                                .HasColumnType("TEXT");
 
-                    b.Property<int>("DbSiteId")
-                        .HasColumnType("INTEGER");
+                            b.Property<int>("DbSiteId")
+                                .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("End")
-                        .HasColumnType("TEXT");
+                            b.Property<DateTime>("End")
+                                .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("Start")
-                        .HasColumnType("TEXT");
+                            b.Property<DateTime>("Start")
+                                .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                            b.HasKey("Id");
 
-                    b.HasIndex("DbSiteId");
+                            b.HasIndex("DbSiteId");
 
-                    b.ToTable("SitePrices", (string)null);
-                });
+                            b.ToTable("SitePrices", (string)null);
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.Employee", b =>
-                {
-                    b.Property<int>("employeeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    modelBuilder.Entity("asp_net_web_app.Data.Employee", b =>
+                        {
+                            b.Property<int>("employeeId")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("dateOfBirth")
-                        .HasColumnType("TEXT");
+                            b.Property<DateTime>("dateOfBirth")
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("firstName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("firstName")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<bool>("isLocked")
-                        .HasColumnType("INTEGER");
+                            b.Property<bool>("isLocked")
+                                .HasColumnType("INTEGER");
 
-                    b.Property<string>("lastName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("lastName")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("password")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("role")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("role")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("username")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("username")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.HasKey("employeeId");
+                            b.HasKey("employeeId");
 
-                    b.ToTable("Employees");
-                });
+                            b.ToTable("Employees");
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.Reservations", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    modelBuilder.Entity("asp_net_web_app.Data.Reservations", b =>
+                        {
+                            b.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("TEXT");
+                            b.Property<DateTime>("EndDate")
+                                .HasColumnType("TEXT");
 
-                    b.Property<int>("SiteId")
-                        .HasColumnType("INTEGER");
+                            b.Property<int>("SiteId")
+                                .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("TEXT");
+                            b.Property<DateTime>("StartDate")
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("Status")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<decimal>("TotalCost")
-                        .HasColumnType("TEXT");
+                            b.Property<decimal>("TotalCost")
+                                .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                            b.Property<int>("UserId")
+                                .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                            b.HasKey("Id");
 
-                    b.ToTable("Reservations", (string)null);
-                });
+                            b.ToTable("Reservations", (string)null);
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.Users", b =>
-                {
-                    b.Property<int>("userId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    modelBuilder.Entity("asp_net_web_app.Data.Users", b =>
+                        {
+                            b.Property<int>("userId")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("TEXT");
+                            b.Property<string>("Discriminator")
+                                .IsRequired()
+                                .HasMaxLength(8)
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("city")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("city")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("email")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("email")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("firstName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("firstName")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<bool>("isBanned")
-                        .HasColumnType("INTEGER");
+                            b.Property<bool>("isBanned")
+                                .HasColumnType("INTEGER");
 
-                    b.Property<string>("lastName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("lastName")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("middleInitial")
-                        .HasColumnType("TEXT");
+                            b.Property<string>("middleInitial")
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("phoneNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("phoneNumber")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("state")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("state")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("streetAddress")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("streetAddress")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("zip")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("zip")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.HasKey("userId");
+                            b.HasKey("userId");
 
-                    b.ToTable("Users", (string)null);
+                            b.ToTable("Users", (string)null);
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Users");
+                            b.HasDiscriminator<string>("Discriminator").HasValue("Users");
 
-                    b.UseTphMappingStrategy();
-                });
+                            b.UseTphMappingStrategy();
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.Lot", b =>
-                {
-                    b.HasBaseType("asp_net_web_app.Data.Site");
+                    modelBuilder.Entity("asp_net_web_app.Data.Lot", b =>
+                        {
+                            b.HasBaseType("asp_net_web_app.Data.Site");
 
-                    b.Property<string>("utilities")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.Property<string>("utilities")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.HasDiscriminator().HasValue("Lot");
-                });
+                            b.HasDiscriminator().HasValue("Lot");
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.StorageContainer", b =>
-                {
-                    b.HasBaseType("asp_net_web_app.Data.Site");
+                    modelBuilder.Entity("asp_net_web_app.Data.StorageContainer", b =>
+                        {
+                            b.HasBaseType("asp_net_web_app.Data.Site");
 
-                    b.Property<double>("height")
-                        .HasColumnType("REAL");
+                            b.Property<double>("height")
+                                .HasColumnType("REAL");
 
-                    b.HasDiscriminator().HasValue("StorageContainer");
-                });
+                            b.HasDiscriminator().HasValue("StorageContainer");
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.Customer", b =>
-                {
-                    b.HasBaseType("asp_net_web_app.Data.Users");
+                    modelBuilder.Entity("asp_net_web_app.Data.Customer", b =>
+                        {
+                            b.HasBaseType("asp_net_web_app.Data.Users");
 
-                    b.HasDiscriminator().HasValue("Customer");
-                });
+                            b.HasDiscriminator().HasValue("Customer");
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.Staff", b =>
-                {
-                    b.HasBaseType("asp_net_web_app.Data.Users");
+                    modelBuilder.Entity("asp_net_web_app.Data.Staff", b =>
+                        {
+                            b.HasBaseType("asp_net_web_app.Data.Users");
 
-                    b.Property<bool>("isAdmin")
-                        .HasColumnType("INTEGER");
+                            b.Property<bool>("isAdmin")
+                                .HasColumnType("INTEGER");
 
-                    b.Property<bool>("isCurrentEmployee")
-                        .HasColumnType("INTEGER");
+                            b.Property<bool>("isCurrentEmployee")
+                                .HasColumnType("INTEGER");
 
-                    b.HasDiscriminator().HasValue("Staff");
-                });
+                            b.HasDiscriminator().HasValue("Staff");
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.Admin", b =>
-                {
-                    b.HasBaseType("asp_net_web_app.Data.Staff");
+                    modelBuilder.Entity("asp_net_web_app.Data.Admin", b =>
+                        {
+                            b.HasBaseType("asp_net_web_app.Data.Staff");
 
-                    b.HasDiscriminator().HasValue("Admin");
-                });
+                            b.HasDiscriminator().HasValue("Admin");
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.DbSitePhoto", b =>
-                {
-                    b.HasOne("asp_net_web_app.Data.DbSite", null)
-                        .WithMany("Photos")
-                        .HasForeignKey("DbSiteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                    modelBuilder.Entity("asp_net_web_app.Data.DbSitePhoto", b =>
+                        {
+                            b.HasOne("asp_net_web_app.Data.DbSite", null)
+                                .WithMany("Photos")
+                                .HasForeignKey("DbSiteId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.DbSitePrice", b =>
-                {
-                    b.HasOne("asp_net_web_app.Data.DbSite", null)
-                        .WithMany("PriceRules")
-                        .HasForeignKey("DbSiteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                    modelBuilder.Entity("asp_net_web_app.Data.DbSitePrice", b =>
+                        {
+                            b.HasOne("asp_net_web_app.Data.DbSite", null)
+                                .WithMany("PriceRules")
+                                .HasForeignKey("DbSiteId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
 
-            modelBuilder.Entity("asp_net_web_app.Data.DbSite", b =>
-                {
-                    b.Navigation("Photos");
+                    modelBuilder.Entity("asp_net_web_app.Data.DbSite", b =>
+                        {
+                            b.Navigation("Photos");
 
-                    b.Navigation("PriceRules");
-                });
+                            b.Navigation("PriceRules");
+                        });
 #pragma warning restore 612, 618
+                });
         }
     }
 }
