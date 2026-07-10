@@ -7,7 +7,10 @@ namespace asp_net_web_app.Data
         [Key]
         public int userId { get; set; }
 
+        [Required(ErrorMessage = "First name is required")]
         public string firstName { get; set; }
+
+        [Required(ErrorMessage = "Last name is required")]
         public string lastName { get; set; }
         public string email { get; set; }
         public string phoneNumber { get; set; }

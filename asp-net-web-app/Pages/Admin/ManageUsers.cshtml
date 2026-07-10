@@ -1,0 +1,397 @@
+@page
+@model asp_net_web_app.Pages.Admin.ManageUsersModel
+@{
+    ViewData["Title"] = "Admin Manage User";
+    ViewData["Page"]  = "Users";
+
+    var statusMsg = TempData["StatusMessage"]?.ToString();
+}
+
+<style>
+    /* ── Page layout ──────────────────────────────────────── */
+    .um-header { margin-bottom: 22px; }
+    .um-header h1 { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+
+    /* Tab strip */
+    .um-tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+    }
+    .um-tab {
+        padding: 8px 18px;
+        font-size: 13.5px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        text-decoration: none;
+        transition: color .15s;
+    }
+    .um-tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+        font-weight: 500;
+    }
+    .um-tab:hover:not(.active) { color: var(--text-primary); }
+
+    /* Two-column layout */
+    .um-layout {
+        display: grid;
+        grid-template-columns: 230px 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    /* ── Left panel — user list ───────────────────────────── */
+    .um-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .um-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px 10px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .um-panel-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .um-panel-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .um-icon-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 15px;
+        padding: 2px 4px;
+        border-radius: 4px;
+        transition: color .15s;
+    }
+    .um-icon-btn:hover { color: var(--text-primary); }
+
+    .um-user-list { padding: 8px 0; max-height: 520px; overflow-y: auto; }
+
+    .um-user-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 14px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background .12s;
+        border-radius: 0;
+    }
+    .um-user-row:hover  { background: var(--bg-hover); }
+    .um-user-row.active { background: rgba(59,130,246,.12); }
+
+    .um-avatar {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: var(--bg-input);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }
+
+    .um-user-name {
+        font-size: 13.5px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    /* ── Right panel — edit form ──────────────────────────── */
+    .um-form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px 28px;
+    }
+
+    .um-form-top {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+
+    .um-form-avatar {
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        background: var(--bg-input);
+        border: 2px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 40px;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }
+
+    .um-form-name {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .um-form-email {
+        font-size: 12.5px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+    }
+
+    /* Grid rows for the fields */
+    .um-field-row {
+        display: grid;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+    .um-field-row.cols-3 { grid-template-columns: 1fr 1fr 80px; }
+    .um-field-row.cols-2 { grid-template-columns: 1fr 80px; }
+    .um-field-row.cols-2b { grid-template-columns: 1fr 1fr; }
+
+    .um-field label {
+        display: block;
+        font-size: 11.5px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .um-field input {
+        width: 100%;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-primary);
+        font-size: 13px;
+        padding: 7px 10px;
+        transition: border-color .15s;
+    }
+    .um-field input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(59,130,246,.2);
+    }
+    .um-field input::placeholder { color: var(--text-muted); }
+    .um-field input.input-validation-error {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 2px rgba(239,68,68,.2);
+    }
+    .um-field .field-validation-error {
+        color: #f87171;
+        font-size: 11px;
+        margin-top: 4px;
+        display: block;
+    }
+
+    /* Action buttons */
+    .um-form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    .btn-save {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 22px;
+        font-size: 13.5px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background .15s;
+    }
+    .btn-save:hover { background: #2563eb; }
+
+    .btn-delete {
+        background: var(--accent-danger);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 22px;
+        font-size: 13.5px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background .15s;
+    }
+    .btn-delete:hover { background: #dc2626; }
+
+    /* Status toast */
+    .um-toast {
+        padding: 10px 16px;
+        border-radius: 7px;
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+    .um-toast.success { background: rgba(34,197,94,.12); color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
+    .um-toast.error   { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.25); }
+
+    /* Empty state */
+    .um-empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+</style>
+
+<div class="um-header">
+    <h1>User Management</h1>
+</div>
+
+<!-- Tab strip: Customers | Staff -->
+<div class="um-tabs">
+    <a href="/Admin/ManageUsers" class="um-tab active">Customers</a>
+    <a href="#" class="um-tab">Staff</a>
+</div>
+
+@if (!string.IsNullOrEmpty(statusMsg))
+{
+    <div class="um-toast success">✓ @statusMsg</div>
+}
+@if (Model.IsError)
+{
+    <div class="um-toast error">⚠ @Model.StatusMessage</div>
+}
+
+<div class="um-layout">
+
+    <!-- ── Left: Customer list ───────────────────────────────── -->
+    <div class="um-panel">
+        <div class="um-panel-header">
+            <span class="um-panel-title">Customer Users</span>
+            <div class="um-panel-actions">
+                <button class="um-icon-btn" title="Filter"><i class="bi bi-funnel"></i></button>
+                <button class="um-icon-btn" title="Refresh" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i></button>
+            </div>
+        </div>
+
+        <div class="um-user-list">
+            @foreach (var u in Model.Customers)
+            {
+                var isActive = u.userId == Model.SelectedId;
+                <a class="um-user-row @(isActive ? "active" : "")"
+                   href="/Admin/ManageUsers?selectedId=@u.userId">
+                    <div class="um-avatar"><i class="bi bi-person-circle"></i></div>
+                    <span class="um-user-name">@u.firstName @u.lastName</span>
+                </a>
+            }
+
+            @if (!Model.Customers.Any())
+            {
+                <div style="padding:20px; text-align:center; font-size:13px; color:var(--text-muted);">
+                    No customers found.
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- ── Right: Edit form ──────────────────────────────────── -->
+    @if (Model.SelectedUser != null)
+    {
+        <div class="um-form-card">
+
+            <!-- Avatar + name header -->
+            <div class="um-form-top">
+                <div class="um-form-avatar"><i class="bi bi-person-circle"></i></div>
+                <div>
+                    <div class="um-form-name">@Model.SelectedUser.firstName @Model.SelectedUser.lastName</div>
+                    <div class="um-form-email">@Model.SelectedUser.emailAddress</div>
+                </div>
+            </div>
+
+            <!-- Save form -->
+            <form method="post" asp-page-handler="Save">
+                <input type="hidden" asp-for="SelectedUser.userId" />
+
+                <!-- Row 1: First | Last | M.I. (no M.I. in model — rendered as disabled placeholder) -->
+                <div class="um-field-row cols-3">
+                    <div class="um-field">
+                        <label>First Name</label>
+                        <input asp-for="SelectedUser.firstName" placeholder="First name" />
+                        <span asp-validation-for="SelectedUser.firstName"></span>
+                    </div>
+                    <div class="um-field">
+                        <label>Last Name</label>
+                        <input asp-for="SelectedUser.lastName" placeholder="Last name" />
+                        <span asp-validation-for="SelectedUser.lastName"></span>
+                    </div>
+                    <div class="um-field">
+                        <label>M.I.</label>
+                        <input asp-for="SelectedUser.middleInitial" placeholder="M.I." maxlength="1" />
+                    </div>
+                </div>
+
+                <!-- Row 2: Address | Apt/Suite -->
+                <div class="um-field-row cols-2">
+                    <div class="um-field">
+                        <label>Address</label>
+                        <input asp-for="SelectedUser.address" placeholder="Street address" />
+                        <span asp-validation-for="SelectedUser.address"></span>
+                    </div>
+                    <div class="um-field">
+                        <label>Apt/Suite</label>
+                        <input asp-for="SelectedUser.aptSuite" placeholder="Apt/Suite" />
+                    </div>
+                </div>
+
+                <!-- Row 3: Phone | Email -->
+                <div class="um-field-row cols-2b">
+                    <div class="um-field">
+                        <label>Phone</label>
+                        <input asp-for="SelectedUser.phoneNumber" placeholder="(555) 000-0000" />
+                        <span asp-validation-for="SelectedUser.phoneNumber"></span>
+                    </div>
+                    <div class="um-field">
+                        <label>Email</label>
+                        <input asp-for="SelectedUser.emailAddress" type="email" placeholder="email@example.com" />
+                        <span asp-validation-for="SelectedUser.emailAddress"></span>
+                    </div>
+                </div>
+
+                <div class="um-form-actions">
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+
+            <!-- Separate delete form to avoid accidental submits -->
+            <form method="post" asp-page-handler="Delete"
+                  onsubmit="return confirm('Delete @Model.SelectedUser.firstName @Model.SelectedUser.lastName? This cannot be undone.');">
+                <input type="hidden" asp-for="SelectedUser.userId" />
+                <div class="um-form-actions" style="margin-top:10px;">
+                    <button type="submit" class="btn-delete">Delete User</button>
+                </div>
+            </form>
+
+        </div>
+    }
+    else
+    {
+        <div class="um-form-card">
+            <div class="um-empty">
+                <i class="bi bi-person-x" style="font-size:36px; display:block; margin-bottom:12px;"></i>
+                Select a customer from the list to view and edit their details.
+            </div>
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

@@ -1,0 +1,34 @@
+@page
+@model PricingModel
+@{
+    ViewData["Title"] = "Pricing";
+    ViewData["Page"] = "Pricing";
+}
+
+<h2>Pricing</h2>
+<div class="card">
+    <form method="post">
+        <div class="mb-3">
+            <label class="form-label" asp-for="BaseRate">Base Nightly Rate</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" asp-for="BaseRate" asp-format="{0:F2}" type="number" step="0.01" />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" asp-for="SeasonMult">Season Multiplier</label>
+            <input class="form-control" asp-for="SeasonMult" type="number" step="0.1" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" asp-for="LargeSiteMult">Large Site Multiplier</label>
+            <input class="form-control" asp-for="LargeSiteMult" type="number" step="0.1" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" asp-for="UtilMult">Utility Multiplier</label>
+            <input class="form-control" asp-for="UtilMult" type="number" step="0.1" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+
+    <p class="card-footnote">Updated @Model.UpdatedAt.ToString("MMM d, yyyy 'at' h:mm tt")</p>
+</div>
