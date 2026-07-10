@@ -8,8 +8,8 @@ public abstract class FilterableListPageModel<T> : PageModel, IFilterableListPag
 {
     protected readonly DatabaseWrapper Db;
 
-    public List<FilterModel.FilterDefinition> Filters { get; private set; } = [];
-    public List<object> Rows { get; private set; } = [];
+    public List<FilterModel.FilterDefinition> Filters { get; protected set; } = [];
+    public List<object> Rows { get; protected set; } = [];
 
     [BindProperty]
     public string? SelectedId { get; set; } // sent back to the page via post, for selction
@@ -25,10 +25,14 @@ public abstract class FilterableListPageModel<T> : PageModel, IFilterableListPag
 
     public void OnGet()
     {
+        BeforeOnGet();
+
         var table = GetTable().ToList();
         Filters = BuildFilters(table);
         Rows = ApplyFilters(table, Filters).Cast<object>().ToList();
     }
+
+    protected virtual void BeforeOnGet(){}
 
     protected T? GetSelectedRow() // call from onpost to get the row the user selected
     {
@@ -43,7 +47,7 @@ public abstract class FilterableListPageModel<T> : PageModel, IFilterableListPag
         return GetTable().FirstOrDefault(r => idProp.GetValue(r)?.ToString() == SelectedId);
     }
 
-    private static List<FilterModel.FilterDefinition> BuildFilters(List<T> rows)
+    protected static List<FilterModel.FilterDefinition> BuildFilters(List<T> rows)
     {
         var filters = new List<FilterModel.FilterDefinition>();
         var rowObjects = rows.Cast<object>().ToList();
@@ -71,7 +75,7 @@ public abstract class FilterableListPageModel<T> : PageModel, IFilterableListPag
         return filters;
     }
 
-    private List<T> ApplyFilters(List<T> rows, List<FilterModel.FilterDefinition> filters)
+    protected List<T> ApplyFilters(List<T> rows, List<FilterModel.FilterDefinition> filters)
     {
         var query = rows.AsEnumerable();
 

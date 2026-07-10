@@ -9,7 +9,7 @@ public class IndexModel : PageModel
 {
     private readonly DatabaseWrapper _db;
 
-    public IndexModel(DatabaseWrapper db, UserLogic userLogic)
+    public IndexModel(DatabaseWrapper db)
     {
         _db = db;
     }
