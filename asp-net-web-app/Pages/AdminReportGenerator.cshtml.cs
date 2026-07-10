@@ -8,11 +8,11 @@ using QuestPDF.Infrastructure;
 
 namespace asp_net_web_app.Pages;
 
-public class AdminReportGeneratorModel : FilterableListPageModel<Reservation>
+public class AdminReportGeneratorModel : FilterableListPageModel<Reservations>
 {
     public AdminReportGeneratorModel(DatabaseWrapper db) : base(db) { }
 
-    protected override IEnumerable<Reservation> GetTable() => Db.Set<Reservation>();
+    protected override IEnumerable<Reservations> GetTable() => Db.Set<Reservations>();
 
     public List<string> AvailableTables { get; private set; } = [];
 

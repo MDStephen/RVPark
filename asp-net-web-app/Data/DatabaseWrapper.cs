@@ -18,10 +18,11 @@ namespace asp_net_web_app.Data
         public DbSet<DbSitePrice> SitePrices { get; set; }
         public DbSet<Reservations> Reservations { get; set; }
 
-        // Site, Lot, StorageContainer all in sites now
-        public DbSet<Site> Sites { get; set; }
+        // NOTE: renamed from sites - temporary collision fix
+        public DbSet<Site> SiteModels { get; set; }
 
-        public DbSet<Reservation> Reservations { get; set; }
+        // NOTE: renamed from reservations - temporary collision fix
+        public DbSet<Reservation> ReservationModels { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Pricing> Pricing { get; set; }
 
@@ -29,14 +30,16 @@ namespace asp_net_web_app.Data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Users>().ToTable("Users");
-            modelBuilder.Entity<Customer>();
-            modelBuilder.Entity<Staff>();
-            modelBuilder.Entity<Admin>();
+
+            // NOTE: renamed from sites - temporary collision fix
+            modelBuilder.Entity<Site>().ToTable("SiteModels");
             modelBuilder.Entity<Lot>();
             modelBuilder.Entity<StorageContainer>();
-            modelBuilder.Entity<Reservation>().ToTable("Reservations");
+
+            // NOTE: renamed from sites - temporary collision fix
+            modelBuilder.Entity<Reservation>().ToTable("ReservationModels");
             modelBuilder.Entity<Payment>().ToTable("Payments");
-            modelBuilder.Entity<Pricing>().ToTable("Pricing");            
+            modelBuilder.Entity<Pricing>().ToTable("Pricing");
             modelBuilder.Entity<Employee>().ToTable("Employees");
 
             modelBuilder.Entity<DbSite>().ToTable("Sites");

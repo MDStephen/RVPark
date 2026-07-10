@@ -11,14 +11,118 @@ using asp_net_web_app.Data;
 namespace asp_net_web_app.Migrations
 {
     [DbContext(typeof(DatabaseWrapper))]
-    [Migration("20260710023700_AddTableModels")]
-    partial class AddTableModels
+    [Migration("20260710041042_AddTableModelsFixed")]
+    partial class AddTableModelsFixed
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
+
+            modelBuilder.Entity("asp_net_web_app.Data.DbSite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SiteNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Sites", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.DbSitePhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DbSiteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DbSiteId");
+
+                    b.ToTable("SitePhotos", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.DbSitePrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DbSiteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DbSiteId");
+
+                    b.ToTable("SitePrices", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.Employee", b =>
+                {
+                    b.Property<int>("employeeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("dateOfBirth")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("firstName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("isLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("lastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("employeeId");
+
+                    b.ToTable("Employees", (string)null);
+                });
 
             modelBuilder.Entity("asp_net_web_app.Data.Payment", b =>
                 {
@@ -107,7 +211,37 @@ namespace asp_net_web_app.Migrations
 
                     b.HasKey("reservationId");
 
-                    b.ToTable("Reservations", (string)null);
+                    b.ToTable("ReservationModels", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.Reservations", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SiteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("TotalCost")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Reservations");
                 });
 
             modelBuilder.Entity("asp_net_web_app.Data.Site", b =>
@@ -136,7 +270,7 @@ namespace asp_net_web_app.Migrations
 
                     b.HasKey("siteId");
 
-                    b.ToTable("Sites", (string)null);
+                    b.ToTable("SiteModels", (string)null);
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("Site");
 
@@ -154,11 +288,14 @@ namespace asp_net_web_app.Migrations
                         .HasMaxLength(8)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("city")
+                    b.Property<string>("address")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("email")
+                    b.Property<string>("aptSuite")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("emailAddress")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -166,26 +303,14 @@ namespace asp_net_web_app.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("isBanned")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("lastName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("middleInitial")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("phoneNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("state")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("streetAddress")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("zip")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -244,6 +369,31 @@ namespace asp_net_web_app.Migrations
                     b.HasBaseType("asp_net_web_app.Data.Staff");
 
                     b.HasDiscriminator().HasValue("Admin");
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.DbSitePhoto", b =>
+                {
+                    b.HasOne("asp_net_web_app.Data.DbSite", null)
+                        .WithMany("Photos")
+                        .HasForeignKey("DbSiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.DbSitePrice", b =>
+                {
+                    b.HasOne("asp_net_web_app.Data.DbSite", null)
+                        .WithMany("PriceRules")
+                        .HasForeignKey("DbSiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.DbSite", b =>
+                {
+                    b.Navigation("Photos");
+
+                    b.Navigation("PriceRules");
                 });
 #pragma warning restore 612, 618
         }
