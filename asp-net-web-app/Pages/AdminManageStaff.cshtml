@@ -1,0 +1,306 @@
+@page
+@model AdminManageStaffModel
+@{
+    ViewData["Title"] = "User Management - Staff";
+}
+
+<style>
+    /* Dark theme to match the mockup */
+    .staff-wrapper {
+        background-color: #1a1d21;
+        color: #e4e6eb;
+        border-radius: 12px;
+        padding: 24px;
+        min-height: 600px;
+    }
+
+    .staff-wrapper h1 {
+        color: #ffffff;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .staff-card {
+        background-color: #23272d;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 12px;
+    }
+
+    .staff-card h4 {
+        color: #ffffff;
+        margin-bottom: 16px;
+    }
+
+    .staff-panel {
+        background-color: #2b3038;
+        border-radius: 8px;
+        display: flex;
+        min-height: 480px;
+        overflow: hidden;
+    }
+
+    /* Left panel: staff list */
+    .staff-left {
+        width: 280px;
+        border-right: 1px solid #3a4048;
+        padding: 16px 0;
+        flex-shrink: 0;
+    }
+
+    .staff-list-item {
+        display: block;
+        padding: 12px 20px;
+        color: #e4e6eb;
+        text-decoration: none;
+        border-left: 3px solid transparent;
+    }
+
+    .staff-list-item:hover {
+        background-color: #343a43;
+        color: #ffffff;
+    }
+
+    .staff-list-item.selected {
+        background-color: #343a43;
+        border-left-color: #4d9fff;
+        color: #ffffff;
+    }
+
+    .avatar-circle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #4d9fff;
+        color: #fff;
+        font-weight: 700;
+        margin-right: 10px;
+        font-size: 0.85rem;
+    }
+
+    .avatar-large {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background-color: #3a4048;
+        color: #9aa2ad;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    /* Right panel: form area */
+    .staff-right {
+        flex-grow: 1;
+        padding: 28px;
+        display: flex;
+        gap: 28px;
+    }
+
+    .staff-form label {
+        color: #c8cdd4;
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .staff-form .form-control,
+    .staff-form .form-select {
+        background-color: #1f2329;
+        border: 1px solid #3a4048;
+        color: #e4e6eb;
+        border-radius: 999px;
+        padding: 8px 16px;
+    }
+
+    .staff-form .form-control:focus,
+    .staff-form .form-select:focus {
+        background-color: #1f2329;
+        color: #ffffff;
+        border-color: #4d9fff;
+        box-shadow: none;
+    }
+
+    .staff-form .form-control:disabled {
+        background-color: #262b31;
+        color: #9aa2ad;
+    }
+
+    .btn-save {
+        background-color: #4d9fff;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 18px;
+    }
+
+    .btn-save:hover { background-color: #3b8ae6; color: #fff; }
+
+    .btn-delete {
+        background-color: #e5484d;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 18px;
+    }
+
+    .btn-delete:hover { background-color: #d13438; color: #fff; }
+
+    .btn-lock {
+        background-color: #f0a020;
+        color: #1a1d21;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 18px;
+        font-weight: 600;
+    }
+
+    .btn-lock:hover { background-color: #d98f1a; color: #1a1d21; }
+
+    .locked-badge {
+        background-color: #e5484d;
+        color: #fff;
+        font-size: 0.7rem;
+        border-radius: 999px;
+        padding: 2px 8px;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+
+    .status-note {
+        background-color: #1f3a5f;
+        color: #bcd8ff;
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin-bottom: 14px;
+    }
+
+    .hint-text { color: #9aa2ad; font-size: 0.85rem; }
+</style>
+
+<div class="staff-wrapper">
+    <h1>User Management</h1>
+
+    <div class="staff-card">
+        <h4>Staff Users</h4>
+
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="status-note">@Model.StatusMessage</div>
+        }
+
+        <div class="staff-panel">
+
+            <!-- ===================== LEFT PANEL: staff list ===================== -->
+            <div class="staff-left">
+                @foreach (var emp in Model.Employees)
+                {
+                    <a class="staff-list-item @(Model.Selected != null && Model.Selected.employeeId == emp.employeeId ? "selected" : "")"
+                       asp-page="/AdminManageStaff" asp-route-id="@emp.employeeId">
+                        <span class="avatar-circle">@emp.firstName.Substring(0,1)@emp.lastName.Substring(0,1)</span>
+                        @emp.firstName @emp.lastName
+                        @if (emp.isLocked)
+                        {
+                            <span class="locked-badge">Locked</span>
+                        }
+                    </a>
+                }
+
+                @if (Model.Employees.Count == 0)
+                {
+                    <p class="hint-text" style="padding: 12px 20px;">
+                        No staff accounts yet. Staff accounts are created on the Create Staff Account page.
+                    </p>
+                }
+            </div>
+
+            <!-- ===================== RIGHT PANEL: edit form ===================== -->
+            <div class="staff-right">
+
+                @if (Model.Selected != null)
+                {
+                    <div class="avatar-large">
+                        @Model.Selected.firstName.Substring(0,1)@Model.Selected.lastName.Substring(0,1)
+                    </div>
+
+                    <form method="post" class="staff-form" style="max-width:520px; width:100%;">
+                        <input type="hidden" name="id" value="@Model.Selected.employeeId" />
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label>First Name</label>
+                                <input class="form-control" name="firstName" value="@Model.Selected.firstName" />
+                            </div>
+                            <div class="col">
+                                <label>Last Name</label>
+                                <input class="form-control" name="lastName" value="@Model.Selected.lastName" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label>Date Of Birth</label>
+                                <input class="form-control" type="date" name="dateOfBirth"
+                                       value="@Model.Selected.dateOfBirth.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col">
+                                <label>Role (Access Level)</label>
+                                <select class="form-select" name="role">
+                                    @if (Model.Selected.role == "Admin")
+                                    {
+                                        <option value="Employee">Employee</option>
+                                        <option value="Admin" selected>Admin</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="Employee" selected>Employee</option>
+                                        <option value="Admin">Admin</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label>Username</label>
+                                <input class="form-control" value="@Model.Selected.username" disabled />
+                            </div>
+                            <div class="col">
+                                <label>Password (Employee ID)</label>
+                                <input class="form-control" value="@Model.Selected.password" disabled />
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" asp-page-handler="Save" class="btn-save">Save Changes</button>
+
+                            @if (Model.Selected.isLocked)
+                            {
+                                <button type="submit" asp-page-handler="Unlock" class="btn-lock">Unlock User</button>
+                            }
+                            else
+                            {
+                                <button type="submit" asp-page-handler="Lock" class="btn-lock">Lock User</button>
+                            }
+
+                            <button type="submit" asp-page-handler="Delete" class="btn-delete"
+                                    onclick="return confirm('Delete this staff member? This cannot be undone.');">
+                                Delete User
+                            </button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <p class="hint-text">Select a staff member from the list to view and edit their details.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
