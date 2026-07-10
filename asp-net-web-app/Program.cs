@@ -14,6 +14,7 @@ builder.Services.AddDbContext<DatabaseWrapper>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<CreateEmployeeLogic>();
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<EmployeeLogic>();
 
 
 var app = builder.Build();
