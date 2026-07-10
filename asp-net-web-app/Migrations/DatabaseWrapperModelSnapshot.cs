@@ -161,6 +161,9 @@ namespace asp_net_web_app.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("aptSuite")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("emailAddress")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -171,6 +174,9 @@ namespace asp_net_web_app.Migrations
 
                     b.Property<string>("lastName")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("middleInitial")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("phoneNumber")
