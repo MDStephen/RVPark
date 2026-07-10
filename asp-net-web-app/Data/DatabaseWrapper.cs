@@ -1,7 +1,4 @@
-That's exactly what GitHub predicted — 2 real conflicts. Now let's resolve them.
-1. Data/DatabaseWrapper.cs
-Select all, delete, paste this combined version:
-csharpusing Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace asp_net_web_app.Data
 {
