@@ -1,0 +1,262 @@
+@page "{handler?}/{id?}"
+@model asp_net_web_app.Pages.AdminManageSiteModel
+@{
+    ViewData["Title"] = "Admin - Manage Sites";
+}
+
+<style>
+    .admin-container { padding: 2.5rem 3rem; color: #e5e5e5; background-color: transparent; min-height: 100vh; }
+    .flex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .btn-custom-primary { background-color: #4f46e5; color: white; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 500; text-decoration: none; border: none; cursor: pointer; }
+    .btn-custom-primary:hover { background-color: #4338ca; }
+    .data-card { background-color: #171717; border: 1px solid #262626; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); margin-bottom: 2rem; }
+    .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .admin-table th { padding: 1rem; border-bottom: 1px solid #262626; color: #a3a3a3; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .admin-table td { padding: 1rem; border-bottom: 1px solid #262626; font-size: 0.875rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #a3a3a3; margin-bottom: 0.5rem; }
+    .form-input-field { width: 100%; background-color: #0a0a0a; color: white; border: 1px solid #262626; border-radius: 0.5rem; padding: 0.6rem 0.75rem; outline: none; font-size: 0.875rem; }
+    .form-input-field:focus { border-color: #4f46e5; }
+    .btn-grid-action { background: #262626; color: #d4d4d4; border: 1px solid #404040; padding: 0.4rem 0.75rem; border-radius: 0.375rem; text-decoration: none; font-size: 0.75rem; cursor: pointer; }
+    .btn-grid-action:hover { background: #404040; color: white; }
+    .badge-status { padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; background-color: #262626; color: #d4d4d4; }
+</style>
+
+<div class="admin-container">
+
+    <!--________________ View 1: Main Page ________________-->
+    @if (Model.CurrentAction == "List")
+    {
+        <div class="flex-header">
+            <div>
+                <h1 style="font-size: 1.5rem; font-weight: 600; color: white; margin: 0;">Site Inventory Management</h1>
+                <p style="font-size: 0.875rem; color: #a3a3a3; margin: 0.25rem 0 0 0;">Configure park locations, photo portfolios, and dynamic price windows.</p>
+            </div>
+            <a asp-page-handler="CreateSite" class="btn-custom-primary">+ Add Property Site</a>
+        </div>
+
+        <div class="data-card" style="padding: 0; overflow: hidden;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="padding-left: 1.5rem;">Site Identifier</th>
+                        <th>Classification Category</th>
+                        <th>Operational Status</th>
+                        <th style="text-align: right; padding-right: 1.5rem;">Management Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.AllSites != null && Model.AllSites.Any())
+                    {
+                        @foreach (var site in Model.AllSites)
+                        {
+                            <tr>
+                                <td style="padding-left: 1.5rem; font-weight: 600; color: white;">@site.SiteNumber</td>
+                                <td><span class="badge-status">@site.Category</span></td>
+                                <td>
+                                    @if (site.IsAvailable)
+                                    {
+                                        <span style="padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.35);">
+                                            Available
+                                        </span>
+                                    }
+                                    else
+                                        {
+                                        <span style="padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: rgba(239,68,68,0.1); color: #f87171; border: 1px solid #ef4444; box-shadow: 0 0 4px rgba(239,68,68,0.25);">
+                                            In Use
+                                        </span>
+                                    }
+                                </td>
+
+                                <td style="text-align: right; padding-right: 1.5rem;">
+                                    <a asp-page-handler="CreateSite" asp-route-id="@site.Id" class="btn-grid-action" style="color: #6366f1;">Edit</a>
+                                    <a asp-page-handler="ManagePhotos" asp-route-id="@site.Id" class="btn-grid-action" style="color: #818cf8;">Photos</a>
+                                    <a asp-page-handler="ManagePrices" asp-route-id="@site.Id" class="btn-grid-action" style="color: #fbbf24;">Rates</a>
+                                    <form method="post" asp-page-handler="DeleteSite" asp-route-siteId="@site.Id" style="display: inline;" onclick="return confirm('Delete this site permanently?');">
+                                        <button type="submit" class="btn-grid-action" style="color: #f87171;">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #737373; padding: 2rem;">No property sites available. Click "+ Add Property Site" to create one.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+        <!--________________ View 2: Site Creator/Manager ________________-->
+    @if (Model.CurrentAction == "Create" || Model.CurrentAction == "Edit")
+    {
+        <div style="margin-bottom: 1.5rem;">
+            <a asp-page="" style="font-size: 0.75rem; color: #a3a3a3; text-decoration: none;">← Back to Site Control Hub</a>
+            <h1 style="font-size: 1.25rem; font-weight: 600; color: white; margin-top: 0.5rem;">
+                @(Model.CurrentAction == "Create" ? "Provision New Site Location" : $"Modify Configuration for Site {Model.ActiveSiteNumber}")
+            </h1>
+        </div>
+
+        <div class="data-card" style="max-width: 500px;">
+            <form method="post" asp-page-handler="@(Model.CurrentAction == "Edit" ? "UpdateSite" : "CreateSite")">
+                <input type="hidden" name="siteId" value="@Model.ActiveSiteId" />
+                
+                <div class="form-group">
+                    <label class="form-label">Site Designation / Number</label>
+                    <input name="siteNum" class="form-input-field" value="@(Model.CurrentAction == "Edit" ? Model.ActiveSiteNumber : "")" placeholder="e.g., Premium-RV-40" required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Classification Category Type</label>
+                    <select name="category" class="form-input-field">
+                        <option value="Tent Site">Tent Site</option>
+                        <option value="RV Hookup">RV Hookup</option>
+                        <option value="RV Parking">RV Parking</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Operational Status</label>
+                    <select name="isAvailable" class="form-input-field">
+                        @if (Model.ActiveSiteStatus == true)
+                        {
+                            <option value="true" selected>Available</option>
+                            <option value="false">In Use</option>
+                        }
+                        else
+                        {
+                            <option value="true">Available</option>
+                            <option value="false" selected>In Use</option>
+                        }
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #262626;">
+                    <button type="submit" class="btn-custom-primary" style="background-color: #10b981;">
+                        @(Model.CurrentAction == "Edit" ? "Update Details" : "Commit Settings")
+                    </button>
+                    <a asp-page="" class="btn-grid-action" style="padding: 0.6rem 1.2rem; font-size: 0.875rem; border-radius: 0.5rem;">Cancel</a>
+                </div>
+            </form>
+        </div>
+    }
+
+
+    <!--________________ View 3: Photo Manager ________________-->
+    @if (Model.CurrentAction == "Photos")
+    {
+        <div style="margin-bottom: 1.5rem;">
+            <a asp-page="" style="font-size: 0.75rem; color: #a3a3a3; text-decoration: none;">← Save and Return to Inventory</a>
+            <h1 style="font-size: 1.25rem; font-weight: 600; color: white; margin-top: 0.5rem;">Photo Portfolio Management <span style="color:#737373; font-size:1rem;">(Site @Model.ActiveSiteNumber)</span></h1>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
+            <div class="data-card" style="flex: 1; min-width: 280px; max-width: 400px; height: fit-content;">
+                <h5 class="form-label" style="font-weight: 700; margin-bottom: 1rem;">Attach New Asset</h5>
+                <form method="post" asp-page-handler="AddPhoto">
+                    <input type="hidden" name="siteId" value="@Model.ActiveSiteId" />
+                    <div class="form-group">
+                        <label class="form-label">Asset Image URL Path</label>
+                        <input name="url" class="form-input-field" placeholder="/images/uploads/site-a.jpg" required />
+                    </div>
+                    <button type="submit" class="btn-custom-primary" style="width: 100%;">Upload Asset</button>
+                </form>
+            </div>
+            
+            <div class="data-card" style="flex: 2; min-width: 320px;">
+                <h5 class="form-label" style="font-weight: 700; margin-bottom: 1rem;">Active Portfolio Items</h5>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;">
+                    @if (Model.SelectedPhotos.Any())
+                    {
+                        @foreach (var photo in Model.SelectedPhotos)
+                        {
+                            <div style="position: relative; background-color: #0a0a0a; border: 1px solid #262626; border-radius: 0.5rem; overflow: hidden; height: 120px;">
+                                <div style="width: 100%; height: 100%; background-image: url('@photo.PhotoUrl'); background-size: cover; background-position: center;"></div>
+                                <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0.25rem; background: rgba(0,0,0,0.8); text-align: center; font-size: 0.65rem; font-family: monospace; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; color: #d4d4d4;">
+                                    @photo.PhotoUrl
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p style="color:#737373; font-size:0.875rem;">No photos uploaded for this site yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!--________________ SCREEN 4: Rates & Price Manager ________________-->
+    @if (Model.CurrentAction == "Prices")
+    {
+        <div style="margin-bottom: 1.5rem;">
+            <a asp-page="" style="font-size: 0.75rem; color: #a3a3a3; text-decoration: none;">← Save and Return to Inventory</a>
+            <h1 style="font-size: 1.25rem; font-weight: 600; color: white; margin-top: 0.5rem;">Dynamic Seasonal Pricing <span style="color:#737373; font-size:1rem;">(Site @Model.ActiveSiteNumber)</span></h1>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
+            <div class="data-card" style="flex: 1; min-width: 280px; max-width: 400px; height: fit-content;">
+                <h5 class="form-label" style="font-weight: 700; margin-bottom: 1rem;">Create Active Price Window</h5>
+                <form method="post" asp-page-handler="AddPrice">
+                    <input type="hidden" name="siteId" value="@Model.ActiveSiteId" />
+                    <div class="form-group">
+                        <label class="form-label">Daily Rate ($)</label>
+                        <input name="cost" type="number" step="0.01" class="form-input-field" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Effective Activation Date</label>
+                        <input name="start" type="date" class="form-input-field" value="2026-07-09" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Deactivation Expiry Date</label>
+                        <input name="end" type="date" class="form-input-field" value="2026-07-16" required />
+                    </div>
+                    <button type="submit" class="btn-custom-primary" style="width: 100%; background-color: #f59e0b; color: #0a0a0a; font-weight: 600;">Apply Rate Rule</button>
+                </form>
+            </div>
+
+            <div class="data-card" style="flex: 2; min-width: 320px; padding: 0; overflow: hidden;">
+                <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #262626;">
+                    <h5 class="form-label" style="font-weight: 700; margin: 0;">Active Price Schedules</h5>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 1.5rem;">Price (Per Night)</th>
+                            <th>Effective Start</th>
+                            <th>Effective End</th>
+                            <th style="text-align: right; padding-right: 1.5rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.SelectedPrices.Any())
+                        {
+                            @foreach(var price in Model.SelectedPrices) {
+                                <tr>
+                                    <td style="padding-left: 1.5rem; color: #fbbf24; font-weight: 600;">$@price.Cost.ToString("F2")</td>
+                                    <td style="color: #d4d4d4;">@price.Start.ToShortDateString()</td>
+                                    <td style="color: #d4d4d4;">@price.End.ToShortDateString()</td>
+                                    <td style="text-align: right; padding-right: 1.5rem;">
+                                        <form method="post" asp-page-handler="DeletePrice" asp-route-priceId="@price.Id" asp-route-siteId="@Model.ActiveSiteId" style="display: inline;">
+                                            <button type="submit" class="btn-grid-action" style="color: #f87171;">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #737373; padding: 2rem;">No dynamic rates configured for this site.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

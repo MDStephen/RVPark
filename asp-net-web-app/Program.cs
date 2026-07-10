@@ -1,4 +1,7 @@
 using asp_net_web_app.Data;
+using asp_net_web_app.Repositories;
+using asp_net_web_app.Pages;
+using asp_net_web_app.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,8 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<DatabaseWrapper>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<UserLogic>();
-builder.Services.AddScoped<EmployeeLogic>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<CreateEmployeeLogic>();
 builder.Services.AddRazorPages();
+
 
 var app = builder.Build();
 
@@ -16,44 +21,13 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<DatabaseWrapper>();
     db.Database.Migrate();
-
-    // Seed staff data so the Manage Staff page has records to perform CRUD on.
-    // Only runs when the Employees table is empty - won't create duplicates.
-    if (!db.Employees.Any())
+    if (!db.Users.Any())
     {
-        db.Employees.Add(new Employee
-        {
-            firstName = "Test",
-            lastName = "Admin",
-            dateOfBirth = new DateTime(1990, 1, 1),
-            username = "tadmin",
-            password = "1",
-            role = "Admin",
-            isLocked = false
-        });
-
-        db.Employees.Add(new Employee
-        {
-            firstName = "Jane",
-            lastName = "Desk",
-            dateOfBirth = new DateTime(1998, 5, 20),
-            username = "jdesk",
-            password = "2",
-            role = "Employee",
-            isLocked = false
-        });
-
-        db.Employees.Add(new Employee
-        {
-            firstName = "Mark",
-            lastName = "Gate",
-            dateOfBirth = new DateTime(1995, 9, 3),
-            username = "mgate",
-            password = "3",
-            role = "Employee",
-            isLocked = true   // one pre-locked employee, nice for demoing Unlock
-        });
-
+        db.Users.AddRange(
+            new Users { firstName = "Jane", lastName = "Doe", emailAddress = "jane@example.com", phoneNumber = "555 555-1234", address = "123 Main St" },
+            new Users { firstName = "John", lastName = "Smith", emailAddress = "john@example.com", phoneNumber = "555 555-5678", address = "456 Oak Ave" },
+            new Users { firstName = "Bob", lastName = "Johnson", emailAddress = "bob@example.com", phoneNumber = "555 555-2468", address = "987 Center St" }
+        );
         db.SaveChanges();
     }
 }
