@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using asp_net_web_app.Data;
 
@@ -10,9 +11,11 @@ using asp_net_web_app.Data;
 namespace asp_net_web_app.Migrations
 {
     [DbContext(typeof(DatabaseWrapper))]
-    partial class DatabaseWrapperModelSnapshot : ModelSnapshot
+    [Migration("20260710002241_AddReservationsManagement")]
+    partial class AddReservationsManagement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -82,36 +85,6 @@ namespace asp_net_web_app.Migrations
                     b.HasIndex("DbSiteId");
 
                     b.ToTable("SitePrices", (string)null);
-                });
-
-            modelBuilder.Entity("asp_net_web_app.Data.Reservations", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("SiteId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TotalCost")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("asp_net_web_app.Data.Users", b =>

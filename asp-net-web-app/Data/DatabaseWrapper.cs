@@ -13,6 +13,7 @@ namespace asp_net_web_app.Data
         public DbSet<DbSite> Sites { get; set; }
         public DbSet<DbSitePhoto> SitePhotos { get; set; }
         public DbSet<DbSitePrice> SitePrices { get; set; }
+        public DbSet<Reservations> Reservations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,6 +22,7 @@ namespace asp_net_web_app.Data
             modelBuilder.Entity<DbSite>().ToTable("Sites");
             modelBuilder.Entity<DbSitePhoto>().ToTable("SitePhotos");
             modelBuilder.Entity<DbSitePrice>().ToTable("SitePrices");
+            modelBuilder.Entity<Reservations>().ToTable("Reservations");
         }
 
         public void AddUser(string username)
@@ -62,5 +64,16 @@ namespace asp_net_web_app.Data
         public decimal Cost { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
+    }
+
+    public class Reservations
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public int SiteId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Status { get; set; } = "Upcoming";
+        public decimal TotalCost { get; set; }
     }
 }
