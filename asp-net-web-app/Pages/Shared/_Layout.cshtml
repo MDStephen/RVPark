@@ -23,7 +23,7 @@
             <a href="/Index" class="nav-item @(ViewData["Page"]?.ToString() == "Dashboard" ? "active" : "")">
                 <i class="bi bi-grid nav-icon"></i> Dashboard
             </a>
-            <a href="/Reservations" class="nav-item @(ViewData["Page"]?.ToString() == "Reservations" ? "active" : "")">
+            <a href="/AdminManageReservations" class="nav-item @(ViewData["Page"]?.ToString() == "Reservations" ? "active" : "")">
                 <i class="bi bi-calendar3 nav-icon"></i> Reservations
             </a>
             <a href="/Customers" class="nav-item @(ViewData["Page"]?.ToString() == "Customers" ? "active" : "")">
@@ -38,8 +38,11 @@
             <a href="/Pricing" class="nav-item @(ViewData["Page"]?.ToString() == "Pricing" ? "active" : "")">
                 <i class="bi bi-cash-coin nav-icon"></i> Pricing
             </a>
-            <a href="/Users" class="nav-item @(ViewData["Page"]?.ToString() == "Users" ? "active" : "")">
+            <a href="/Admin/ManageUsers" class="nav-item @(ViewData["Page"]?.ToString() == "Users" ? "active" : "")">
                 <i class="bi bi-people nav-icon"></i> Users
+            </a>
+            <a href="/AdminManageSite" class="nav-item @(ViewData["Page"]?.ToString() == "Manage Site" ? "active" : "")">
+                <i class="bi bi-building-gear nav-icon"></i> Manage Site
             </a>
         </nav>
 
