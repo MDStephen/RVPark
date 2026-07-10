@@ -3,6 +3,7 @@ using asp_net_web_app.Repositories;
 using asp_net_web_app.Pages;
 using asp_net_web_app.Services;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure; // necessary for LicenseType to be recognized
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,4 +51,5 @@ app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
 
+QuestPDF.Settings.License = LicenseType.Community;
 app.Run();

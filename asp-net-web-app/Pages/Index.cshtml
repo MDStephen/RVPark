@@ -5,38 +5,3 @@
     ViewData["Page"]  = "Dashboard";
 }
 
-<h2>Add User</h2>
-<form method="post">
-    <div>
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Enter username"/>
-    </div>
-    <div>
-        <button type="submit">Add User</button>
-    </div>
-</form>
-<h2>Current Users</h2>
-<table class="border table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Address</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach ( var c in Model.UserList){
-        <tr>
-            <td>@c.userId</td>
-            <td>@c.firstName</td>
-            <td>@c.lastName</td>
-            <td>@c.emailAddress</td>
-            <td>@c.phoneNumber</td>
-            <td>@c.address</td>
-        </tr>
-    }
-    </tbody>
-</table>

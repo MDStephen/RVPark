@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace asp_net_web_app.Data
 {
-    public class Users
+    public abstract class Users
     {
         [Key]
         public int userId { get; set; }
@@ -12,20 +12,12 @@ namespace asp_net_web_app.Data
 
         [Required(ErrorMessage = "Last name is required")]
         public string lastName { get; set; }
-
-        public string? middleInitial { get; set; }
-
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Enter a valid email address")]
-        public string emailAddress { get; set; }
-
-        [Required(ErrorMessage = "Phone number is required")]
+        public string email { get; set; }
         public string phoneNumber { get; set; }
-
-        [Required(ErrorMessage = "Address is required")]
-        public string address { get; set; }
-
-        public string? aptSuite { get; set; }
-        
+        public string streetAddress { get; set; }
+        public string city { get; set; }
+        public string state { get; set; }
+        public string zip { get; set; }
+        public bool isBanned { get; set; }
     }
 }

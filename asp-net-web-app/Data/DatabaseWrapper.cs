@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 
 namespace asp_net_web_app.Data
@@ -8,6 +9,7 @@ namespace asp_net_web_app.Data
         {
         }
 
+        // Users, Customer, Staff, Admin all in users now
         public DbSet<Users> Users { get; set; }
         public DbSet<Employee> Employees { get; set; }
 
@@ -16,31 +18,32 @@ namespace asp_net_web_app.Data
         public DbSet<DbSitePrice> SitePrices { get; set; }
         public DbSet<Reservations> Reservations { get; set; }
 
+        // Site, Lot, StorageContainer all in sites now
+        public DbSet<Site> Sites { get; set; }
+
+        public DbSet<Reservation> Reservations { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Pricing> Pricing { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
             modelBuilder.Entity<Users>().ToTable("Users");
+            modelBuilder.Entity<Customer>();
+            modelBuilder.Entity<Staff>();
+            modelBuilder.Entity<Admin>();
+            modelBuilder.Entity<Lot>();
+            modelBuilder.Entity<StorageContainer>();
+            modelBuilder.Entity<Reservation>().ToTable("Reservations");
+            modelBuilder.Entity<Payment>().ToTable("Payments");
+            modelBuilder.Entity<Pricing>().ToTable("Pricing");            
             modelBuilder.Entity<Employee>().ToTable("Employees");
 
             modelBuilder.Entity<DbSite>().ToTable("Sites");
             modelBuilder.Entity<DbSitePhoto>().ToTable("SitePhotos");
             modelBuilder.Entity<DbSitePrice>().ToTable("SitePrices");
-            modelBuilder.Entity<Reservations>().ToTable("Reservations");
         }
 
-        public void AddUser(string username)
-        {
-            Users.Add(new Users
-            {
-                firstName = username,
-                lastName = "",
-                emailAddress = "",
-                phoneNumber = "",
-                address = ""
-            });
-            SaveChanges();
-        }
     }
 
     public class DbSite

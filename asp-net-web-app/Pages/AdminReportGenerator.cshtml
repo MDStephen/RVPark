@@ -1,0 +1,68 @@
+﻿@page
+@model AdminReportGeneratorModel
+@{
+    ViewData["Title"] = "Admin Report Generator";
+    ViewData["Page"] = "Reports";
+}
+
+<div class="container">
+
+    <form method="post" class="mb-3">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-4">
+                <label class="form-label">Database Table</label>
+                <select class="form-select" asp-for="SelectedTable">
+                    @foreach (var table in Model.AvailableTables)
+                    {
+                        <option value="@table">@table</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-8">
+                <label class="form-label d-block">Report Format</label>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="ReportType"
+                           value="PDF"
+                           checked>
+                    <label class="form-check-label">PDF</label>
+                </div>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="ReportType"
+                           value="CSV">
+                    <label class="form-check-label">CSV</label>
+                </div>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="ReportType"
+                           value="JSON">
+                    <label class="form-check-label">JSON</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <button type="submit"
+                        class="btn btn-primary"
+                        asp-page-handler="GenerateReport">
+                    Create Report
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+    <partial name="_FilterPanel" />
+    <partial name="_ListTable" />
+
+</div>
