@@ -12,6 +12,7 @@ builder.Services.AddScoped<UserLogic>();
 builder.Services.AddScoped<CreateEmployeeLogic>();
 builder.Services.AddRazorPages();
 
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
