@@ -16,18 +16,18 @@ namespace asp_net_web_app.Data
         public DbSet<DbSitePrice> SitePrices { get; set; }
         public DbSet<Reservations> Reservations { get; set; }
 
-        public DbSet<Employee> Employees { get; set; }   
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-<public DbSet<Employee> Employees { get; set; }
+            base.OnModelCreating(modelBuilder);
 
-protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
-    base.OnModelCreating(modelBuilder);
-    modelBuilder.Entity<Users>().ToTable("Users");
-    modelBuilder.Entity<Employee>().ToTable("Employees");
-}
+            modelBuilder.Entity<Users>().ToTable("Users");
+            modelBuilder.Entity<Employee>().ToTable("Employees");
+
+            modelBuilder.Entity<DbSite>().ToTable("Sites");
+            modelBuilder.Entity<DbSitePhoto>().ToTable("SitePhotos");
+            modelBuilder.Entity<DbSitePrice>().ToTable("SitePrices");
+            modelBuilder.Entity<Reservations>().ToTable("Reservations");
+        }
 
         public void AddUser(string username)
         {
