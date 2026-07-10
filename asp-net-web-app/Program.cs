@@ -1,5 +1,7 @@
 using asp_net_web_app.Data;
 using asp_net_web_app.Repositories;
+using asp_net_web_app.Pages;
+using asp_net_web_app.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +11,9 @@ builder.Services.AddDbContext<DatabaseWrapper>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<UserLogic>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<CreateEmployeeLogic>();
 builder.Services.AddRazorPages();
+
 
 var app = builder.Build();
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using asp_net_web_app.Data;
 
@@ -10,9 +11,11 @@ using asp_net_web_app.Data;
 namespace asp_net_web_app.Migrations
 {
     [DbContext(typeof(DatabaseWrapper))]
-    partial class DatabaseWrapperModelSnapshot : ModelSnapshot
+    [Migration("20260710022958_SyncWithMainEmployee")]
+    partial class SyncWithMainEmployee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -161,9 +164,6 @@ namespace asp_net_web_app.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("aptSuite")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("emailAddress")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -174,9 +174,6 @@ namespace asp_net_web_app.Migrations
 
                     b.Property<string>("lastName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("middleInitial")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("phoneNumber")
