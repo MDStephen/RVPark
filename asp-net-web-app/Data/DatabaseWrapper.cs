@@ -37,6 +37,8 @@ namespace asp_net_web_app.Data
             modelBuilder.Entity<Reservation>().ToTable("Reservations");
             modelBuilder.Entity<Payment>().ToTable("Payments");
             modelBuilder.Entity<Pricing>().ToTable("Pricing");            
+            modelBuilder.Entity<Employee>().ToTable("Employees");
+
             modelBuilder.Entity<DbSite>().ToTable("Sites");
             modelBuilder.Entity<DbSitePhoto>().ToTable("SitePhotos");
             modelBuilder.Entity<DbSitePrice>().ToTable("SitePrices");
