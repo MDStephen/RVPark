@@ -32,6 +32,43 @@ using (var scope = app.Services.CreateScope())
         );
         db.SaveChanges();
     }
+
+    if (!db.Reservations.Any())
+    {
+        var seededSites = db.Sites.OrderBy(s => s.Id).Take(3).Select(s => s.Id).ToList();
+        var firstUserId = db.Users.OrderBy(u => u.userId).Select(u => u.userId).FirstOrDefault();
+
+        db.Reservations.AddRange(
+            new Reservations
+            {
+                UserId = firstUserId,
+                SiteId = seededSites.Count > 0 ? seededSites[0] : 1,
+                StartDate = DateTime.Today.AddDays(7),
+                EndDate = DateTime.Today.AddDays(10),
+                Status = "Upcoming",
+                TotalCost = 150.00m
+            },
+            new Reservations
+            {
+                UserId = firstUserId,
+                SiteId = seededSites.Count > 1 ? seededSites[1] : 2,
+                StartDate = DateTime.Today.AddDays(14),
+                EndDate = DateTime.Today.AddDays(16),
+                Status = "Upcoming",
+                TotalCost = 90.00m
+            },
+            new Reservations
+            {
+                UserId = firstUserId,
+                SiteId = seededSites.Count > 2 ? seededSites[2] : 3,
+                StartDate = DateTime.Today.AddDays(21),
+                EndDate = DateTime.Today.AddDays(25),
+                Status = "Upcoming",
+                TotalCost = 220.00m
+            }
+        );
+        db.SaveChanges();
+    }
 }
 
 // Configure the HTTP request pipeline.
