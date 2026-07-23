@@ -1,0 +1,48 @@
+@page
+@model ReservationService.Pages.Reservations.CreateReservationModel
+
+<div class="form-container">
+    <h2 class="page-title">Create a Reservation</h2>
+
+    <form method="post" asp-page-handler="Search" class="styled-form">
+        <label class="form-label">Check-In Date</label>
+        <input asp-for="CheckIn" type="date" class="form-input" />
+
+        <label class="form-label">Check-Out Date</label>
+        <input asp-for="CheckOut" type="date" class="form-input" />
+
+        <label class="form-label">Site Type</label>
+        <select asp-for="SiteType" class="form-input">
+            <option value="">-- Select Site Type --</option>
+            @foreach (var type in Model.SiteTypes)
+            {
+                <option value="@type">@type</option>
+            }
+        </select>
+
+        <label class="form-label">RV / Vehicle Length (optional)</label>
+        <input asp-for="VehicleLength" type="number" class="form-input" />
+
+        <button type="submit" class="primary-button">Search Campsites</button>
+    </form>
+
+    @if (Model.MatchingSites.Any())
+    {
+        <h3 class="page-title">Available Campsites</h3>
+        <div class="results-container">
+            @foreach (var site in Model.MatchingSites)
+            {
+                <div class="result-card">
+                    <h4>@site.Name</h4>
+                    <p>Type: @site.SiteType</p>
+                    <p>Max Length: @site.MaxLength ft</p>
+
+                    <form method="post" asp-page-handler="Reserve">
+                        <input type="hidden" name="campsiteId" value="@site.CampsiteId" />
+                        <button class="primary-button">Reserve This Site</button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+</div>
