@@ -1,0 +1,53 @@
+@page
+@model UserLoginPageModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_ExternalLayout";
+}
+
+<div class="container py-4">
+    <h1 class="text-light mb-4">Login</h1>
+
+    <div class="card bg-secondary bg-opacity-10 border-secondary-subtle rounded-3">
+        <div class="card-header bg-secondary bg-opacity-25 border-secondary-subtle">
+            <span class="fw-semibold text-light">Log in using username and password</span>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="bg-secondary bg-opacity-25 rounded-3 p-5">
+                <form method="post" class="mx-auto" style="max-width: 320px;">
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label text-light fw-semibold">Username</label>
+                        <input asp-for="Username" class="form-control bg-dark text-light border-secondary-subtle" />
+                        <span asp-validation-for="Username" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label text-light fw-semibold">Password</label>
+                        <input asp-for="Password" type="password" class="form-control bg-dark text-light border-secondary-subtle" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <button type="submit" class="btn btn-info text-dark fw-semibold px-4">Login</button>
+                        <a asp-page="/ForgotPassword" class="link-info small text-decoration-none">Forgot Password?</a>
+                    </div>
+
+                    <div class="mt-2">
+                        <a asp-page="/CustomerFacing/UserCreateAccountPage" class="link-info small text-decoration-none">
+                            Don't have an account? Create Account
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center text-light mt-3">
+        Having trouble?: <a asp-page="/RequestAccess" class="link-info text-decoration-none">Request Access</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

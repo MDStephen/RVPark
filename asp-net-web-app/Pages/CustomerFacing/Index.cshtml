@@ -1,0 +1,138 @@
+@page "/"
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+    Layout = "_ExternalLayout";
+}
+
+<!-- ===== Hero / Banner ===== -->
+<section class="text-white d-flex align-items-center"
+          style="min-height: 70vh; background: linear-gradient(180deg, rgba(13,17,23,0.35) 0%, rgba(13,17,23,0.85) 100%), url('@Url.Content("~/images/hill-airforce-base.webp")') center/cover no-repeat;">
+    <div class="container text-center py-5">
+        <h1 class="display-4 fw-bold mb-3">Hill AFB RVPARK</h1>
+        <p class="lead text-white mb-4 mx-auto" style="max-width: 620px;">
+            Full-hookup RV sites, dry storage, and temporary lodging for Hill Air Force Base
+            personnel and authorized guests.
+        </p>
+        <a class="btn btn-light btn-lg rounded-pill px-4 fw-semibold" asp-area="" asp-page="/Campsites/Index">
+            Browse Campsites
+        </a>
+    </div>
+</section>
+
+<!-- ===== Brief Park Description ===== -->
+<section class="bg-dark text-light py-5">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-7">
+                <h2 class="mb-3 fw-semibold">About the Park</h2>
+                <p class="fs-5 text-white">
+                    Hill AFB RVPARK provides temporary residency for military personnel and their
+                    families, along with dry storage for RVs and trailers. Sites include electric,
+                    water, sewer, and internet access. All reservations require verification of
+                    base authorization before booking is confirmed.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== Featured Campsite Images ===== -->
+<section class="bg-dark text-light py-5 border-top border-secondary-subtle">
+    <div class="container">
+        <h2 class="text-center mb-4 fw-semibold">Featured Sites</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 bg-black bg-opacity-50 text-light border-0 rounded-4 overflow-hidden shadow-sm">
+                    <img src="~/images/site-rv-fullhookup.jpg" class="card-img-top" alt="Full hookup RV site" style="height: 190px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Full Hookup RV Sites</h5>
+                        <p class="card-text text-white">Electric, water, and sewer &mdash; sized for RVs up to 45 ft.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 bg-black bg-opacity-50 text-light border-0 rounded-4 overflow-hidden shadow-sm">
+                    <img src="~/images/site-dry-storage.jpg" class="card-img-top" alt="Dry storage lot" style="height: 190px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Dry Storage</h5>
+                        <p class="card-text text-white">Secure long-term storage for RVs and trailers not in active use.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 bg-black bg-opacity-50 text-light border-0 rounded-4 overflow-hidden shadow-sm">
+                    <img src="~/images/site-tent.jpg" class="card-img-top" alt="Tent site" style="height: 190px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Tent &amp; Overflow Sites</h5>
+                        <p class="card-text text-white">Simple sites for short stays and overflow during peak season.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <a class="btn btn-outline-light rounded-pill px-4" asp-area="" asp-page="/Campsites/Index">Browse Campsites</a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== Campsite Search (no login required) ===== -->
+<section class="bg-black text-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-2 fw-semibold">Find a Site</h2>
+        <p class="text-center text-white mb-4">
+            Browse and search availability without an account &mdash; sign in only when you're ready to book.
+        </p>
+        <form method="get" asp-page="/Campsites/Index" class="row g-3 justify-content-center">
+            <div class="col-md-3">
+                <label for="checkIn" class="form-label">Check-in</label>
+                <input type="date" class="form-control bg-dark text-light border-secondary-subtle" id="checkIn" name="checkIn" />
+            </div>
+            <div class="col-md-3">
+                <label for="checkOut" class="form-label">Check-out</label>
+                <input type="date" class="form-control bg-dark text-light border-secondary-subtle" id="checkOut" name="checkOut" />
+            </div>
+            <div class="col-md-3">
+                <label for="rvLength" class="form-label">RV Length (ft)</label>
+                <input type="number" class="form-control bg-dark text-light border-secondary-subtle" id="rvLength" name="rvLength" min="0" placeholder="e.g. 32" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-semibold">Search</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- ===== Rates & Policies ===== -->
+<section class="bg-dark text-light py-5 border-top border-secondary-subtle">
+    <div class="container">
+        <h2 class="text-center mb-4 fw-semibold">Rates &amp; Policies</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <h5>Nightly Rates</h5>
+                <ul class="list-unstyled text-white">
+                    <li>Full Hookup RV Site &mdash; $45/night</li>
+                    <li>Tent / Overflow Site &mdash; $25/night</li>
+                    <li>Dry Storage &mdash; $60/month</li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>Stay Policies</h5>
+                <ul class="list-unstyled text-white">
+                    <li>Check-in: 2:00 PM &nbsp;|&nbsp; Check-out: 11:00 AM</li>
+                    <li>14-day stay limit during peak season (PCS exceptions apply)</li>
+                    <li>Full payment required at time of booking</li>
+                    <li>Cancellations require 48-hour notice</li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>Eligibility &amp; Access</h5>
+                <ul class="list-unstyled text-white">
+                    <li>Base authorization required before reservation is confirmed</li>
+                    <li>Valid military ID or sponsor verification needed at check-in</li>
+                    <li>South Gate entry &mdash; security may verify reservation on arrival</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
