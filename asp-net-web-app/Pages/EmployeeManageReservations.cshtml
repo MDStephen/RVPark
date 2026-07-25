@@ -301,6 +301,10 @@
                             }
                         </div>
                     </form>
+                    <a asp-page="/EmployeeManageReservations" asp-route-mode="walkin" class="btn-save"
+                       style="display:block; text-align:center; margin-top:10px; background-color:#10b981;">
+                        + New Walk-In Reservation
+                    </a>
                 </div>
 
                 <div class="emp-list">
@@ -329,7 +333,159 @@
 
             <!-- ===================== RIGHT PANEL: detail / edit ===================== -->
             <div class="emp-right">
-                @if (Model.InvalidId)
+                @if (Model.Mode == "walkin")
+                {
+                    <div class="emp-detail-header">
+                        <h3>New Walk-In Reservation</h3>
+                        <a asp-page="/EmployeeManageReservations" class="btn-save" style="background-color:#3a4048;">Cancel</a>
+                    </div>
+
+                    @if (Model.SelectedWalkInCustomer == null)
+                    {
+                        <!-- Step A: find or create the customer -->
+                        <h5 style="color:#ffffff; font-size:0.95rem; margin-bottom:12px;">Step 1 &ndash; Find Customer</h5>
+                        <form method="get" class="emp-form mb-3">
+                            <input type="hidden" name="mode" value="walkin" />
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label>Search by name or email</label>
+                                    <input class="form-control" type="text" name="custQ" value="@Model.CustomerQuery" placeholder="e.g. Jane Doe or jane@example.com" />
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-save">Search</button>
+                        </form>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.CustomerQuery))
+                        {
+                            @if (Model.CustomerMatches.Any())
+                            {
+                                <div class="emp-card" style="margin-top:0;">
+                                    @foreach (var c in Model.CustomerMatches)
+                                    {
+                                        <div class="emp-detail-header" style="margin-bottom:10px;">
+                                            <div>
+                                                <div class="value" style="color:#fff;">@c.FullName</div>
+                                                <div class="res-dates">@c.Email &middot; @c.Phone</div>
+                                            </div>
+                                            <a asp-page="/EmployeeManageReservations" asp-route-mode="walkin" asp-route-custId="@c.Id" class="btn-save">Select</a>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="hint-text" style="padding:12px 0;">No matching customers found for "@Model.CustomerQuery".</p>
+                            }
+
+                            <h5 style="color:#ffffff; font-size:0.95rem; margin:20px 0 12px 0;">Or Create New Customer</h5>
+                            <form method="post" asp-page-handler="CreateCustomer" class="emp-form">
+                                <input type="hidden" name="custQ" value="@Model.CustomerQuery" />
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <label>First Name</label>
+                                        <input class="form-control" type="text" name="firstName" required />
+                                    </div>
+                                    <div class="col">
+                                        <label>Last Name</label>
+                                        <input class="form-control" type="text" name="lastName" required />
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <label>Email</label>
+                                        <input class="form-control" type="email" name="email" required />
+                                    </div>
+                                    <div class="col">
+                                        <label>Phone</label>
+                                        <input class="form-control" type="text" name="phone" />
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-save">Create Customer</button>
+                            </form>
+                        }
+                    }
+                    else
+                    {
+                        var wc = Model.SelectedWalkInCustomer;
+                        <!-- Step B: reservation details -->
+                        <h5 style="color:#ffffff; font-size:0.95rem; margin-bottom:4px;">Step 2 &ndash; Reservation Details</h5>
+                        <p class="res-dates" style="margin-bottom:12px;">Booking for: @wc.FullName</p>
+                        <div class="emp-info-grid" style="margin-bottom:20px;">
+                            <div class="emp-info-item">
+                                <label>Customer</label>
+                                <div class="value">@wc.FullName</div>
+                            </div>
+                            <div class="emp-info-item">
+                                <label>Email</label>
+                                <div class="value">@wc.Email</div>
+                            </div>
+                            <div class="emp-info-item">
+                                <label>Phone</label>
+                                <div class="value">@wc.Phone</div>
+                            </div>
+                        </div>
+
+                        <form method="post" asp-page-handler="CreateReservation" class="emp-form">
+                            <input type="hidden" name="custId" value="@wc.Id" />
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label>Site</label>
+                                    <select class="form-select" name="siteId" required>
+                                        <option value="">-- Select a site --</option>
+                                        @foreach (var s in Model.SiteOptions)
+                                        {
+                                            <option value="@s.Id">@s.SiteNumber</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label>Total Cost</label>
+                                    <input class="form-control" type="number" step="0.01" min="0" name="totalCost" value="0.00" required />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label>Start Date</label>
+                                    <input class="form-control" type="date" name="startDate" required />
+                                </div>
+                                <div class="col">
+                                    <label>End Date</label>
+                                    <input class="form-control" type="date" name="endDate" required />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label>Adults</label>
+                                    <input class="form-control" type="number" min="1" name="adults" value="1" required />
+                                </div>
+                                <div class="col">
+                                    <label>Children</label>
+                                    <input class="form-control" type="number" min="0" name="children" value="0" />
+                                </div>
+                                <div class="col">
+                                    <label>Pets</label>
+                                    <input class="form-control" type="number" min="0" max="4" name="pets" value="0" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label>Notes</label>
+                                    <textarea class="form-control" name="notes" rows="3" maxlength="500" placeholder="Special requests or notes for this reservation..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn-save">Create Reservation</button>
+                                <a asp-page="/EmployeeManageReservations" asp-route-mode="walkin" class="btn-save" style="background-color:#3a4048;">Back to Customer Search</a>
+                            </div>
+                        </form>
+                    }
+                }
+                else if (Model.InvalidId)
                 {
                     <p class="hint-text">We couldn't find that reservation. It may have been removed &mdash; try selecting one from the list.</p>
                 }
@@ -369,6 +525,29 @@
                             <div class="value">@d.Status</div>
                         </div>
                     </div>
+
+                    <h5 style="color:#ffffff; font-size:0.95rem; margin-bottom:12px;">Customer</h5>
+                    @if (d.CustomerFound)
+                    {
+                        <div class="emp-info-grid" style="margin-bottom:20px;">
+                            <div class="emp-info-item">
+                                <label>Name</label>
+                                <div class="value">@d.CustomerName</div>
+                            </div>
+                            <div class="emp-info-item">
+                                <label>Email</label>
+                                <div class="value">@d.CustomerEmail</div>
+                            </div>
+                            <div class="emp-info-item">
+                                <label>Phone</label>
+                                <div class="value">@d.CustomerPhone</div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="hint-text" style="padding:0 0 12px 0;">Customer record not found</p>
+                    }
 
                     <form method="post" asp-page-handler="Save" class="emp-form">
                         <input type="hidden" name="id" value="@d.Id" />
@@ -422,6 +601,7 @@
                 else
                 {
                     <p class="hint-text">Select a reservation from the list to view details and assist a customer.</p>
+                }
                 }
             </div>
         </div>

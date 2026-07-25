@@ -35,6 +35,16 @@ using (var scope = app.Services.CreateScope())
 
     if (!db.Reservations.Any())
     {
+        if (!db.Sites.Any())
+        {
+            db.Sites.AddRange(
+                new DbSite { SiteNumber = "A1", Category = "Standard", IsAvailable = true },
+                new DbSite { SiteNumber = "A2", Category = "Standard", IsAvailable = true },
+                new DbSite { SiteNumber = "B1", Category = "Premium", IsAvailable = true }
+            );
+            db.SaveChanges();
+        }
+
         var seededSites = db.Sites.OrderBy(s => s.Id).Take(3).Select(s => s.Id).ToList();
         var firstUserId = db.Users.OrderBy(u => u.userId).Select(u => u.userId).FirstOrDefault();
 
