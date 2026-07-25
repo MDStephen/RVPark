@@ -198,6 +198,11 @@
         border: none;
         border-radius: 6px;
         padding: 8px 18px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        cursor: pointer;
     }
     .btn-save:hover { background-color: #3b8ae6; color: #fff; }
 
@@ -302,7 +307,7 @@
                         </div>
                     </form>
                     <a asp-page="/EmployeeManageReservations" asp-route-mode="walkin" class="btn-save"
-                       style="display:block; text-align:center; margin-top:10px; background-color:#10b981;">
+                       style="display:block; margin-top:10px;">
                         + New Walk-In Reservation
                     </a>
                 </div>
@@ -601,7 +606,6 @@
                 else
                 {
                     <p class="hint-text">Select a reservation from the list to view details and assist a customer.</p>
-                }
                 }
             </div>
         </div>
