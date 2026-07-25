@@ -27,6 +27,11 @@ public class AdminManageStaffModel : PageModel
         {
             Selected = _logic.GetEmployee(id.Value);
         }
+        else if (Employees.Any())
+        {
+            // Auto-select the first employee so the panel is never blank
+            Selected = Employees.First();
+        }
 
         StatusMessage = status ?? "";
     }
