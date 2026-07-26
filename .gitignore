@@ -481,7 +481,8 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-# Other
+# Other, app.db not working??
+app.db
 *.db
 *.db-shm
 *.db-wal
