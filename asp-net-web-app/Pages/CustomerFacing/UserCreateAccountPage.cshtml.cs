@@ -37,7 +37,9 @@ public class UserCreateAccountPageModel : PageModel
             return Page();
         }
 
-        // TODO: create user record, hash password, sign in, redirect
+        // TODO: create user record with hashed password (BCrypt/ASP.NET Identity PasswordHasher)
+        // TODO: add username/password columns to Users table once schema is finalized
+        // TODO: sign in and redirect to customer dashboard
 
         return RedirectToPage("/Index");
     }

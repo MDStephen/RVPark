@@ -1,21 +1,27 @@
 using asp_net_web_app.Data;
 using asp_net_web_app.Repositories;
-using asp_net_web_app.Pages;
 using asp_net_web_app.Services;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF.Infrastructure; // necessary for LicenseType to be recognized
+using QuestPDF.Infrastructure;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddDbContext<DatabaseWrapper>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-//builder.Services.AddScoped<UserLogic>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<CreateEmployeeLogic>();
-builder.Services.AddRazorPages();
 builder.Services.AddScoped<EmployeeLogic>();
+builder.Services.AddScoped<SiteAvailabilityService>();
+builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
+builder.Services.AddScoped<IPaymentService, StripePaymentService>();
+builder.Services.AddRazorPages();
 
+var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+if (!string.IsNullOrWhiteSpace(stripeSecretKey))
+{
+    StripeConfiguration.ApiKey = stripeSecretKey;
+}
 
 var app = builder.Build();
 

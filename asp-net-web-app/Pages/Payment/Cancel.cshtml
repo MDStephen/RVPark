@@ -1,0 +1,12 @@
+@page
+@{
+    ViewData["Title"] = "Payment Cancelled";
+    Layout = "_ExternalLayout";
+}
+
+<div class="container py-5 text-light text-center">
+    <h1 class="mb-3">Payment Cancelled</h1>
+    <p>Your reservation was not charged. You can return and try again when ready.</p>
+    <a asp-page="/CompleteReservation" asp-route-id="@Request.Query["id"]" class="btn btn-primary rounded-pill mt-3 me-2">Back to Reservation</a>
+    <a asp-page="/Campsites/Index" class="btn btn-outline-light rounded-pill mt-3">Browse Sites</a>
+</div>

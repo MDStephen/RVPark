@@ -7,12 +7,12 @@
 
 <div class="container">
 
-    <form method="post" class="mb-3">
+    <form method="post" class="mb-4">
 
         <div class="row g-3 align-items-end">
 
             <div class="col-md-4">
-                <label class="form-label">Database Table</label>
+                <label class="form-label">Report Data</label>
                 <select class="form-select" asp-for="SelectedTable">
                     @foreach (var table in Model.AvailableTables)
                     {
@@ -25,44 +25,65 @@
                 <label class="form-label d-block">Report Format</label>
 
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input"
-                           type="radio"
-                           name="ReportType"
-                           value="PDF"
-                           checked>
+                    <input class="form-check-input" type="radio" asp-for="ReportType" value="PDF" checked>
                     <label class="form-check-label">PDF</label>
                 </div>
 
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input"
-                           type="radio"
-                           name="ReportType"
-                           value="CSV">
+                    <input class="form-check-input" type="radio" asp-for="ReportType" value="CSV">
                     <label class="form-check-label">CSV</label>
                 </div>
 
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input"
-                           type="radio"
-                           name="ReportType"
-                           value="JSON">
+                    <input class="form-check-input" type="radio" asp-for="ReportType" value="JSON">
                     <label class="form-check-label">JSON</label>
                 </div>
             </div>
 
             <div class="col-12">
-                <button type="submit"
-                        class="btn btn-primary"
-                        asp-page-handler="GenerateReport">
+                <button type="submit" class="btn btn-primary" asp-page-handler="GenerateReport">
                     Create Report
                 </button>
+                <a asp-page="/Admin/AdminReportGenerator" asp-route-SelectedTable="@Model.SelectedTable" class="btn btn-outline-secondary ms-2">
+                    Refresh Preview
+                </a>
             </div>
 
         </div>
 
     </form>
 
-    <partial name="_FilterPanel" />
-    <partial name="_ListTable" />
+    <h5 class="mb-3">Preview (first 25 rows)</h5>
+
+    @if (Model.PreviewRows.Count == 0)
+    {
+        <p class="text-muted">No data in this table yet.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        @foreach (var col in Model.ColumnNames)
+                        {
+                            <th>@col</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.PreviewRows)
+                    {
+                        <tr>
+                            @foreach (var col in Model.ColumnNames)
+                            {
+                                <td>@(row.GetType().GetProperty(col)?.GetValue(row)?.ToString())</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 
 </div>

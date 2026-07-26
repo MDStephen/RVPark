@@ -1,0 +1,25 @@
+@page
+@model asp_net_web_app.Pages.Payment.SuccessModel
+@{
+    ViewData["Title"] = "Payment Confirmation";
+    Layout = "_ExternalLayout";
+}
+
+<div class="container py-5 text-light">
+    @if (Model.PaymentConfirmed)
+    {
+        <div class="text-center py-5">
+            <h1 class="text-success mb-3">Payment Successful</h1>
+            <p class="lead">Your reservation is confirmed. A confirmation email has been sent.</p>
+            <a asp-page="/CustomerFacing/Index" class="btn btn-primary rounded-pill mt-3">Return Home</a>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <h1 class="text-warning mb-3">Payment Issue</h1>
+            <p>@(Model.ErrorMessage ?? "We couldn't confirm your payment.")</p>
+            <a asp-page="/Campsites/Index" class="btn btn-outline-light rounded-pill mt-3">Back to Sites</a>
+        </div>
+    }
+</div>

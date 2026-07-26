@@ -32,6 +32,9 @@
                     water, sewer, and internet access. All reservations require verification of
                     base authorization before booking is confirmed.
                 </p>
+                <p class="text-white-50 mb-0">
+                    @Model.TotalSites sites in inventory &mdash; @Model.AvailableSitesToday available tonight.
+                </p>
             </div>
         </div>
     </div>
@@ -42,33 +45,20 @@
     <div class="container">
         <h2 class="text-center mb-4 fw-semibold">Featured Sites</h2>
         <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 bg-black bg-opacity-50 text-light border-0 rounded-4 overflow-hidden shadow-sm">
-                    <img src="~/images/site-rv-fullhookup.jpg" class="card-img-top" alt="Full hookup RV site" style="height: 190px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Full Hookup RV Sites</h5>
-                        <p class="card-text text-white">Electric, water, and sewer &mdash; sized for RVs up to 45 ft.</p>
+            @foreach (var site in Model.FeaturedSites)
+            {
+                <div class="col-md-4">
+                    <div class="card h-100 bg-black bg-opacity-50 text-light border-0 rounded-4 overflow-hidden shadow-sm">
+                        <div class="card-img-top d-flex align-items-center justify-content-center bg-secondary bg-opacity-25" style="height: 190px;">
+                            <span class="display-6 fw-bold text-white-50">@site.SiteNumber</span>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">@site.Category</h5>
+                            <p class="card-text text-white">Site @site.SiteNumber &mdash; @(site.IsAvailable ? "Available" : "Unavailable")</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 bg-black bg-opacity-50 text-light border-0 rounded-4 overflow-hidden shadow-sm">
-                    <img src="~/images/site-dry-storage.jpg" class="card-img-top" alt="Dry storage lot" style="height: 190px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Dry Storage</h5>
-                        <p class="card-text text-white">Secure long-term storage for RVs and trailers not in active use.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 bg-black bg-opacity-50 text-light border-0 rounded-4 overflow-hidden shadow-sm">
-                    <img src="~/images/site-tent.jpg" class="card-img-top" alt="Tent site" style="height: 190px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Tent &amp; Overflow Sites</h5>
-                        <p class="card-text text-white">Simple sites for short stays and overflow during peak season.</p>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
         <div class="text-center mt-4">
             <a class="btn btn-outline-light rounded-pill px-4" asp-area="" asp-page="/Campsites/Index">Browse Campsites</a>

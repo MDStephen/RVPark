@@ -224,10 +224,27 @@
                 }
             </div>
 
+            @if (!string.IsNullOrEmpty(Model.PaymentError))
+            {
+                <div class="cr-toast error">@Model.PaymentError</div>
+            }
+
             <div class="cr-form-actions">
-                <button type="button" class="btn-pending" disabled title="Payment feature coming soon">
-                    Continue to Payment (coming soon)
-                </button>
+                @if (Model.PaymentConfigured)
+                {
+                    <form method="post" asp-page-handler="Pay">
+                        <input type="hidden" asp-for="ReservationId" />
+                        <button type="submit" class="btn-continue">
+                            Continue to Payment — @Model.Summary!.TotalCost.ToString("C")
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <button type="button" class="btn-pending" disabled title="Add Stripe:SecretKey to appsettings.json">
+                        Payment unavailable — configure Stripe sandbox keys
+                    </button>
+                }
             </div>
         </div>
     }
