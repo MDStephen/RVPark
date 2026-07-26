@@ -85,5 +85,9 @@ namespace asp_net_web_app.Data
         public DateTime EndDate { get; set; }
         public string Status { get; set; } = "Upcoming";
         public decimal TotalCost { get; set; }
+        public int Adults { get; set; } = 1;
+        public int Children { get; set; } = 0;
+        public int Pets { get; set; } = 0;
+        public string Notes { get; set; } = string.Empty;
     }
 }
