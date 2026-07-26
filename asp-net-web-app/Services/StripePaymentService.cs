@@ -64,7 +64,7 @@ public class StripePaymentService : IPaymentService
                         UnitAmount = amountCents,
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
-                            Name = $"RV Park Reservation — {siteLabel}",
+                            Name = $"RV Park Reservation  {siteLabel}",
                             Description = $"{reservation.StartDate:MMM d} – {reservation.EndDate:MMM d, yyyy}"
                         }
                     }

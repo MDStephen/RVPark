@@ -117,7 +117,7 @@ public class IndexModel : PageModel
             Adults = 1,
             Children = 0,
             Pets = 0,
-            Notes = "Created from public site browse — assign to logged-in customer once auth is ready."
+            Notes = "Created from public site browse  assign to logged-in customer once auth is ready."
         };
 
         _db.Reservations.Add(reservation);

@@ -5,7 +5,7 @@
     Layout = "_ExternalLayout";
 }
 
-<!-- ===== Hero / Banner ===== -->
+<!-- Hero / Banner -->
 <section class="text-white d-flex align-items-center"
           style="min-height: 70vh; background: linear-gradient(180deg, rgba(13,17,23,0.35) 0%, rgba(13,17,23,0.85) 100%), url('@Url.Content("~/images/hill-airforce-base.webp")') center/cover no-repeat;">
     <div class="container text-center py-5">
@@ -20,7 +20,7 @@
     </div>
 </section>
 
-<!-- ===== Brief Park Description ===== -->
+<!-- Brief Park Description -->
 <section class="bg-dark text-light py-5">
     <div class="container">
         <div class="row justify-content-center text-center">
@@ -33,14 +33,14 @@
                     base authorization before booking is confirmed.
                 </p>
                 <p class="text-white-50 mb-0">
-                    @Model.TotalSites sites in inventory &mdash; @Model.AvailableSitesToday available tonight.
+                    @Model.TotalSites sites in inventory @Model.AvailableSitesToday available tonight.
                 </p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ===== Featured Campsite Images ===== -->
+<!-- Featured Campsite Images -->
 <section class="bg-dark text-light py-5 border-top border-secondary-subtle">
     <div class="container">
         <h2 class="text-center mb-4 fw-semibold">Featured Sites</h2>
@@ -54,7 +54,7 @@
                         </div>
                         <div class="card-body">
                             <h5 class="card-title">@site.Category</h5>
-                            <p class="card-text text-white">Site @site.SiteNumber &mdash; @(site.IsAvailable ? "Available" : "Unavailable")</p>
+                            <p class="card-text text-white">Site @site.SiteNumber @(site.IsAvailable ? "Available" : "Unavailable")</p>
                         </div>
                     </div>
                 </div>
@@ -66,12 +66,12 @@
     </div>
 </section>
 
-<!-- ===== Campsite Search (no login required) ===== -->
+<!-- Campsite Search (no login required) -->
 <section class="bg-black text-light py-5">
     <div class="container">
         <h2 class="text-center mb-2 fw-semibold">Find a Site</h2>
         <p class="text-center text-white mb-4">
-            Browse and search availability without an account &mdash; sign in only when you're ready to book.
+            Browse and search availability without an account sign in only when you're ready to book.
         </p>
         <form method="get" asp-page="/Campsites/Index" class="row g-3 justify-content-center">
             <div class="col-md-3">
@@ -93,7 +93,7 @@
     </div>
 </section>
 
-<!-- ===== Rates & Policies ===== -->
+<!-- Rates & Policies -->
 <section class="bg-dark text-light py-5 border-top border-secondary-subtle">
     <div class="container">
         <h2 class="text-center mb-4 fw-semibold">Rates &amp; Policies</h2>
@@ -101,9 +101,9 @@
             <div class="col-md-4">
                 <h5>Nightly Rates</h5>
                 <ul class="list-unstyled text-white">
-                    <li>Full Hookup RV Site &mdash; $45/night</li>
-                    <li>Tent / Overflow Site &mdash; $25/night</li>
-                    <li>Dry Storage &mdash; $60/month</li>
+                    <li>Full Hookup RV Site $45/night</li>
+                    <li>Tent / Overflow Site $25/night</li>
+                    <li>Dry Storage $60/month</li>
                 </ul>
             </div>
             <div class="col-md-4">
@@ -120,7 +120,7 @@
                 <ul class="list-unstyled text-white">
                     <li>Base authorization required before reservation is confirmed</li>
                     <li>Valid military ID or sponsor verification needed at check-in</li>
-                    <li>South Gate entry &mdash; security may verify reservation on arrival</li>
+                    <li>South Gate entry security may verify reservation on arrival</li>
                 </ul>
             </div>
         </div>
