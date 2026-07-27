@@ -12,6 +12,7 @@ namespace asp_net_web_app.Data
         // Users, Customer, Staff, Admin all in users now
         public DbSet<Users> Users { get; set; }
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<UserAccount> UserAccounts { get; set; }
 
         public DbSet<DbSite> Sites { get; set; }
         public DbSet<DbSitePhoto> SitePhotos { get; set; }
@@ -45,6 +46,8 @@ namespace asp_net_web_app.Data
             modelBuilder.Entity<DbSite>().ToTable("Sites");
             modelBuilder.Entity<DbSitePhoto>().ToTable("SitePhotos");
             modelBuilder.Entity<DbSitePrice>().ToTable("SitePrices");
+
+            modelBuilder.Entity<UserAccount>().ToTable("UserAccounts");
         }
 
     }
