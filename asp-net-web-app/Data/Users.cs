@@ -26,6 +26,5 @@ namespace asp_net_web_app.Data
         public string address { get; set; }
 
         public string? aptSuite { get; set; }
-        
     }
 }

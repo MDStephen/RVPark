@@ -95,6 +95,34 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// seed the pricing table
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DatabaseWrapper>();
+
+    db.Database.Migrate();
+
+    if (!db.Pricing.Any())
+    {
+        db.Pricing.Add(new Pricing
+        {
+            pricingId = 1,
+            baseNightlyRate = 25m,
+            baseMonthlyRateStorage = 125m,
+            seasonMultiplier = 1.25m,
+            largeSiteMultiplier = 1.15m,
+            utilityMultiplier = 1.80m,
+            cancellationFee = 20m,
+            earlyCheckInFee = 10m,
+            lateCheckOutFee = 10m,
+            specialEventMultiplier = 1.50m,
+            lastUpdated = DateTime.Now
+        });
+
+        db.SaveChanges();
+    }
+}
+
 app.UseHttpsRedirection();
 
 app.UseRouting();

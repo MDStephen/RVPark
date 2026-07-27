@@ -11,6 +11,7 @@ namespace asp_net_web_app.Data
         public int pricingId { get; set; }
 
         public decimal baseNightlyRate { get; set; }
+        public decimal baseMonthlyRateStorage { get; set; }
         public decimal seasonMultiplier { get; set; }
         public decimal largeSiteMultiplier { get; set; }
         public decimal utilityMultiplier { get; set; }

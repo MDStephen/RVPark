@@ -32,9 +32,6 @@
                     water, sewer, and internet access. All reservations require verification of
                     base authorization before booking is confirmed.
                 </p>
-                <p class="text-white-50 mb-0">
-                    @Model.TotalSites sites in inventory @Model.AvailableSitesToday available tonight.
-                </p>
             </div>
         </div>
     </div>
@@ -100,17 +97,20 @@
         <div class="row g-4">
             <div class="col-md-4">
                 <h5>Nightly Rates</h5>
-                <ul class="list-unstyled text-white">
-                    <li>Full Hookup RV Site $45/night</li>
-                    <li>Tent / Overflow Site $25/night</li>
-                    <li>Dry Storage $60/month</li>
-                </ul>
+                @if (Model.Pricing is not null)
+                {
+                    <ul class="list-unstyled text-white">
+                        <li>Full Hookup RV Site @((Model.Pricing.baseNightlyRate * Model.Pricing.utilityMultiplier).ToString("C"))/night</li>
+                        <li>Tent / Overflow Site @Model.Pricing.baseNightlyRate.ToString("C")/night</li>
+                        <li>Dry Storage @Model.Pricing.baseMonthlyRateStorage.ToString("C")/month</li>
+                    </ul>
+                }
             </div>
             <div class="col-md-4">
                 <h5>Stay Policies</h5>
                 <ul class="list-unstyled text-white">
                     <li>Check-in: 2:00 PM &nbsp;|&nbsp; Check-out: 11:00 AM</li>
-                    <li>14-day stay limit during peak season (PCS exceptions apply)</li>
+                    <li>14-day stay limit during peak season</li>
                     <li>Full payment required at time of booking</li>
                     <li>Cancellations require 48-hour notice</li>
                 </ul>
