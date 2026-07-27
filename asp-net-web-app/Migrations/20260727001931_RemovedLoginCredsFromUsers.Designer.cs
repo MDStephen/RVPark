@@ -11,8 +11,8 @@ using asp_net_web_app.Data;
 namespace asp_net_web_app.Migrations
 {
     [DbContext(typeof(DatabaseWrapper))]
-    [Migration("20260710003210_SyncReservationsModel")]
-    partial class SyncReservationsModel
+    [Migration("20260727001931_RemovedLoginCredsFromUsers")]
+    partial class RemovedLoginCredsFromUsers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,14 +87,133 @@ namespace asp_net_web_app.Migrations
                     b.ToTable("SitePrices", (string)null);
                 });
 
+            modelBuilder.Entity("asp_net_web_app.Data.Employee", b =>
+                {
+                    b.Property<int>("employeeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("dateOfBirth")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("firstName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("isLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("lastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("employeeId");
+
+                    b.ToTable("Employees", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.Payment", b =>
+                {
+                    b.Property<int>("paymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ReservationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("amount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("paidAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("paymentStatus")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("stripeId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("paymentId");
+
+                    b.ToTable("Payments", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.Pricing", b =>
+                {
+                    b.Property<int>("pricingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("baseMonthlyRateStorage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("baseNightlyRate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("cancellationFee")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("earlyCheckInFee")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("largeSiteMultiplier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("lastUpdated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("lateCheckOutFee")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("seasonMultiplier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("specialEventMultiplier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("utilityMultiplier")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("pricingId");
+
+                    b.ToTable("Pricing", (string)null);
+                });
+
             modelBuilder.Entity("asp_net_web_app.Data.Reservations", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Adults")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Children")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Pets")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("SiteId")
                         .HasColumnType("INTEGER");
@@ -114,7 +233,7 @@ namespace asp_net_web_app.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Reservations", (string)null);
+                    b.ToTable("Reservations");
                 });
 
             modelBuilder.Entity("asp_net_web_app.Data.Users", b =>
@@ -127,6 +246,9 @@ namespace asp_net_web_app.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("aptSuite")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("emailAddress")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -137,6 +259,9 @@ namespace asp_net_web_app.Migrations
 
                     b.Property<string>("lastName")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("middleInitial")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("phoneNumber")

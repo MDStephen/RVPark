@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace asp_net_web_app.Data
 {
-    // Singleton at the application layer — enforce single-row usage
+    // Singleton at the application layer  enforce single-row usage
     // in whatever service/repository reads/writes this table.
     public class Pricing
     {
@@ -11,6 +11,7 @@ namespace asp_net_web_app.Data
         public int pricingId { get; set; }
 
         public decimal baseNightlyRate { get; set; }
+        public decimal baseMonthlyRateStorage { get; set; }
         public decimal seasonMultiplier { get; set; }
         public decimal largeSiteMultiplier { get; set; }
         public decimal utilityMultiplier { get; set; }

@@ -72,7 +72,7 @@ public class EmployeeLogic
         return "success";
     }
 
-    // Lock / Unlock — the graded "lock employees out" requirement
+    // Lock / Unlock  the graded "lock employees out" requirement
     public string SetLock(int id, bool locked)
     {
         var employee = _db.Employees.Find(id);

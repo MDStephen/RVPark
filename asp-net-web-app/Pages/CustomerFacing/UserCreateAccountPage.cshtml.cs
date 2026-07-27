@@ -58,6 +58,7 @@ public class UserCreateAccountPageModel : PageModel
             return Page();
         }
 
+<<<<<<< HEAD
         // Don't allow two accounts with the same email
         // (we're using the email as the username for now).
         bool emailTaken = await _db.UserAccounts.AnyAsync(a => a.Username == Email);
@@ -66,6 +67,11 @@ public class UserCreateAccountPageModel : PageModel
             ModelState.AddModelError(nameof(Email), "An account with that email already exists.");
             return Page();
         }
+=======
+        // TODO: create user record with hashed password (BCrypt/ASP.NET Identity PasswordHasher)
+        // TODO: add username/password columns to Users table once schema is finalized
+        // TODO: sign in and redirect to customer dashboard
+>>>>>>> Mahlon-Final-Pages
 
         // 1) Create the person's profile row in the Users table (as a Customer).
         var customer = new Customer

@@ -2,16 +2,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 using asp_net_web_app.Data;
+using asp_net_web_app.Services;
 
 namespace asp_net_web_app.Pages
 {
     public class CompleteReservationModel : PageModel
     {
         private readonly DatabaseWrapper _context;
+        private readonly IPaymentService _payment;
+        private readonly IConfiguration _config;
 
-        public CompleteReservationModel(DatabaseWrapper context)
+        public CompleteReservationModel(
+            DatabaseWrapper context,
+            IPaymentService payment,
+            IConfiguration config)
         {
             _context = context;
+            _payment = payment;
+            _config = config;
         }
 
         public class ReservationSummary
@@ -45,6 +53,8 @@ namespace asp_net_web_app.Pages
         public ReservationSummary? Summary { get; set; }
         public bool ReservationNotFound { get; set; }
         public bool SaveSuccess { get; set; }
+        public bool PaymentConfigured { get; set; }
+        public string? PaymentError { get; set; }
         public List<string> ValidationErrors { get; set; } = new();
 
         public void OnGet(int? id)
@@ -125,7 +135,45 @@ namespace asp_net_web_app.Pages
             _context.SaveChanges();
 
             SaveSuccess = true;
+            PaymentConfigured = !string.IsNullOrWhiteSpace(_config["Stripe:SecretKey"]);
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostPayAsync()
+        {
+            var reservation = _context.Reservations.Find(ReservationId);
+            if (reservation == null)
+            {
+                ReservationNotFound = true;
+                return Page();
+            }
+
+            Summary = BuildSummary(reservation);
+            PaymentConfigured = !string.IsNullOrWhiteSpace(_config["Stripe:SecretKey"]);
+
+            if (!PaymentConfigured)
+            {
+                PaymentError = "Stripe is not configured. Add your sandbox keys to appsettings.json.";
+                SaveSuccess = true;
+                return Page();
+            }
+
+            try
+            {
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var checkoutUrl = await _payment.CreateCheckoutSessionAsync(
+                    ReservationId,
+                    $"{baseUrl}/Payment/Success?session_id={{CHECKOUT_SESSION_ID}}",
+                    $"{baseUrl}/Payment/Cancel?id={ReservationId}");
+
+                return Redirect(checkoutUrl);
+            }
+            catch (Exception)
+            {
+                PaymentError = "Unable to start payment. Check your Stripe configuration.";
+                SaveSuccess = true;
+                return Page();
+            }
         }
 
         private ReservationSummary BuildSummary(Reservations reservation)

@@ -1,21 +1,27 @@
 using asp_net_web_app.Data;
 using asp_net_web_app.Repositories;
-using asp_net_web_app.Pages;
 using asp_net_web_app.Services;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF.Infrastructure; // necessary for LicenseType to be recognized
+using QuestPDF.Infrastructure;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddDbContext<DatabaseWrapper>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-//builder.Services.AddScoped<UserLogic>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<CreateEmployeeLogic>();
-builder.Services.AddRazorPages();
 builder.Services.AddScoped<EmployeeLogic>();
+builder.Services.AddScoped<SiteAvailabilityService>();
+builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
+builder.Services.AddScoped<IPaymentService, StripePaymentService>();
+builder.Services.AddRazorPages();
 
+var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+if (!string.IsNullOrWhiteSpace(stripeSecretKey))
+{
+    StripeConfiguration.ApiKey = stripeSecretKey;
+}
 
 var app = builder.Build();
 
@@ -87,6 +93,34 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+// seed the pricing table
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DatabaseWrapper>();
+
+    db.Database.Migrate();
+
+    if (!db.Pricing.Any())
+    {
+        db.Pricing.Add(new Pricing
+        {
+            pricingId = 1,
+            baseNightlyRate = 25m,
+            baseMonthlyRateStorage = 125m,
+            seasonMultiplier = 1.25m,
+            largeSiteMultiplier = 1.15m,
+            utilityMultiplier = 1.80m,
+            cancellationFee = 20m,
+            earlyCheckInFee = 10m,
+            lateCheckOutFee = 10m,
+            specialEventMultiplier = 1.50m,
+            lastUpdated = DateTime.Now
+        });
+
+        db.SaveChanges();
+    }
 }
 
 app.UseHttpsRedirection();

@@ -8,7 +8,7 @@
 <div class="container py-4">
     <h1 class="text-light mb-4">Login</h1>
 
-    <div class="card bg-secondary bg-opacity-10 border-secondary-subtle rounded-3">
+    <div class="card bg-secondary bg-opacity-10 border-secondary-subtle rounded-3 mb-4">
         <div class="card-header bg-secondary bg-opacity-25 border-secondary-subtle">
             <span class="fw-semibold text-light">Log in using username and password</span>
         </div>
@@ -30,7 +30,6 @@
 
                     <div class="d-flex align-items-center gap-3">
                         <button type="submit" class="btn btn-info text-dark fw-semibold px-4">Login</button>
-                        <a asp-page="/ForgotPassword" class="link-info small text-decoration-none">Forgot Password?</a>
                     </div>
 
                     <div class="mt-2">
@@ -43,9 +42,18 @@
         </div>
     </div>
 
-    <div class="text-center text-light mt-3">
-        Having trouble?: <a asp-page="/RequestAccess" class="link-info text-decoration-none">Request Access</a>
+    <div class="card bg-secondary bg-opacity-10 border-secondary-subtle rounded-3">
+        <div class="card-header bg-secondary bg-opacity-25 border-secondary-subtle">
+            <span class="fw-semibold text-light">Browse without logging in</span>
+        </div>
+        <div class="card-body">
+            <p class="text-light mb-3">You can search campsites and view pricing without an account. Sign in when you're ready to book under your profile.</p>
+            <a asp-page="/Campsites/Index" class="btn btn-outline-light rounded-pill">Browse &amp; Search Campsites</a>
+        </div>
     </div>
+
+    @* TODO: Implement credential validation, password hashing, and ASP.NET Identity/cookie auth once username/password strategy is finalized. *@
+    @* TODO: Forgot Password and Request Access pages  pending account system design. *@
 </div>
 
 @section Scripts {

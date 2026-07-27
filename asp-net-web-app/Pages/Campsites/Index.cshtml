@@ -1,0 +1,131 @@
+@page "/Campsites/Index"
+@model asp_net_web_app.Pages.Campsites.IndexModel
+@{
+    ViewData["Title"] = "Browse Campsites";
+    Layout = "_ExternalLayout";
+}
+
+<section class="bg-dark text-light py-4 border-bottom border-secondary-subtle">
+    <div class="container">
+        <h1 class="fw-semibold mb-1">Browse Campsites</h1>
+        <p class="text-white mb-0">Search availability by date and site type  no account required to browse.</p>
+    </div>
+</section>
+
+<section class="bg-black text-light py-4">
+    <div class="container">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label asp-for="CheckIn" class="form-label">Check-in</label>
+                <input asp-for="CheckIn" type="date" class="form-control bg-dark text-light border-secondary-subtle" />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="CheckOut" class="form-label">Check-out</label>
+                <input asp-for="CheckOut" type="date" class="form-control bg-dark text-light border-secondary-subtle" />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="SiteType" class="form-label">Site Type</label>
+                <select asp-for="SiteType" asp-items="@(new SelectList(Model.CategoryOptions, "Value", "Text", Model.SiteType))" class="form-select bg-dark text-light border-secondary-subtle">
+                    <option value="">All types</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label asp-for="RvLength" class="form-label">RV Length (ft)</label>
+                <input asp-for="RvLength" type="number" min="0" class="form-control bg-dark text-light border-secondary-subtle" placeholder="Optional" />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="AvailabilityMode" class="form-label">Availability</label>
+                <select asp-for="AvailabilityMode" asp-items="Html.GetEnumSelectList<asp_net_web_app.Services.AvailabilityFilter>()" class="form-select bg-dark text-light border-secondary-subtle"></select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-semibold">Search</button>
+            </div>
+        </form>
+        <p class="small text-white-50 mt-2 mb-0">
+            <strong>Entire range</strong>  site is free for your full stay.
+            <strong>Any during range</strong>  site has at least one open day in your dates.
+        </p>
+    </div>
+</section>
+
+<section class="bg-dark text-light py-4">
+    <div class="container">
+        @if (!string.IsNullOrEmpty(Model.SearchMessage))
+        {
+            <div class="alert alert-warning">@Model.SearchMessage</div>
+        }
+
+        @if (Model.Results.Count == 0)
+        {
+            <p class="text-center text-white-50 py-5">No sites to display. Try adjusting your search criteria.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Site</th>
+                            <th>Type</th>
+                            @if (Model.CheckIn.HasValue && Model.CheckOut.HasValue)
+                            {
+                                <th>Nights</th>
+                                <th>Est. Total</th>
+                                <th>Availability</th>
+                                <th></th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var site in Model.Results)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@site.SiteNumber</td>
+                                <td>@site.Category</td>
+                                @if (Model.CheckIn.HasValue && Model.CheckOut.HasValue)
+                                {
+                                    <td>@site.Nights</td>
+                                    <td>@site.EstimatedTotal.ToString("C")</td>
+                                    <td>
+                                        @if (site.FullyAvailable)
+                                        {
+                                            <span class="badge text-bg-success">Full stay</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-warning text-dark">Partial</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        @if (site.FullyAvailable)
+                                        {
+                                            <form method="post" asp-page-handler="StartReservation" class="d-inline">
+                                                <input type="hidden" asp-for="CheckIn" />
+                                                <input type="hidden" asp-for="CheckOut" />
+                                                <input type="hidden" asp-for="SiteType" />
+                                                <input type="hidden" asp-for="AvailabilityMode" />
+                                                <input type="hidden" name="siteId" value="@site.SiteId" />
+                                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">
+                                                    Reserve
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-white-50 small">Not bookable for full stay</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.CheckIn.HasValue || !Model.CheckOut.HasValue)
+            {
+                <p class="text-center text-white-50 mt-3">Select check-in and check-out dates to see pricing and reserve a site.</p>
+            }
+        }
+    </div>
+</section>

@@ -21,7 +21,8 @@ public class UserLoginPageModel : PageModel
             return Page();
         }
 
-        // TODO: validate credentials, sign in, redirect
+        // TODO: validate credentials, hash password, sign in with cookie auth, redirect to customer dashboard
+        // TODO: wire up IUserRepository + password hashing once account creation strategy is decided
 
         return RedirectToPage("/Index");
     }

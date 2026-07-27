@@ -11,8 +11,8 @@ using asp_net_web_app.Data;
 namespace asp_net_web_app.Migrations
 {
     [DbContext(typeof(DatabaseWrapper))]
-    [Migration("20260710042356_RemoveUsersInheritance")]
-    partial class RemoveUsersInheritance
+    [Migration("20260726221028_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -130,6 +130,9 @@ namespace asp_net_web_app.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ReservationId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("amount")
                         .HasColumnType("TEXT");
 
@@ -187,41 +190,27 @@ namespace asp_net_web_app.Migrations
                     b.ToTable("Pricing", (string)null);
                 });
 
-            modelBuilder.Entity("asp_net_web_app.Data.Reservation", b =>
-                {
-                    b.Property<int>("reservationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("endDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("isEligible")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("startDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("totalCost")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("reservationId");
-
-                    b.ToTable("ReservationModels", (string)null);
-                });
-
             modelBuilder.Entity("asp_net_web_app.Data.Reservations", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Adults")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Children")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Pets")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("SiteId")
                         .HasColumnType("INTEGER");
@@ -242,39 +231,6 @@ namespace asp_net_web_app.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Reservations");
-                });
-
-            modelBuilder.Entity("asp_net_web_app.Data.Site", b =>
-                {
-                    b.Property<int>("siteId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("isAvailable")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("length")
-                        .HasColumnType("REAL");
-
-                    b.Property<string>("location")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("width")
-                        .HasColumnType("REAL");
-
-                    b.HasKey("siteId");
-
-                    b.ToTable("SiteModels", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Site");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("asp_net_web_app.Data.Users", b =>
@@ -312,27 +268,6 @@ namespace asp_net_web_app.Migrations
                     b.HasKey("userId");
 
                     b.ToTable("Users", (string)null);
-                });
-
-            modelBuilder.Entity("asp_net_web_app.Data.Lot", b =>
-                {
-                    b.HasBaseType("asp_net_web_app.Data.Site");
-
-                    b.Property<string>("utilities")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("Lot");
-                });
-
-            modelBuilder.Entity("asp_net_web_app.Data.StorageContainer", b =>
-                {
-                    b.HasBaseType("asp_net_web_app.Data.Site");
-
-                    b.Property<double>("height")
-                        .HasColumnType("REAL");
-
-                    b.HasDiscriminator().HasValue("StorageContainer");
                 });
 
             modelBuilder.Entity("asp_net_web_app.Data.DbSitePhoto", b =>
