@@ -233,8 +233,7 @@ namespace asp_net_web_app.Migrations
                     b.ToTable("Reservations");
                 });
 
-<<<<<<< HEAD
-            modelBuilder.Entity("asp_net_web_app.Data.Site", b =>
+/*            modelBuilder.Entity("asp_net_web_app.Data.Site", b =>
                 {
                     b.Property<int>("siteId")
                         .ValueGeneratedOnAdd()
@@ -266,7 +265,7 @@ namespace asp_net_web_app.Migrations
 
                     b.UseTphMappingStrategy();
                 });
-
+*/
             modelBuilder.Entity("asp_net_web_app.Data.UserAccount", b =>
                 {
                     b.Property<int>("Id")
@@ -295,8 +294,6 @@ namespace asp_net_web_app.Migrations
                     b.ToTable("UserAccounts", (string)null);
                 });
 
-=======
->>>>>>> Mahlon-Final-Pages
             modelBuilder.Entity("asp_net_web_app.Data.Users", b =>
                 {
                     b.Property<int>("userId")
