@@ -46,8 +46,10 @@
                 <p style="font-size: 0.875rem; color: #a3a3a3; margin: 0.25rem 0 0 0;">Search, edit, and cancel guest reservations.</p>
             </div>
             <a asp-page-handler="CreateReservation" class="btn-custom-primary">+ New Reservation</a>
-        </div>
-
+            <a asp-page="/Payment/AlternativePayment" class="btn-custom-primary" style="background-color:#3b82f6;">
+               Make a Payment
+            </a>
+         </div>
         <div class="data-card" style="padding:1rem 1.5rem;">
             <form method="get">
                 <div style="display:flex; gap:0.75rem; align-items:end;">

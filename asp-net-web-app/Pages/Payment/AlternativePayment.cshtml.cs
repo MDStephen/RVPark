@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using asp_net_web_app.Data;
 
+
 namespace asp_net_web_app.Pages.Payment
 {
     public class AlternativePaymentModel : PageModel
@@ -77,7 +78,7 @@ namespace asp_net_web_app.Pages.Payment
                     ModelState.AddModelError("", "Amount received is less than amount due.");
                     return Page();
                 }
-                CreatePaymentRecord(reservation, AmountDue);
+                CreatePaymentRecord(reservation, AmountDue, "");
                 Message = $"Cash payment recorded. Change owed: ${ChangeOwed:F2}";
                 return Page();
             }
@@ -90,15 +91,15 @@ namespace asp_net_web_app.Pages.Payment
             ModelState.AddModelError("", "Unknown payment type.");
             return Page();
         }
-        private Payment CreatePaymentRecord(Reservations reservations, decimal amount, string paymentID, string status = "Paid")
+        private asp_net_web_app.Data.Payment CreatePaymentRecord(Reservations reservations, decimal amount, string paymentID, string status = "Paid")
         {
-            var payment = new Payment
+            var payment = new asp_net_web_app.Data.Payment
             {
                 amount = amount,
                 paidAt = DateTime.Now,
-                stripeId = stripeId,
+                stripeId = paymentID,
                 paymentStatus = status,
-                ReservationId = reservation.Id
+                ReservationId = reservations.Id
             };
 
             _db.Payments.Add(payment);
