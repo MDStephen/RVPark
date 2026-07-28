@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using asp_net_web_app.Data;
+using asp_net_web_app.Services;
 
 namespace asp_net_web_app.Pages
 {
@@ -42,6 +43,7 @@ namespace asp_net_web_app.Pages
         public string ActiveStatus { get; set; } = "Upcoming";
         public decimal ActiveCost { get; set; }
 
+
         public void OnGet(string? search)
         {
             CurrentAction = "List";
@@ -54,12 +56,12 @@ namespace asp_net_web_app.Pages
             }
         }
 
-        public void OnGetCreateReservation(int? id)
+        public void OnGetUserCreateReservation(int? id)
         {
             //How to get the current user? 
             //int currentUserId = int.Parse(User.FindFirst("UserId")!.Value);
             AllUsers = _db.Users.ToList();  //.Where(u => u.userId == currentUserId)
-            AllSites = _context.Sites.ToList();
+            AllSites = _db.Sites.ToList();
 
             if (id.HasValue)
             {
@@ -72,7 +74,7 @@ namespace asp_net_web_app.Pages
                     ActiveSiteId = res.SiteId;
                     ActiveStartDate = res.StartDate;
                     ActiveEndDate = res.EndDate;
-                    ActiveStatus = res.Status;
+                    ActiveStatus = "Upcoming";
                     ActiveCost = res.TotalCost;
                 }
             }
@@ -87,11 +89,21 @@ namespace asp_net_web_app.Pages
         {
             //How to I get the current user? 
             //int currentUserId = int.Parse(User.FindFirst("UserId")!.Value);
-
             var reservations = _db.Reservations.ToList();  //.Where(r => r.UserId == currentUserId)
             var users = _db.Users.ToList();   //.Where(u => reservations.Select(r => r.UserId).Contains(u.userId))
-
             var sites = _db.Sites.ToList(); //.Where(s => reservations.Select(r => r.SiteId).Contains(s.Id))
+
+            var today = DateTime.Today;
+
+            foreach (var r in reservations)
+            {
+                if (DateTime.Today >= r.StartDate && DateTime.Today <= r.EndDate)
+                    r.Status = "In Progress";
+                else if (DateTime.Today > r.EndDate)
+                    r.Status = "Completed";
+
+                _db.SaveChanges();
+            }
 
             var rows = reservations.Select(r => new ReservationDisplay
             {
@@ -119,35 +131,64 @@ namespace asp_net_web_app.Pages
 
         public IActionResult OnPostUserCreateReservation(int userId, int siteId, DateTime startDate, DateTime endDate, string status, decimal totalCost)
         {
-            /*if (AvailablityCheck(startDate, endDate, siteId))
+            if (AvailablityCheck(startDate, endDate, siteId))
             {
+                // Reload dropdowns
+                AllUsers = _db.Users.ToList();
+                AllSites = _db.Sites.ToList();
+
+                // Restore form mode
+                CurrentAction = "Create";
+
+                // Restore user input
+                ActiveUserId = userId;
+                ActiveSiteId = siteId;
+                ActiveStartDate = startDate;
+                ActiveEndDate = endDate;
+                ActiveStatus = "Upcoming";
+                ActiveCost = CalculateCost(siteId, startDate, endDate);
+
                 ModelState.AddModelError("", "This site is already reserved for the selected dates.");
-                return Page(); // Stay on the same page and show error
-            }*/
+                return Page();
+            }
+            totalCost = CalculateCost(siteId, startDate, endDate);   
             var newRes = new Reservations
             {
                 UserId = userId,
                 SiteId = siteId,
                 StartDate = startDate,
                 EndDate = endDate,
-                Status = "In Progress",     // status (what should it be??)
+                Status = "Upcoming",     // status (what should it be??)
                 TotalCost = totalCost
             };
             _db.Reservations.Add(newRes);
             _db.SaveChanges();
-            return RedirectToPage("CompleteReservation");  //What do I need to pass to the page??
+            return RedirectToPage("CompleteReservation", new { id = newRes.Id});  
         }
 
         public IActionResult OnPostUpdateReservation(int reservationId, int userId, int siteId, DateTime startDate, DateTime endDate, string status, decimal totalCost)
         {
             var res = _db.Reservations.Find(reservationId);
 
-            /*if (AvailablityCheck(startDate, endDate, siteId))
+            if (AvailablityCheck(startDate, endDate, siteId, reservationId))
             {
-                ModelState.AddModelError("", "This site is already reserved for the selected dates.");
-                return Page(); // Stay on the same page and show error
-            }*/
+                AllUsers = _db.Users.ToList();
+                AllSites = _db.Sites.ToList();
 
+                CurrentAction = "Edit";
+
+                ActiveId = reservationId;
+                ActiveUserId = userId;
+                ActiveSiteId = siteId;
+                ActiveStartDate = startDate;
+                ActiveEndDate = endDate;
+                ActiveStatus = "Upcoming";
+                ActiveCost = totalCost;
+
+                ModelState.AddModelError("", "This site is already reserved for the selected dates.");
+                return Page();
+            }
+            totalCost = CalculateCost(siteId, startDate, endDate); 
             if (res != null)
             {
                 decimal oldCost = res.TotalCost;
@@ -156,7 +197,7 @@ namespace asp_net_web_app.Pages
                 res.SiteId = siteId;
                 res.StartDate = startDate;
                 res.EndDate = endDate;
-                res.Status = "In Progress";
+                res.Status = "Upcoming";
                 res.TotalCost = totalCost;
                 _db.SaveChanges();
 
@@ -179,7 +220,7 @@ namespace asp_net_web_app.Pages
             }
             return RedirectToPage();
         }
-        /*
+        
         public bool AvailablityCheck(DateTime startDate, DateTime endDate, int siteID, int? ignoreId = null)
         {
             DateTime start = startDate.Date;
@@ -188,8 +229,23 @@ namespace asp_net_web_app.Pages
             return _db.Reservations
                 .Where(r => r.SiteId == siteID)
                 .Where(r => ignoreId == null || r.Id != ignoreId)
-                .Where(r => startDate <= r.EndDate && endDate >= r.StartDate)
+                .Where(r => start <= r.EndDate && end >= r.StartDate)
                 .Any();
-        }*/
+        }
+
+        private decimal CalculateCost(int siteId, DateTime start, DateTime end)
+        {
+            int nights = (end.Date - start.Date).Days;
+            if (nights < 1) nights = 1;
+
+            decimal nightlyRate =
+                PricingStore.BaseRate *
+                PricingStore.SeasonMult *
+                PricingStore.LargeSiteMult *
+                PricingStore.UtilMult;
+
+            return nightlyRate * nights;
+        }
+
     }
 }
