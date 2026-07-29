@@ -163,7 +163,7 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
     private string? GetParam(string key) =>
         Request.HasFormContentType ? Request.Form[key].ToString() : Request.Query[key].ToString();
 
-    // --- Monthly trends ---
+    // monthly trends graph
     // Picks the first DateTime column to bucket by month, and (if present) the first
     // numeric column that looks money-shaped, to sum alongside the row count.
     // Tables with no date column (Sites, Pricing, ...) just get no trend chart.
