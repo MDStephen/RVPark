@@ -1,16 +1,26 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using asp_net_web_app.Data;
+
 
 namespace asp_net_web_app.Pages;
 
 public class DashboardModel : PageModel
 {
-    private readonly DatabaseWrapper _db;
+    public string UserDisplayName { get; set; } = "Team Member";
+    public string InitialServerTime { get; set; } = string.Empty;
+    public string TimeZoneName { get; set; } = string.Empty;
 
-    public DashboardModel(DatabaseWrapper db)
+    public void OnGet()
     {
-        _db = db;
+        if (User.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(User.Identity.Name))
+        {
+            UserDisplayName = User.Identity.Name;
+        }
+
+        // Capture initial server date/time and timezone display
+        var now = DateTime.Now;
+        InitialServerTime = now.ToString("yyyy-MM-ddTHH:mm:ss");
+        TimeZoneName = TimeZoneInfo.Local.IsDaylightSavingTime(now) 
+            ? TimeZoneInfo.Local.DaylightName 
+            : TimeZoneInfo.Local.StandardName;
     }
 }

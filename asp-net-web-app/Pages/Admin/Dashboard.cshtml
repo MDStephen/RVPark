@@ -1,6 +1,78 @@
 @page
 @model DashboardModel
 @{
-    ViewData["Title"] = "Dashboard page";
-    ViewData["Page"]  = "Dashboard Page";
+    ViewData["Title"] = "Staff Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <div class="p-5 bg-dark text-white rounded-3 shadow-sm">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+            <div>
+                <span class="badge bg-primary text-uppercase mb-2" id="greetingBadge"></span>
+                <h1 class="display-5 fw-bold mb-1" id="greetingHeader"></h1>
+                <p class="fs-5 text-secondary mb-0" id="currentDateDisplay"></p>
+            </div>
+            <div class="text-md-end">
+                <div class="display-3 fw-bold text-info font-monospace" id="clockDisplay">
+                    00:00:00 AM
+                </div>
+                <div class="small text-secondary text-uppercase mt-1 fw-semibold" style="letter-spacing: 1px;">
+                    <span id="timeZoneDisplay">@Model.TimeZoneName</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const clockEl = document.getElementById("clockDisplay");
+            const dateEl = document.getElementById("currentDateDisplay");
+            const greetingHeaderEl = document.getElementById("greetingHeader");
+            const greetingBadgeEl = document.getElementById("greetingBadge");
+            const userName = "@Model.UserDisplayName" || "Team Member";
+
+            function updateClock() {
+                const now = new Date();
+
+                const timeOptions = { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit', 
+                    hour12: true 
+                };
+                clockEl.textContent = now.toLocaleTimeString(undefined, timeOptions);
+
+                const dateOptions = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                };
+                dateEl.textContent = now.toLocaleDateString(undefined, dateOptions);
+
+                const hour = now.getHours();
+                let greeting = "Good day";
+                let badgeText = "Shift Active";
+
+                if (hour < 12) {
+                    greeting = "Good morning";
+                    badgeText = "Morning Shift";
+                } else if (hour < 17) {
+                    greeting = "Good afternoon";
+                    badgeText = "Afternoon Shift";
+                } else {
+                    greeting = "Good evening";
+                    badgeText = "Evening Shift";
+                }
+
+                greetingHeaderEl.textContent = `${greeting}, ${userName}`;
+                greetingBadgeEl.textContent = badgeText;
+            }
+
+            updateClock();
+            setInterval(updateClock, 1000);
+        });
+    </script>
 }
