@@ -1,17 +1,20 @@
 using System.Text;
 using System.Text.Json;
 using asp_net_web_app.Data;
+using asp_net_web_app.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
-using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 namespace asp_net_web_app.Pages;
 
-public class AdminReportGeneratorModel : PageModel
+public class AdminReportGeneratorModel : PageModel, IFilterableListPage
 {
+    // Safety cap on how many rows we ever pull into memory for a table. Filtering/export
+    // happens against this set, not the raw DB table, so a huge table can't take the page down.
+    private const int MaxRows = 5000;
+
     private readonly DatabaseWrapper _db;
 
     private static readonly Dictionary<string, Func<DatabaseWrapper, IQueryable<object>>> TableQueries = new()
@@ -26,35 +29,47 @@ public class AdminReportGeneratorModel : PageModel
         ["Pricing"] = db => db.Pricing.Select(p => (object)p),
     };
 
-    public AdminReportGeneratorModel(DatabaseWrapper db)
-    {
-        _db = db;
-    }
+    public AdminReportGeneratorModel(DatabaseWrapper db) => _db = db;
 
     public List<string> AvailableTables { get; } = TableQueries.Keys.OrderBy(k => k).ToList();
 
-    [BindProperty]
+    [BindProperty(SupportsGet = true)]
     public string SelectedTable { get; set; } = "Reservations";
 
     [BindProperty]
     public string ReportType { get; set; } = "PDF";
 
-    public List<object> PreviewRows { get; private set; } = [];
-    public List<string> ColumnNames { get; private set; } = [];
+    // --- IFilterableListPage ---
+    public List<FilterModel.FilterDefinition> Filters { get; private set; } = [];
+    public List<object> Rows { get; private set; } = []; // preview only (capped below)
+    public string IdPropertyName => "Id";
+    public string? SelectedId { get; set; } // not used for reports; required by the interface
+
+    // Full filtered row count, for an honest "Generate Report (N rows)" label -
+    // Rows above is capped to 25 for the preview table.
+    public int FilteredCount { get; private set; }
 
     public void OnGet()
     {
-        LoadPreview();
+        if (!TableQueries.ContainsKey(SelectedTable))
+            SelectedTable = "Reservations";
+
+        var allRows = TableQueries[SelectedTable](_db).Take(MaxRows).ToList();
+        Filters = BuildFilters(allRows);
+
+        var filtered = ApplyFilters(allRows, Filters);
+        FilteredCount = filtered.Count;
+        Rows = filtered.Take(25).ToList();
     }
 
     public IActionResult OnPostGenerateReport()
     {
         if (!TableQueries.ContainsKey(SelectedTable))
-        {
             SelectedTable = "Reservations";
-        }
 
-        var rows = TableQueries[SelectedTable](_db).Take(500).ToList();
+        var allRows = TableQueries[SelectedTable](_db).Take(MaxRows).ToList();
+        var filters = BuildFilters(allRows);
+        var rows = ApplyFilters(allRows, filters);
 
         return ReportType switch
         {
@@ -67,15 +82,74 @@ public class AdminReportGeneratorModel : PageModel
         };
     }
 
-    private void LoadPreview()
-    {
-        if (!TableQueries.ContainsKey(SelectedTable))
-            SelectedTable = "Reservations";
+    // --- Filtering ---
+    // Mirrors FilterableListPageModel<T>'s logic, but the table type is picked at runtime
+    // (SelectedTable), so it can't be a compile-time generic T - we key off the row's actual type instead.
 
-        PreviewRows = TableQueries[SelectedTable](_db).Take(25).ToList();
-        ColumnNames = PreviewRows.FirstOrDefault()?.GetType().GetProperties()
-            .Select(p => p.Name).ToList() ?? [];
+    private static List<FilterModel.FilterDefinition> BuildFilters(List<object> rows)
+    {
+        if (rows.Count == 0) return [];
+
+        var filters = new List<FilterModel.FilterDefinition>();
+
+        foreach (var prop in rows[0].GetType().GetProperties())
+        {
+            if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?))
+            {
+                filters.Add(new FilterModel.FilterDefinition("StartDate", prop.Name, rows));
+                filters.Add(new FilterModel.FilterDefinition("EndDate", prop.Name, rows));
+            }
+            else if (prop.PropertyType == typeof(string))
+            {
+                var distinctCount = rows.Select(r => prop.GetValue(r)?.ToString()).Distinct().Count();
+
+                filters.Add(distinctCount <= 15
+                    ? new FilterModel.FilterDefinition("Dropdown", prop.Name, rows)
+                    : new FilterModel.FilterDefinition("Search", prop.Name, rows));
+            }
+        }
+
+        return filters;
     }
+
+    private List<object> ApplyFilters(List<object> rows, List<FilterModel.FilterDefinition> filters)
+    {
+        if (rows.Count == 0) return rows;
+
+        var type = rows[0].GetType();
+        var query = rows.AsEnumerable();
+
+        foreach (var filter in filters)
+        {
+            var paramName = filter.Type is "StartDate" or "EndDate" ? $"{filter.Name}_{filter.Type}" : filter.Name;
+            var raw = GetParam(paramName);
+            if (string.IsNullOrWhiteSpace(raw)) continue;
+
+            var prop = type.GetProperty(filter.Name)!;
+
+            query = filter.Type switch
+            {
+                "Dropdown" => query.Where(r => prop.GetValue(r)?.ToString() == raw),
+                "Search" => query.Where(r => (prop.GetValue(r)?.ToString() ?? "")
+                                    .Contains(raw, StringComparison.OrdinalIgnoreCase)),
+                "StartDate" => DateTime.TryParse(raw, out var start)
+                                    ? query.Where(r => (DateTime?)prop.GetValue(r) >= start) : query,
+                "EndDate" => DateTime.TryParse(raw, out var end)
+                                    ? query.Where(r => (DateTime?)prop.GetValue(r) <= end) : query,
+                _ => query
+            };
+        }
+
+        return query.ToList();
+    }
+
+    // Filters are submitted via GET (query string) on preview, but forwarded as hidden form
+    // fields on the POST that generates the report - this reads whichever is present, so
+    // the exact same filtering logic covers both without duplicating it.
+    private string? GetParam(string key) =>
+        Request.HasFormContentType ? Request.Form[key].ToString() : Request.Query[key].ToString();
+
+    // --- Output formats (unchanged) ---
 
     private static byte[] GeneratePdf(List<object> data, string title)
     {

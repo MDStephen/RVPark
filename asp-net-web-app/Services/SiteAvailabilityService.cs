@@ -96,9 +96,11 @@ public class SiteAvailabilityService
     {
         return !_db.Reservations
             .AsNoTracking()
-            .Any(r => r.SiteId == siteId
-                      && r.Status != "Cancelled"
-                      && RangesOverlap(checkIn, checkOut, r.StartDate, r.EndDate));
+            .Any(r =>
+                r.SiteId == siteId &&
+                r.Status != "Cancelled" &&
+                checkIn < r.EndDate &&
+                r.StartDate < checkOut);
     }
 
     public async Task<decimal> CalculateTotalCostAsync(int siteId, DateTime checkIn, DateTime checkOut)

@@ -2,329 +2,186 @@
 @model CompleteReservationModel
 @{
     ViewData["Title"] = "Complete Reservation";
+    Layout = "_ExternalLayout";
 }
-
-<style>
-    .cr-wrapper {
-        max-width: 720px;
-        margin: 0 auto;
-    }
-
-    .cr-header { margin-bottom: 22px; }
-    .cr-header h1 { font-size: 22px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
-    .cr-header p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
-
-    .cr-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 22px 26px;
-        margin-bottom: 20px;
-    }
-
-    .cr-card h2 {
-        font-size: 15px;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 16px;
-    }
-
-    /* ── Summary card ─────────────────────────────────────── */
-    .cr-summary-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-    }
-
-    .cr-summary-item label {
-        display: block;
-        font-size: 11px;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        margin-bottom: 4px;
-    }
-
-    .cr-summary-item .value {
-        font-size: 15px;
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-
-    /* ── Form ─────────────────────────────────────────────── */
-    .cr-field-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 14px;
-        margin-bottom: 16px;
-    }
-
-    .cr-field label {
-        display: block;
-        font-size: 11.5px;
-        color: var(--text-secondary);
-        font-weight: 500;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-    }
-
-    .cr-field input,
-    .cr-field select,
-    .cr-field textarea {
-        width: 100%;
-        background: var(--bg-input);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        color: var(--text-primary);
-        font-size: 13.5px;
-        padding: 8px 10px;
-        transition: border-color .15s;
-        font-family: inherit;
-    }
-
-    .cr-field input:focus,
-    .cr-field select:focus,
-    .cr-field textarea:focus {
-        outline: none;
-        border-color: var(--accent);
-        box-shadow: 0 0 0 2px rgba(59,130,246,.2);
-    }
-
-    .cr-field textarea { resize: vertical; min-height: 90px; }
-    .cr-char-count { font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 4px; }
-
-    .cr-form-actions { margin-top: 22px; }
-
-    .btn-continue {
-        background: var(--accent);
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 10px 24px;
-        font-size: 13.5px;
-        font-weight: 500;
-        cursor: pointer;
-    }
-    .btn-continue:hover { background: #2563eb; }
-
-    .btn-pending {
-        background: var(--bg-input);
-        color: var(--text-muted);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: 10px 24px;
-        font-size: 13.5px;
-        font-weight: 500;
-        cursor: not-allowed;
-    }
-
-    .cr-toast {
-        padding: 10px 16px;
-        border-radius: 7px;
-        font-size: 13px;
-        margin-bottom: 16px;
-    }
-    .cr-toast.error { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.25); }
-    .cr-toast.success { background: rgba(34,197,94,.12); color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
-
-    .cr-empty {
-        text-align: center;
-        padding: 60px 20px;
-        color: var(--text-secondary);
-        font-size: 14px;
-    }
-
-    .cr-confirm-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
-        margin-bottom: 20px;
-    }
-    .cr-confirm-grid .cr-summary-item.full { grid-column: 1 / -1; }
-
-    /* ── Mobile responsive ───────────────────────────────── */
-    @@media (max-width: 700px) {
-        .cr-card { padding: 18px; }
-        .cr-summary-grid { grid-template-columns: 1fr 1fr; }
-        .cr-field-row { grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px; }
-        .cr-confirm-grid { grid-template-columns: 1fr; }
-        .btn-continue, .btn-pending { width: 100%; }
-    }
-
-    @@media (max-width: 420px) {
-        .cr-summary-grid { grid-template-columns: 1fr; }
-    }
-</style>
-
-<div class="cr-wrapper">
-    <div class="cr-header">
-        <h1>Complete Reservation</h1>
-        <p>Tell us a bit more about your stay before you continue to payment.</p>
-    </div>
-
-    @if (Model.ReservationNotFound)
-    {
-        <div class="cr-card">
-            <div class="cr-empty">
-                <i class="bi bi-exclamation-circle" style="font-size:36px; display:block; margin-bottom:12px;"></i>
-                We couldn't find that reservation. Please check your link, or start a new reservation from site selection.
-            </div>
+<div class="container py-4" data-bs-theme="dark" style="max-width: 720px;">
+    <div class="container py-4" style="max-width: 720px;">
+        <div class="mb-4">
+            <h1>Complete Reservation</h1>
+            <p class="text-muted">Tell us a bit more about your stay before you continue to payment.</p>
         </div>
-    }
-    else if (Model.SaveSuccess)
-    {
-        <div class="cr-toast success">✓ Your reservation details have been saved.</div>
 
-        <div class="cr-card">
-            <h2>Reservation Summary</h2>
-            <div class="cr-confirm-grid">
-                <div class="cr-summary-item">
-                    <label>Site</label>
-                    <div class="value">@Model.Summary!.SiteNumber</div>
-                </div>
-                <div class="cr-summary-item">
-                    <label>Nights</label>
-                    <div class="value">@Model.Summary!.Nights</div>
-                </div>
-                <div class="cr-summary-item">
-                    <label>Check-in</label>
-                    <div class="value">@Model.Summary!.StartDate.ToString("MMM d, yyyy")</div>
-                </div>
-                <div class="cr-summary-item">
-                    <label>Check-out</label>
-                    <div class="value">@Model.Summary!.EndDate.ToString("MMM d, yyyy")</div>
-                </div>
-                <div class="cr-summary-item">
-                    <label>Total Cost</label>
-                    <div class="value">@Model.Summary!.TotalCost.ToString("C")</div>
-                </div>
-            </div>
-
-            <h2>Party Details</h2>
-            <div class="cr-confirm-grid">
-                <div class="cr-summary-item">
-                    <label>Adults</label>
-                    <div class="value">@Model.Adults</div>
-                </div>
-                <div class="cr-summary-item">
-                    <label>Children</label>
-                    <div class="value">@Model.Children</div>
-                </div>
-                <div class="cr-summary-item">
-                    <label>Pets</label>
-                    <div class="value">@Model.Pets</div>
-                </div>
-                @if (!string.IsNullOrWhiteSpace(Model.Notes))
-                {
-                    <div class="cr-summary-item full">
-                        <label>Special Requests</label>
-                        <div class="value" style="font-weight:400;">@Model.Notes</div>
-                    </div>
-                }
-            </div>
-
-            @if (!string.IsNullOrEmpty(Model.PaymentError))
-            {
-                <div class="cr-toast error">@Model.PaymentError</div>
-            }
-
-            <div class="cr-form-actions">
-                @if (Model.PaymentConfigured)
-                {
-                    <form method="post" asp-page-handler="Pay">
-                        <input type="hidden" asp-for="ReservationId" />
-                        <button type="submit" class="btn-continue">
-                            Continue to Payment  @Model.Summary!.TotalCost.ToString("C")
-                        </button>
-                    </form>
-                }
-                else
-                {
-                    <button type="button" class="btn-pending" disabled title="Add Stripe:SecretKey to appsettings.json">
-                        Payment unavailable  configure Stripe sandbox keys
-                    </button>
-                }
-            </div>
-        </div>
-    }
-    else
-    {
-        @if (Model.ValidationErrors.Count > 0)
+        @if (Model.ReservationNotFound)
         {
-            <div class="cr-toast error">
-                ⚠ Please fix the following:
-                <ul style="margin: 6px 0 0 18px; padding: 0;">
-                    @foreach (var error in Model.ValidationErrors)
-                    {
-                        <li>@error</li>
-                    }
-                </ul>
+            <div class="card">
+                <div class="card-body text-center text-muted py-5">
+                    <i class="bi bi-exclamation-circle d-block mb-3" style="font-size:36px;"></i>
+                    We couldn't find that reservation. Please check your link, or start a new reservation from site selection.
+                </div>
             </div>
         }
+        else if (Model.SaveSuccess)
+        {
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> Your reservation details have been saved.
+            </div>
 
-        <div class="cr-card">
-            <h2>Your Stay</h2>
-            <div class="cr-summary-grid">
-                <div class="cr-summary-item">
-                    <label>Site</label>
-                    <div class="value">@Model.Summary!.SiteNumber</div>
-                </div>
-                <div class="cr-summary-item">
-                    <label>Check-in</label>
-                    <div class="value">@Model.Summary!.StartDate.ToString("MMM d, yyyy")</div>
-                </div>
-                <div class="cr-summary-item">
-                    <label>Check-out</label>
-                    <div class="value">@Model.Summary!.EndDate.ToString("MMM d, yyyy")</div>
-                </div>
-                <div class="cr-summary-item">
-                    <label>Nights</label>
-                    <div class="value">@Model.Summary!.Nights</div>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4">Reservation Summary</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-4">
+                            <div class="text-muted small text-uppercase">Site</div>
+                            <div class="fw-semibold">@Model.Summary!.SiteNumber</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="text-muted small text-uppercase">Nights</div>
+                            <div class="fw-semibold">@Model.Summary!.Nights</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="text-muted small text-uppercase">Check-in</div>
+                            <div class="fw-semibold">@Model.Summary!.StartDate.ToString("MMM d, yyyy")</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="text-muted small text-uppercase">Check-out</div>
+                            <div class="fw-semibold">@Model.Summary!.EndDate.ToString("MMM d, yyyy")</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="text-muted small text-uppercase">Total Cost</div>
+                            <div class="fw-semibold">@Model.Summary!.TotalCost.ToString("C")</div>
+                        </div>
+                    </div>
+
+                    <h2 class="h4">Party Details</h2>
+                    <div class="row g-3">
+                        <div class="col-6 col-md-4">
+                            <div class="text-muted small text-uppercase">Adults</div>
+                            <div class="fw-semibold">@Model.Adults</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="text-muted small text-uppercase">Children</div>
+                            <div class="fw-semibold">@Model.Children</div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="text-muted small text-uppercase">Pets</div>
+                            <div class="fw-semibold">@Model.Pets</div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                        {
+                            <div class="col-12">
+                                <div class="text-muted small text-uppercase">Special Requests</div>
+                                <div>@Model.Notes</div>
+                            </div>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.PaymentError))
+                    {
+                        <div class="alert alert-danger mt-3" role="alert">@Model.PaymentError</div>
+                    }
+
+                    <div class="mt-4">
+                        @if (Model.PaymentConfigured)
+                        {
+                            <form method="post" asp-page-handler="Pay">
+                                <input type="hidden" asp-for="ReservationId" />
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    Continue to Payment &mdash; @Model.Summary!.TotalCost.ToString("C")
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-secondary btn-lg w-100" disabled
+                                    title="Add Stripe:SecretKey to appsettings.json">
+                                Payment unavailable &mdash; configure Stripe sandbox keys
+                            </button>
+                        }
+                    </div>
                 </div>
             </div>
-            <div class="cr-summary-item" style="margin-top:16px;">
-                <label>Total Cost</label>
-                <div class="value">@Model.Summary!.TotalCost.ToString("C")</div>
+        }
+        else
+        {
+            @if (Model.ValidationErrors.Count > 0)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Please fix the following:
+                    <ul class="mb-0 mt-2">
+                        @foreach (var error in Model.ValidationErrors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4">Your Stay</h2>
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small text-uppercase">Site</div>
+                            <div class="fw-semibold">@Model.Summary!.SiteNumber</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small text-uppercase">Check-in</div>
+                            <div class="fw-semibold">@Model.Summary!.StartDate.ToString("MMM d, yyyy")</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small text-uppercase">Check-out</div>
+                            <div class="fw-semibold">@Model.Summary!.EndDate.ToString("MMM d, yyyy")</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small text-uppercase">Nights</div>
+                            <div class="fw-semibold">@Model.Summary!.Nights</div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div>
+                        <div class="text-muted small text-uppercase">Total Cost</div>
+                        <div class="fs-4 fw-bold">@Model.Summary!.TotalCost.ToString("C")</div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="cr-card">
-            <h2>Party Details</h2>
-            <form method="post">
-                <input type="hidden" asp-for="ReservationId" />
-
-                <div class="cr-field-row">
-                    <div class="cr-field">
-                        <label>Adults</label>
-                        <input asp-for="Adults" type="number" min="1" required />
-                    </div>
-                    <div class="cr-field">
-                        <label>Children</label>
-                        <input asp-for="Children" type="number" min="0" />
-                    </div>
-                    <div class="cr-field">
-                        <label>Pets</label>
-                        <select asp-for="Pets">
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                        </select>
-                    </div>
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h4">Party Details</h2>
+                    <form method="post">
+                        <input type="hidden" asp-for="ReservationId" />
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Adults" class="form-label">Adults</label>
+                                <input asp-for="Adults" type="number" min="1" required class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Children" class="form-label">Children</label>
+                                <input asp-for="Children" type="number" min="0" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Pets" class="form-label">Pets</label>
+                                <select asp-for="Pets" class="form-select">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">Special Requests / Notes (optional)</label>
+                            <textarea asp-for="Notes" maxlength="500" class="form-control"
+                                    placeholder="Let us know about any special requests..."></textarea>
+                            <div class="form-text">Max 500 characters</div>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Save Reservation Details</button>
+                        </div>
+                    </form>
                 </div>
-
-                <div class="cr-field">
-                    <label>Special Requests / Notes (optional)</label>
-                    <textarea asp-for="Notes" maxlength="500" placeholder="Let us know about any special requests..."></textarea>
-                    <div class="cr-char-count">Max 500 characters</div>
-                </div>
-
-                <div class="cr-form-actions">
-                    <button type="submit" class="btn-continue">Save Reservation Details</button>
-                </div>
-            </form>
-        </div>
-    }
+            </div>
+        }
+    </div>
 </div>
