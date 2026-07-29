@@ -30,6 +30,61 @@
         @await Html.PartialAsync("_FilterPanel", (asp_net_web_app.Models.IFilterableListPage)Model)
     }
 
+    @if (Model.Trends.Count > 0)
+    {
+        <hr class="my-4" />
+        <h5 class="mb-3">
+            Monthly Trends
+            <span class="fw-normal">
+                (@Model.TrendDateField by month@(Model.TrendAmountField != null ? $", count & {Model.TrendAmountField}" : ", count"))
+            </span>
+        </h5>
+        <canvas id="trendsChart" height="90"></canvas>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+        <script>
+            const trendLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Trends.Select(t => t.Month)));
+            const trendCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Trends.Select(t => t.Count)));
+            const trendTotals = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Trends.Select(t => t.Total)));
+
+            new Chart(document.getElementById('trendsChart'), {
+                type: 'bar',
+                data: {
+                    labels: trendLabels,
+                    datasets: [
+                        {
+                            label: 'Count',
+                            data: trendCounts,
+                            yAxisID: 'y',
+                            backgroundColor: 'rgba(13, 110, 253, 0.6)'
+                        }
+                        @if (Model.TrendAmountField != null)
+                        {
+                            <text>
+                            ,{
+                                label: '@Model.TrendAmountField',
+                                data: trendTotals,
+                                type: 'line',
+                                yAxisID: 'y1',
+                                borderColor: 'rgba(25, 135, 84, 1)',
+                                backgroundColor: 'rgba(25, 135, 84, 0.2)'
+                            }
+                            </text>
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: { type: 'linear', position: 'left', beginAtZero: true, title: { display: true, text: 'Count' } }
+                        @if (Model.TrendAmountField != null)
+                        {
+                            <text>,y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { display: true, text: '@Model.TrendAmountField' } }</text>
+                        }
+                    }
+                }
+            });
+        </script>
+    }
+
     <hr class="my-4" />
 
     <h5 class="mb-3">

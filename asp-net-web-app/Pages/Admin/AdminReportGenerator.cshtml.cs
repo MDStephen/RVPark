@@ -49,6 +49,11 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
     // Rows above is capped to 25 for the preview table.
     public int FilteredCount { get; private set; }
 
+    // --- Monthly trends (screen-only - not part of the PDF/CSV/JSON export) ---
+    public List<MonthlyTrendPoint> Trends { get; private set; } = [];
+    public string? TrendDateField { get; private set; }
+    public string? TrendAmountField { get; private set; }
+
     public void OnGet()
     {
         if (!TableQueries.ContainsKey(SelectedTable))
@@ -60,6 +65,15 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
         var filtered = ApplyFilters(allRows, Filters);
         FilteredCount = filtered.Count;
         Rows = filtered.Take(25).ToList();
+
+        if (allRows.Count > 0)
+        {
+            var (dateField, amountField) = FindTrendFields(allRows[0].GetType());
+            TrendDateField = dateField;
+            TrendAmountField = amountField;
+            if (dateField != null)
+                Trends = BuildTrends(filtered, dateField, amountField); // trends reflect the active filters
+        }
     }
 
     public IActionResult OnPostGenerateReport()
@@ -149,6 +163,53 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
     private string? GetParam(string key) =>
         Request.HasFormContentType ? Request.Form[key].ToString() : Request.Query[key].ToString();
 
+    // --- Monthly trends ---
+    // Picks the first DateTime column to bucket by month, and (if present) the first
+    // numeric column that looks money-shaped, to sum alongside the row count.
+    // Tables with no date column (Sites, Pricing, ...) just get no trend chart.
+
+    private static (string? DateField, string? AmountField) FindTrendFields(Type type)
+    {
+        var props = type.GetProperties();
+
+        var dateField = props
+            .FirstOrDefault(p => p.PropertyType == typeof(DateTime) || p.PropertyType == typeof(DateTime?))
+            ?.Name;
+
+        var moneyNames = new[] { "Cost", "Amount", "Price", "Total" };
+        var amountField = props
+            .FirstOrDefault(p =>
+                (p.PropertyType == typeof(decimal) || p.PropertyType == typeof(decimal?) ||
+                 p.PropertyType == typeof(double) || p.PropertyType == typeof(double?) ||
+                 p.PropertyType == typeof(int) || p.PropertyType == typeof(int?)) &&
+                moneyNames.Any(n => p.Name.Contains(n, StringComparison.OrdinalIgnoreCase)))
+            ?.Name;
+
+        return (dateField, amountField);
+    }
+
+    private static List<MonthlyTrendPoint> BuildTrends(List<object> rows, string dateField, string? amountField)
+    {
+        if (rows.Count == 0) return [];
+
+        var type = rows[0].GetType();
+        var dateProp = type.GetProperty(dateField)!;
+        var amountProp = amountField != null ? type.GetProperty(amountField) : null;
+
+        return rows
+            .Select(r => new { Date = (DateTime?)dateProp.GetValue(r), Row = r })
+            .Where(x => x.Date.HasValue)
+            .GroupBy(x => new DateTime(x.Date!.Value.Year, x.Date.Value.Month, 1))
+            .OrderBy(g => g.Key)
+            .Select(g => new MonthlyTrendPoint(
+                g.Key.ToString("MMM yyyy"),
+                g.Count(),
+                amountProp != null
+                    ? g.Sum(x => Convert.ToDecimal(amountProp.GetValue(x.Row) ?? 0m))
+                    : null))
+            .ToList();
+    }
+
     // --- Output formats (unchanged) ---
 
     private static byte[] GeneratePdf(List<object> data, string title)
@@ -218,3 +279,5 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
         return value;
     }
 }
+
+public record MonthlyTrendPoint(string Month, int Count, decimal? Total);
