@@ -1,6 +1,7 @@
 using asp_net_web_app.Data;
 using asp_net_web_app.Repositories;
 using asp_net_web_app.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
 using Stripe;
@@ -17,6 +18,17 @@ builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
 builder.Services.AddScoped<IPaymentService, StripePaymentService>();
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<IEmailSender, DevEmailSender>();
+
+// Cookie authentication: after a successful login we drop a cookie in the
+// browser, and it's sent back on every request — that's what keeps someone
+// "logged in" from page to page without signing in again each time.
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        // Where to send people who need to log in.
+        options.LoginPath = "/CustomerFacing/UserLoginPage";
+        options.AccessDeniedPath = "/CustomerFacing/UserLoginPage";
+    });
 
 var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
 if (!string.IsNullOrWhiteSpace(stripeSecretKey))
@@ -128,7 +140,8 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication();   // works out WHO you are (reads the login cookie)
+app.UseAuthorization();    // works out WHAT you're allowed to do
 
 app.MapStaticAssets();
 app.MapRazorPages()
