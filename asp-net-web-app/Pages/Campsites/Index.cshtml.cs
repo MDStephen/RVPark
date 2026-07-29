@@ -123,6 +123,6 @@ public class IndexModel : PageModel
         _db.Reservations.Add(reservation);
         await _db.SaveChangesAsync();
 
-        return RedirectToPage("/CompleteReservation", new { id = reservation.Id });
+        return RedirectToPage("/CustomerFacing/CompleteReservation", new { id = reservation.Id });
     }
 }

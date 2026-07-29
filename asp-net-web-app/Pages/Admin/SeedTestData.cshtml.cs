@@ -50,10 +50,13 @@ public class SeedTestDataModel : PageModel
             // TODO seed data for the UserAccounts table that correspond with the accounts above
 
             // Seed Employees
+            // NOTE: dateOfBirth is a non-nullable DateTime with no default set - leaving it
+            // unset means DateTime.MinValue (0001-01-01), which SQL Server's `datetime` column
+            // can't store (valid range starts 1753-01-01). This was the actual seeding failure.
             var employees = new List<Employee>
             {
-                new() { employeeId = 1, firstName = "Admin", lastName = "User", username = "admin", password = "admin123", role = "Admin" },
-                new() { employeeId = 2, firstName = "Staff", lastName = "Member", username = "staff", password = "staff123", role = "Staff" }
+                new() { employeeId = 1, firstName = "Admin", lastName = "User", dateOfBirth = new DateTime(1985, 3, 14), username = "admin", password = "admin123", role = "Admin" },
+                new() { employeeId = 2, firstName = "Staff", lastName = "Member", dateOfBirth = new DateTime(1992, 7, 22), username = "staff", password = "staff123", role = "Staff" }
             };
             _db.Employees.AddRange(employees);
 
@@ -91,46 +94,49 @@ public class SeedTestDataModel : PageModel
                 new() { SiteNumber = "S1", Category = "Dry Storage", IsAvailable = true }
             };
             _db.Sites.AddRange(sites);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(); // sites now have real DB-generated Ids
 
-            // Seed Site Photos (must be after Sites are saved to get valid IDs)
+            // Seed Site Photos (uses the real generated Site Ids, not assumed literals)
             var photos = new List<DbSitePhoto>
             {
-                new() { DbSiteId = 1, PhotoUrl = "/images/site-a1.jpg" },
-                new() { DbSiteId = 2, PhotoUrl = "/images/site-a2.jpg" },
-                new() { DbSiteId = 4, PhotoUrl = "/images/site-b1.jpg" },
-                new() { DbSiteId = 7, PhotoUrl = "/images/site-c1.jpg" }
+                new() { DbSiteId = sites[0].Id, PhotoUrl = "/images/site-a1.jpg" },
+                new() { DbSiteId = sites[1].Id, PhotoUrl = "/images/site-a2.jpg" },
+                new() { DbSiteId = sites[3].Id, PhotoUrl = "/images/site-b1.jpg" },
+                new() { DbSiteId = sites[6].Id, PhotoUrl = "/images/site-c1.jpg" }
             };
             _db.SitePhotos.AddRange(photos);
 
-            // Seed Site Prices (must be after Sites are saved to get valid IDs)
+            // Seed Site Prices (same - real generated Site Ids)
             var sitePrices = new List<DbSitePrice>
             {
-                new() { DbSiteId = 1, Cost = 45.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
-                new() { DbSiteId = 2, Cost = 45.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
-                new() { DbSiteId = 4, Cost = 40.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
-                new() { DbSiteId = 7, Cost = 55.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) }
+                new() { DbSiteId = sites[0].Id, Cost = 45.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
+                new() { DbSiteId = sites[1].Id, Cost = 45.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
+                new() { DbSiteId = sites[3].Id, Cost = 40.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
+                new() { DbSiteId = sites[6].Id, Cost = 55.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) }
             };
             _db.SitePrices.AddRange(sitePrices);
             await _db.SaveChangesAsync();
 
-            // Seed Reservations
+            // Seed Reservations (uses the real generated User/Site Ids)
             var today = DateTime.Today;
             var reservations = new List<Reservations>
             {
-                new() { UserId = 1, SiteId = 1, StartDate = today.AddDays(5), EndDate = today.AddDays(7), Status = "Confirmed", TotalCost = 90.00m, Adults = 2, Children = 0, Pets = 1, Notes = "Early arrival requested" },
-                new() { UserId = 2, SiteId = 4, StartDate = today.AddDays(10), EndDate = today.AddDays(12), Status = "Pending", TotalCost = 80.00m, Adults = 1, Children = 2, Pets = 0, Notes = "" },
-                new() { UserId = 3, SiteId = 5, StartDate = today.AddDays(-2), EndDate = today.AddDays(2), Status = "Confirmed", TotalCost = 160.00m, Adults = 2, Children = 1, Pets = 2, Notes = "Extended stay" },
-                new() { UserId = 4, SiteId = 7, StartDate = today.AddDays(15), EndDate = today.AddDays(17), Status = "Upcoming", TotalCost = 110.00m, Adults = 1, Children = 0, Pets = 0, Notes = "" },
-                new() { UserId = 5, SiteId = 2, StartDate = today.AddDays(20), EndDate = today.AddDays(25), Status = "Upcoming", TotalCost = 225.00m, Adults = 3, Children = 2, Pets = 1, Notes = "Family reunion" }
+                new() { UserId = users[0].userId, SiteId = sites[0].Id, StartDate = today.AddDays(5), EndDate = today.AddDays(7), Status = "Confirmed", TotalCost = 90.00m, Adults = 2, Children = 0, Pets = 1, Notes = "Early arrival requested" },
+                new() { UserId = users[1].userId, SiteId = sites[3].Id, StartDate = today.AddDays(10), EndDate = today.AddDays(12), Status = "Pending", TotalCost = 80.00m, Adults = 1, Children = 2, Pets = 0, Notes = "" },
+                new() { UserId = users[2].userId, SiteId = sites[4].Id, StartDate = today.AddDays(-2), EndDate = today.AddDays(2), Status = "Confirmed", TotalCost = 160.00m, Adults = 2, Children = 1, Pets = 2, Notes = "Extended stay" },
+                new() { UserId = users[3].userId, SiteId = sites[6].Id, StartDate = today.AddDays(15), EndDate = today.AddDays(17), Status = "Upcoming", TotalCost = 110.00m, Adults = 1, Children = 0, Pets = 0, Notes = "" },
+                new() { UserId = users[4].userId, SiteId = sites[1].Id, StartDate = today.AddDays(20), EndDate = today.AddDays(25), Status = "Upcoming", TotalCost = 225.00m, Adults = 3, Children = 2, Pets = 1, Notes = "Family reunion" }
             };
             _db.Reservations.AddRange(reservations);
+            await _db.SaveChangesAsync(); // reservations now have real generated Ids
 
-            // Seed Payments
+            // Seed Payments - linked to the ACTUAL generated Reservation Ids, not hardcoded
+            // guesses (1, 3). The hardcoded version silently pointed at the wrong reservations,
+            // or none at all, on every re-seed after the first.
             var payments = new List<asp_net_web_app.Data.Payment>
             {
-                new() { amount = 90.00m, paidAt = DateTime.UtcNow, stripeId = "pi_test_001", paymentStatus = "paid", ReservationId = 1 },
-                new() { amount = 160.00m, paidAt = DateTime.UtcNow, stripeId = "pi_test_002", paymentStatus = "paid", ReservationId = 3 }
+                new() { amount = 90.00m, paidAt = DateTime.UtcNow, stripeId = "pi_test_001", paymentStatus = "paid", ReservationId = reservations[0].Id },
+                new() { amount = 160.00m, paidAt = DateTime.UtcNow, stripeId = "pi_test_002", paymentStatus = "paid", ReservationId = reservations[2].Id }
             };
             _db.Payments.AddRange(payments);
 
@@ -141,7 +147,13 @@ public class SeedTestDataModel : PageModel
         }
         catch (Exception ex)
         {
-            Message = $"Error seeding test data: {ex.Message}";
+            // ex.Message on a DbUpdateException is always the same generic string - the real
+            // cause (the actual SQL error) is in the inner exception chain.
+            var innermost = ex;
+            while (innermost.InnerException != null)
+                innermost = innermost.InnerException;
+
+            Message = $"Error seeding test data: {innermost.Message}";
             Success = false;
         }
 
