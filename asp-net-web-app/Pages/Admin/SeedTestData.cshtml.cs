@@ -33,6 +33,7 @@ public class SeedTestDataModel : PageModel
             _db.Sites.RemoveRange(_db.Sites);
             _db.Pricing.RemoveRange(_db.Pricing);
             _db.Employees.RemoveRange(_db.Employees);
+            _db.UserAccounts.RemoveRange(_db.UserAccounts);
             _db.Users.RemoveRange(_db.Users);
             await _db.SaveChangesAsync();
 
@@ -47,7 +48,21 @@ public class SeedTestDataModel : PageModel
             };
             _db.Users.AddRange(users);
 
-            // TODO seed data for the UserAccounts table that correspond with the accounts above
+            // Seed UserAccounts (customer logins) matching the Users above.
+            // All share ONE known test password so the team can pass credentials
+            // around. Passwords are BCrypt-hashed, exactly like real sign-ups, and
+            // IsEmailVerified is true so these accounts work even if the login page
+            // ever starts requiring a verified email.
+            const string testPassword = "password123";
+            var userAccounts = new List<UserAccount>
+            {
+                new() { UserId = 1, Username = "john.smith@example.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true },
+                new() { UserId = 2, Username = "jane.doe@example.com",   PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true },
+                new() { UserId = 3, Username = "robert.j@example.com",   PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true },
+                new() { UserId = 4, Username = "emily.d@example.com",    PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true },
+                new() { UserId = 5, Username = "michael.w@example.com",  PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true }
+            };
+            _db.UserAccounts.AddRange(userAccounts);
 
             // Seed Employees
             // NOTE: dateOfBirth is a non-nullable DateTime with no default set - leaving it
