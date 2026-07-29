@@ -16,6 +16,7 @@ builder.Services.AddScoped<SiteAvailabilityService>();
 builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
 builder.Services.AddScoped<IPaymentService, StripePaymentService>();
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<IEmailSender, DevEmailSender>();
 
 var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
 if (!string.IsNullOrWhiteSpace(stripeSecretKey))
