@@ -150,6 +150,7 @@ namespace asp_net_web_app.Pages
 
             Summary = BuildSummary(reservation);
             PaymentConfigured = !string.IsNullOrWhiteSpace(_config["Stripe:SecretKey"]);
+            Console.WriteLine($"[DEBUG] Stripe SecretKey: '{_config["Stripe:SecretKey"]}'");
 
             if (!PaymentConfigured)
             {
