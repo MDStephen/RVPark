@@ -74,7 +74,7 @@ public class UserLoginPageModel : PageModel
             //     return Page();
             // }
 
-            await SignInAsync(account.Username, "Customer");
+            await SignInAsync(account.Username, "Customer", account.UserId);
             return RedirectToPage("/CustomerFacing/Index");
         }
 
@@ -84,13 +84,20 @@ public class UserLoginPageModel : PageModel
     }
 
     // Builds the login cookie: who they are (Name) and their role.
-    private async Task SignInAsync(string username, string role)
+    private async Task SignInAsync(string username, string role, int? userId = null)
     {
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, username),
             new Claim(ClaimTypes.Role, role)
         };
+
+        // For customers, stash their Users-table id so pages like booking can
+        // save records under the right person (read back via User.FindFirst("UserId")).
+        if (userId.HasValue)
+        {
+            claims.Add(new Claim("UserId", userId.Value.ToString()));
+        }
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
