@@ -1,4 +1,5 @@
 using asp_net_web_app.Data;
+using asp_net_web_app.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +10,14 @@ public class UserCreateAccountPageModel : PageModel
     // The database, handed to us automatically by ASP.NET (dependency injection).
     private readonly DatabaseWrapper _db;
 
-    public UserCreateAccountPageModel(DatabaseWrapper db)
+    // How we "send" the confirmation email. In development this is DevEmailSender,
+    // which just prints the link to the console.
+    private readonly IEmailSender _email;
+
+    public UserCreateAccountPageModel(DatabaseWrapper db, IEmailSender email)
     {
         _db = db;
+        _email = email;
     }
 
     [BindProperty]
@@ -83,16 +89,30 @@ public class UserCreateAccountPageModel : PageModel
         //    never the text the user typed.
         var account = new UserAccount
         {
-            UserId          = customer.userId,
-            Username        = Email,
-            PasswordHash    = BCrypt.Net.BCrypt.HashPassword(Password),
-            IsEmailVerified = false
+            UserId                 = customer.userId,
+            Username               = Email,
+            PasswordHash           = BCrypt.Net.BCrypt.HashPassword(Password),
+            IsEmailVerified        = false,
+            // A random one-time token that goes in the confirmation link.
+            // "N" gives 32 hex chars with no dashes.
+            EmailVerificationToken = Guid.NewGuid().ToString("N")
         };
         _db.UserAccounts.Add(account);
         await _db.SaveChangesAsync();
 
-        // For now, send them to the login page.
-        // (Email verification is the next piece we'll build.)
+        // 3) Build the absolute verification link and "send" it.
+        //    Url.Page(..., protocol: Request.Scheme) produces a full URL like
+        //    https://localhost:5046/CustomerFacing/VerifyEmail?token=abc123...
+        var verifyLink = Url.Page(
+            "/CustomerFacing/VerifyEmail",
+            pageHandler: null,
+            values: new { token = account.EmailVerificationToken },
+            protocol: Request.Scheme);
+
+        await _email.SendVerificationEmailAsync(account.Username, verifyLink!);
+
+        // Send them to the login page. They'll need to click the link in their
+        // email (printed to the console for now) before the account is verified.
         return RedirectToPage("/CustomerFacing/UserLoginPage");
     }
 }
