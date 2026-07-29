@@ -93,22 +93,21 @@ public class IndexModel : PageModel
             });
         }
 
-        // TODO: Replace guest user with authenticated customer once login/account creation is implemented.
-        var guestUserId = await _db.Users
-            .OrderBy(u => u.userId)
-            .Select(u => u.userId)
-            .FirstOrDefaultAsync<int>();
-
-        if (guestUserId == 0)
+        // Use the logged-in customer's id (from their login cookie) so the
+        // reservation is saved under THEM, not a default user.
+        var userIdClaim = User.FindFirst("UserId");
+        if (userIdClaim == null)
         {
-            return RedirectToPage(new { checkIn = CheckIn, checkOut = CheckOut });
+            // Not logged in as a customer — send them to log in first.
+            return RedirectToPage("/CustomerFacing/UserLoginPage");
         }
+        int currentUserId = int.Parse(userIdClaim.Value);
 
         var totalCost = await _availability.CalculateTotalCostAsync(siteId, CheckIn.Value, CheckOut.Value);
 
         var reservation = new Reservations
         {
-            UserId = guestUserId,
+            UserId = currentUserId,
             SiteId = siteId,
             StartDate = CheckIn.Value,
             EndDate = CheckOut.Value,
@@ -117,7 +116,7 @@ public class IndexModel : PageModel
             Adults = 1,
             Children = 0,
             Pets = 0,
-            Notes = "Created from public site browse  assign to logged-in customer once auth is ready."
+            Notes = "Created from site browse."
         };
 
         _db.Reservations.Add(reservation);
