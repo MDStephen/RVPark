@@ -1,0 +1,29 @@
+@page
+@model SeedTestDataModel
+@{
+    ViewData["Title"] = "Seed Test Data";
+    Layout = "_ExternalLayout";
+}
+
+<div class="container py-5 text-light">
+    <h1>Seed Test Data</h1>
+
+    @if (Model.Message != null)
+    {
+        <div class="alert @(Model.Success ? "alert-success" : "alert-danger")">
+            @Model.Message
+        </div>
+    }
+
+    <div class="card bg-secondary bg-opacity-10 border-secondary-subtle rounded-3 mb-4">
+        <div class="card-body p-4">
+            <p class="text-light mb-4">This will populate all database tables with sample test data for development and testing purposes.</p>
+            
+            <form method="post">
+                <button type="submit" class="btn btn-warning fw-semibold">Seed All Test Data</button>
+            </form>
+        </div>
+    </div>
+
+    <a asp-page="/Admin/Dashboard" class="btn btn-outline-light">Back to Dashboard</a>
+</div>

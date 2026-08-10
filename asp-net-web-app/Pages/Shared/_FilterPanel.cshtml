@@ -1,6 +1,18 @@
 @model asp_net_web_app.Models.IFilterableListPage
 
+@{
+    var _filterKeys = Model.Filters
+        .SelectMany(f => f.Type is "StartDate" or "EndDate" ? new[] { $"{f.Name}_{f.Type}" } : new[] { f.Name })
+        .ToHashSet();
+}
 <form method="get">
+    @foreach (var kvp in Html.ViewContext.HttpContext.Request.Query)
+    {
+        if (!_filterKeys.Contains(kvp.Key))
+        {
+            <input type="hidden" name="@kvp.Key" value="@kvp.Value" />
+        }
+    }
     <div class="container d-flex gap-3 flex-wrap align-items-end">
         @foreach (var filter in Model.Filters)
         {
@@ -13,7 +25,7 @@
                             <option value="">-- All --</option>
                             @foreach (var value in filter.Data)
                             {
-                                <option value="@value" selected="@(Context.Request.Query[filter.Name] == value)">@value</option>
+                                <option value="@value" selected="@(Html.ViewContext.HttpContext.Request.Query[filter.Name] == value)">@value</option>
                             }
                         </select>
                     </div>
@@ -24,7 +36,7 @@
                         <label class="form-label">@filter.Name (from)</label>
                         <input type="date" class="form-control"
                                name="@($"{filter.Name}_StartDate")"
-                               value="@Context.Request.Query[$"{filter.Name}_StartDate"]" />
+                               value="@Html.ViewContext.HttpContext.Request.Query[$"{filter.Name}_StartDate"]" />
                     </div>
                     break;
 
@@ -33,7 +45,7 @@
                         <label class="form-label">@filter.Name (to)</label>
                         <input type="date" class="form-control"
                                name="@($"{filter.Name}_EndDate")"
-                               value="@Context.Request.Query[$"{filter.Name}_EndDate"]" />
+                               value="@Html.ViewContext.HttpContext.Request.Query[$"{filter.Name}_EndDate"]" />
                     </div>
                     break;
 
@@ -42,7 +54,7 @@
                         <label class="form-label">@filter.Name</label>
                         <input type="text" class="form-control"
                                name="@filter.Name"
-                               value="@Context.Request.Query[filter.Name]"
+                               value="@Html.ViewContext.HttpContext.Request.Query[filter.Name]"
                                placeholder="Search @filter.Name..." />
                     </div>
                     break;

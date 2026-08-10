@@ -10,7 +10,9 @@ namespace asp_net_web_app.Data
 
         public decimal amount { get; set; }
         public DateTime paidAt { get; set; }
-        public string stripeId { get; set; }
-        public string paymentStatus { get; set; }
+        public string stripeId { get; set; } = string.Empty;
+        public string paymentStatus { get; set; } = string.Empty;
+
+        public int? ReservationId { get; set; }
     }
 }

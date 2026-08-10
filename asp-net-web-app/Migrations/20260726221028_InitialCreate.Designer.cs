@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using asp_net_web_app.Data;
 
@@ -10,9 +11,11 @@ using asp_net_web_app.Data;
 namespace asp_net_web_app.Migrations
 {
     [DbContext(typeof(DatabaseWrapper))]
-    partial class DatabaseWrapperModelSnapshot : ModelSnapshot
+    [Migration("20260726221028_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -155,9 +158,6 @@ namespace asp_net_web_app.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("baseMonthlyRateStorage")
-                        .HasColumnType("TEXT");
-
                     b.Property<decimal>("baseNightlyRate")
                         .HasColumnType("TEXT");
 
@@ -231,67 +231,6 @@ namespace asp_net_web_app.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Reservations");
-                });
-
-/*            modelBuilder.Entity("asp_net_web_app.Data.Site", b =>
-                {
-                    b.Property<int>("siteId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("isAvailable")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("length")
-                        .HasColumnType("REAL");
-
-                    b.Property<string>("location")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("width")
-                        .HasColumnType("REAL");
-
-                    b.HasKey("siteId");
-
-                    b.ToTable("SiteModels", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Site");
-
-                    b.UseTphMappingStrategy();
-                });
-*/
-            modelBuilder.Entity("asp_net_web_app.Data.UserAccount", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("EmailVerificationToken")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsEmailVerified")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserAccounts", (string)null);
                 });
 
             modelBuilder.Entity("asp_net_web_app.Data.Users", b =>

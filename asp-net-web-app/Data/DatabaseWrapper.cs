@@ -12,17 +12,12 @@ namespace asp_net_web_app.Data
         // Users, Customer, Staff, Admin all in users now
         public DbSet<Users> Users { get; set; }
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<UserAccount> UserAccounts { get; set; }
 
         public DbSet<DbSite> Sites { get; set; }
         public DbSet<DbSitePhoto> SitePhotos { get; set; }
         public DbSet<DbSitePrice> SitePrices { get; set; }
         public DbSet<Reservations> Reservations { get; set; }
-
-        // NOTE: renamed from sites - temporary collision fix
-        public DbSet<Site> SiteModels { get; set; }
-
-        // NOTE: renamed from reservations - temporary collision fix
-        public DbSet<Reservation> ReservationModels { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Pricing> Pricing { get; set; }
 
@@ -30,14 +25,6 @@ namespace asp_net_web_app.Data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Users>().ToTable("Users");
-
-            // NOTE: renamed from sites - temporary collision fix
-            modelBuilder.Entity<Site>().ToTable("SiteModels");
-            modelBuilder.Entity<Lot>();
-            modelBuilder.Entity<StorageContainer>();
-
-            // NOTE: renamed from sites - temporary collision fix
-            modelBuilder.Entity<Reservation>().ToTable("ReservationModels");
             modelBuilder.Entity<Payment>().ToTable("Payments");
             modelBuilder.Entity<Pricing>().ToTable("Pricing");
             modelBuilder.Entity<Employee>().ToTable("Employees");
@@ -45,6 +32,8 @@ namespace asp_net_web_app.Data
             modelBuilder.Entity<DbSite>().ToTable("Sites");
             modelBuilder.Entity<DbSitePhoto>().ToTable("SitePhotos");
             modelBuilder.Entity<DbSitePrice>().ToTable("SitePrices");
+
+            modelBuilder.Entity<UserAccount>().ToTable("UserAccounts");
         }
 
     }
@@ -85,5 +74,9 @@ namespace asp_net_web_app.Data
         public DateTime EndDate { get; set; }
         public string Status { get; set; } = "Upcoming";
         public decimal TotalCost { get; set; }
+        public int Adults { get; set; } = 1;
+        public int Children { get; set; } = 0;
+        public int Pets { get; set; } = 0;
+        public string Notes { get; set; } = string.Empty;
     }
 }

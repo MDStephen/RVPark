@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using asp_net_web_app.Data;
 
@@ -10,9 +11,11 @@ using asp_net_web_app.Data;
 namespace asp_net_web_app.Migrations
 {
     [DbContext(typeof(DatabaseWrapper))]
-    partial class DatabaseWrapperModelSnapshot : ModelSnapshot
+    [Migration("20260726214835_AddUserAccounts")]
+    partial class AddUserAccounts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -127,9 +130,6 @@ namespace asp_net_web_app.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ReservationId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<decimal>("amount")
                         .HasColumnType("TEXT");
 
@@ -154,9 +154,6 @@ namespace asp_net_web_app.Migrations
                     b.Property<int>("pricingId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("baseMonthlyRateStorage")
-                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("baseNightlyRate")
                         .HasColumnType("TEXT");
@@ -188,6 +185,33 @@ namespace asp_net_web_app.Migrations
                     b.HasKey("pricingId");
 
                     b.ToTable("Pricing", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.Reservation", b =>
+                {
+                    b.Property<int>("reservationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("endDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("isEligible")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("startDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("totalCost")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("reservationId");
+
+                    b.ToTable("ReservationModels", (string)null);
                 });
 
             modelBuilder.Entity("asp_net_web_app.Data.Reservations", b =>
@@ -233,7 +257,7 @@ namespace asp_net_web_app.Migrations
                     b.ToTable("Reservations");
                 });
 
-/*            modelBuilder.Entity("asp_net_web_app.Data.Site", b =>
+            modelBuilder.Entity("asp_net_web_app.Data.Site", b =>
                 {
                     b.Property<int>("siteId")
                         .ValueGeneratedOnAdd()
@@ -265,7 +289,7 @@ namespace asp_net_web_app.Migrations
 
                     b.UseTphMappingStrategy();
                 });
-*/
+
             modelBuilder.Entity("asp_net_web_app.Data.UserAccount", b =>
                 {
                     b.Property<int>("Id")
@@ -329,6 +353,27 @@ namespace asp_net_web_app.Migrations
                     b.HasKey("userId");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.Lot", b =>
+                {
+                    b.HasBaseType("asp_net_web_app.Data.Site");
+
+                    b.Property<string>("utilities")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue("Lot");
+                });
+
+            modelBuilder.Entity("asp_net_web_app.Data.StorageContainer", b =>
+                {
+                    b.HasBaseType("asp_net_web_app.Data.Site");
+
+                    b.Property<double>("height")
+                        .HasColumnType("REAL");
+
+                    b.HasDiscriminator().HasValue("StorageContainer");
                 });
 
             modelBuilder.Entity("asp_net_web_app.Data.DbSitePhoto", b =>
