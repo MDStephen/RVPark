@@ -80,7 +80,22 @@
                         @foreach (var site in Model.Results)
                         {
                             <tr>
-                                <td class="fw-semibold">@site.SiteNumber</td>
+                                <td>
+                                    @if (site.PhotoUrls != null && site.PhotoUrls.Any())
+                                    {
+                                        <img src="@site.PhotoUrls.First()"
+                                            class="img-fluid rounded"
+                                            style="width: 140px; height: 90px; object-fit: cover;" />
+                                        <div class="">Site @site.SiteNumber</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex align-items-center justify-content-center bg-secondary rounded"
+                                            style="width: 140px; height: 90px;">
+                                            <span class="text-white-50">No image</span>
+                                        </div>
+                                    }
+                                </td>
                                 <td>@site.Category</td>
                                 @if (Model.CheckIn.HasValue && Model.CheckOut.HasValue)
                                 {

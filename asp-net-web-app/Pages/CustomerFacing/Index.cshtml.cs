@@ -16,13 +16,24 @@ public class IndexModel : PageModel
 
     public int TotalSites { get; set; }
     public int AvailableSitesToday { get; set; }
-    public Pricing? Pricing { get; set; }
     public List<DbSite> FeaturedSites { get; set; } = [];
+
+    public decimal nightlyRate =>
+        PricingStore.BaseRate;
+
+    public decimal nightlyRateDuringHighSeason =>
+        PricingStore.BaseRate *
+        PricingStore.SeasonMult;
+
+    public decimal nightlyRatePlusUtilities =>
+        PricingStore.BaseRate *
+        PricingStore.UtilMult;
+
+    public decimal nightlyRateLargeSite => 
+        PricingStore.BaseRate *
+        PricingStore.LargeSiteMult;
 
     public async Task OnGetAsync()
     {
-        Pricing = await _db.Pricing
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
     }
 }

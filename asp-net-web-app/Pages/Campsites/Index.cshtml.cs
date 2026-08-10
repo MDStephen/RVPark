@@ -70,8 +70,28 @@ public class IndexModel : PageModel
                 .OrderBy(s => s.SiteNumber)
                 .ToListAsync();
 
+            var photos = await _db.SitePhotos
+                .AsNoTracking()
+                .ToListAsync();
+
+            var photosBySite = photos
+                .GroupBy(p => p.DbSiteId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(p => p.PhotoUrl).ToList());
+
             Results = allSites.Select(s => new SiteSearchResult(
-                s.Id, s.SiteNumber, s.Category, 0, 0, s.IsAvailable)).ToList();
+                s.Id,
+                s.SiteNumber,
+                s.Category,
+                0,
+                0,
+                s.IsAvailable)
+            {
+                PhotoUrls = photosBySite.TryGetValue(s.Id, out var sitePhotos)
+                    ? sitePhotos
+                    : []
+            }).ToList();
         }
     }
 
