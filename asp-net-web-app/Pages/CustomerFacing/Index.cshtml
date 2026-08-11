@@ -97,12 +97,14 @@
         <div class="row g-4">
             <div class="col-md-4">
                 <h5>Nightly Rates</h5>
-                @if (Model.Pricing is not null)
+                @if (Model is not null)
                 {
                     <ul class="list-unstyled text-white">
-                        <li>Full Hookup RV Site @((Model.Pricing.baseNightlyRate * Model.Pricing.utilityMultiplier).ToString("C"))/night</li>
-                        <li>Tent / Overflow Site @Model.Pricing.baseNightlyRate.ToString("C")/night</li>
-                        <li>Dry Storage @Model.Pricing.baseMonthlyRateStorage.ToString("C")/month</li>
+                        <li>Nightly Rate @Model.nightlyRate.ToString("C")</li>
+                        <li>Nightly Rate w/ Utilities @Model.nightlyRatePlusUtilities.ToString("C")</li>
+                        <li>Nightly Rate for large sites @Model.nightlyRateLargeSite.ToString("C")</li>
+                        <li>Nightly Rate during high season @Model.nightlyRateDuringHighSeason.ToString("C")</li>
+
                     </ul>
                 }
             </div>

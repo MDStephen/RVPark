@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
+using QuestPDF.Helpers;
 
 namespace asp_net_web_app.Pages;
 
@@ -39,7 +40,7 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
     [BindProperty]
     public string ReportType { get; set; } = "PDF";
 
-    // --- IFilterableListPage ---
+    // IFilterableListPage
     public List<FilterModel.FilterDefinition> Filters { get; private set; } = [];
     public List<object> Rows { get; private set; } = []; // preview only (capped below)
     public string IdPropertyName => "Id";
@@ -49,10 +50,197 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
     // Rows above is capped to 25 for the preview table.
     public int FilteredCount { get; private set; }
 
-    // --- Monthly trends (screen-only - not part of the PDF/CSV/JSON export) ---
+    // trends (screen-only - not part of the PDF/CSV/JSON export)
     public List<MonthlyTrendPoint> Trends { get; private set; } = [];
     public string? TrendDateField { get; private set; }
     public string? TrendAmountField { get; private set; }
+
+    // Properties whose *name* matches this are treated as sensitive and are:
+    //   1. excluded from generated Filters (no "Search"/"Dropdown" filter is built for them)
+    //   2. excluded from the PDF's column list entirely (no header, no cells)
+    //   3. nulled out on every row object immediately after load, via RedactSensitiveProperties,
+    //      so any other reader of Rows (e.g. the page's preview table) never sees the raw value.
+    // Applied generically across all tables (not just Users) so any future password-like
+    // column is covered automatically. Matches "Password", "PasswordHash", "HashedPassword", etc.
+    private static bool IsExcludedProperty(string name) =>
+        name.Contains("password", StringComparison.OrdinalIgnoreCase);
+
+    // Nulls out sensitive property values in-place on the already-materialized row objects.
+    // These rows come from .ToList() in OnGet/OnPostGenerateReport, so this does not touch
+    // the database - nothing is persisted.
+    private static void RedactSensitiveProperties(List<object> rows)
+    {
+        if (rows.Count == 0) return;
+
+        var sensitiveProps = rows[0].GetType().GetProperties()
+            .Where(p => IsExcludedProperty(p.Name) && p.CanWrite)
+            .ToList();
+
+        if (sensitiveProps.Count == 0) return;
+
+        foreach (var row in rows)
+        {
+            foreach (var prop in sensitiveProps)
+            {
+                prop.SetValue(row, null);
+            }
+        }
+    }
+
+    private static string CreateTrendChartSvg(
+        List<MonthlyTrendPoint> trends,
+        string? amountField)
+    {
+        const int width = 760;
+        const int height = 220;
+
+        const int left = 60;
+        const int right = 30;
+        const int top = 25;
+        const int bottom = 55;
+
+        var chartWidth = width - left - right;
+        var chartHeight = height - top - bottom;
+
+        var maxCount = Math.Max(1, trends.Max(x => x.Count));
+
+        var maxAmount = amountField != null
+            ? Math.Max(1m, trends.Max(x => x.Total ?? 0m))
+            : 1m;
+
+        var points = new List<(double X, double Y)>();
+
+        for (var i = 0; i < trends.Count; i++)
+        {
+            var x = trends.Count == 1
+                ? left + chartWidth / 2.0
+                : left + i * (chartWidth / (double)(trends.Count - 1));
+
+            var y = top +
+                    chartHeight -
+                    (trends[i].Count / (double)maxCount * chartHeight);
+
+            points.Add((x, y));
+        }
+
+        var svg = new StringBuilder();
+
+        svg.Append($"""
+            <svg xmlns="http://www.w3.org/2000/svg"
+                width="{width}"
+                height="{height}"
+                viewBox="0 0 {width} {height}">
+
+                <rect width="100%" height="100%" fill="white"/>
+
+                <line x1="{left}" y1="{top}"
+                    x2="{left}" y2="{top + chartHeight}"
+                    stroke="#777" stroke-width="1"/>
+
+                <line x1="{left}" y1="{top + chartHeight}"
+                    x2="{left + chartWidth}" y2="{top + chartHeight}"
+                    stroke="#777" stroke-width="1"/>
+            """);
+
+        // Horizontal grid lines
+        for (var i = 0; i <= 4; i++)
+        {
+            var y = top + chartHeight - (i / 4.0 * chartHeight);
+            var value = maxCount * i / 4.0;
+
+            svg.Append($"""
+                <line x1="{left}" y1="{y:F1}"
+                    x2="{left + chartWidth}" y2="{y:F1}"
+                    stroke="#e5e5e5" stroke-width="1"/>
+
+                <text x="{left - 8}" y="{y + 4:F1}"
+                    text-anchor="end"
+                    font-size="11"
+                    fill="#555">{value:F0}</text>
+                """);
+        }
+
+        // Count bars
+        for (var i = 0; i < trends.Count; i++)
+        {
+            var x = points[i].X;
+
+            var barWidth = Math.Min(
+                40,
+                chartWidth / Math.Max(1, trends.Count) * 0.65);
+
+            var barHeight =
+                trends[i].Count / (double)maxCount * chartHeight;
+
+            var y = top + chartHeight - barHeight;
+
+            svg.Append($"""
+                <rect x="{x - barWidth / 2:F1}"
+                    y="{y:F1}"
+                    width="{barWidth:F1}"
+                    height="{barHeight:F1}"
+                    fill="#0d6efd"
+                    opacity="0.7"/>
+                """);
+        }
+
+        // Optional amount line
+        if (amountField != null && trends.Any(t => t.Total.HasValue))
+        {
+            var amountPoints = new List<string>();
+
+            for (var i = 0; i < trends.Count; i++)
+            {
+                var x = points[i].X;
+                var amount = (double)(trends[i].Total ?? 0m);
+
+                var y = top +
+                        chartHeight -
+                        (amount / (double)maxAmount * chartHeight);
+
+                amountPoints.Add($"{x:F1},{y:F1}");
+            }
+
+            svg.Append($"""
+                <polyline
+                    points="{string.Join(" ", amountPoints)}"
+                    fill="none"
+                    stroke="#198754"
+                    stroke-width="3"/>
+                """);
+
+            foreach (var point in amountPoints)
+            {
+                var parts = point.Split(',');
+                svg.Append($"""
+                    <circle cx="{parts[0]}"
+                            cy="{parts[1]}"
+                            r="4"
+                            fill="#198754"/>
+                    """);
+            }
+        }
+
+        // Month labels
+        for (var i = 0; i < trends.Count; i++)
+        {
+            var x = points[i].X;
+
+            svg.Append($"""
+                <text x="{x:F1}"
+                    y="{height - 18}"
+                    text-anchor="middle"
+                    font-size="10"
+                    fill="#555">
+                    {System.Security.SecurityElement.Escape(trends[i].Month)}
+                </text>
+                """);
+        }
+
+        svg.Append("</svg>");
+
+        return svg.ToString();
+    }
 
     public void OnGet()
     {
@@ -60,6 +248,7 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
             SelectedTable = "Reservations";
 
         var allRows = TableQueries[SelectedTable](_db).Take(MaxRows).ToList();
+        RedactSensitiveProperties(allRows);
         Filters = BuildFilters(allRows);
 
         var filtered = ApplyFilters(allRows, Filters);
@@ -81,22 +270,50 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
         if (!TableQueries.ContainsKey(SelectedTable))
             SelectedTable = "Reservations";
 
-        var allRows = TableQueries[SelectedTable](_db).Take(MaxRows).ToList();
+        var allRows = TableQueries[SelectedTable](_db)
+            .Take(MaxRows)
+            .ToList();
+        RedactSensitiveProperties(allRows);
+
         var filters = BuildFilters(allRows);
         var rows = ApplyFilters(allRows, filters);
 
+        var (dateField, amountField) = rows.Count > 0
+            ? FindTrendFields(rows[0].GetType())
+            : (null, null);
+
+        var trends = dateField != null
+            ? BuildTrends(rows, dateField, amountField)
+            : [];
+
         return ReportType switch
         {
-            "CSV" => File(Encoding.UTF8.GetBytes(ToCsv(rows)), "text/csv", $"{SelectedTable}.csv"),
+            "CSV" => File(
+                Encoding.UTF8.GetBytes(ToCsv(rows)),
+                "text/csv",
+                $"{SelectedTable}.csv"),
+
             "JSON" => File(
-                Encoding.UTF8.GetBytes(JsonSerializer.Serialize(rows, new JsonSerializerOptions { WriteIndented = true })),
+                Encoding.UTF8.GetBytes(
+                    JsonSerializer.Serialize(
+                        rows,
+                        new JsonSerializerOptions { WriteIndented = true })),
                 "application/json",
                 $"{SelectedTable}.json"),
-            _ => File(GeneratePdf(rows, SelectedTable), "application/pdf", $"{SelectedTable}.pdf")
+
+            _ => File(
+                GeneratePdf(
+                    rows,
+                    SelectedTable,
+                    trends,
+                    dateField,
+                    amountField),
+                "application/pdf",
+                $"{SelectedTable}.pdf")
         };
     }
 
-    // --- Filtering ---
+    // Filtering
     // Mirrors FilterableListPageModel<T>'s logic, but the table type is picked at runtime
     // (SelectedTable), so it can't be a compile-time generic T - we key off the row's actual type instead.
 
@@ -108,6 +325,8 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
 
         foreach (var prop in rows[0].GetType().GetProperties())
         {
+            if (IsExcludedProperty(prop.Name)) continue;
+
             if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?))
             {
                 filters.Add(new FilterModel.FilterDefinition("StartDate", prop.Name, rows));
@@ -210,49 +429,174 @@ public class AdminReportGeneratorModel : PageModel, IFilterableListPage
             .ToList();
     }
 
-    // --- Output formats (unchanged) ---
+    // --- Output formats ---
 
-    private static byte[] GeneratePdf(List<object> data, string title)
+    private static byte[] GeneratePdf(
+        List<object> data,
+        string title,
+        List<MonthlyTrendPoint> trends,
+        string? trendDateField,
+        string? trendAmountField)
     {
-        var props = data.FirstOrDefault()?.GetType().GetProperties();
+        var props = data.FirstOrDefault()?.GetType().GetProperties()
+            .Where(p => !IsExcludedProperty(p.Name))
+            .ToArray();
 
         return Document.Create(container =>
         {
             container.Page(page =>
             {
-                page.Margin(20);
-                page.Header().Text($"{title} Report").FontSize(20).Bold();
-                page.Content().Column(col =>
-                {
-                    if (props == null || data.Count == 0)
-                    {
-                        col.Item().Text("No data available for this report.").FontSize(12);
-                        return;
-                    }
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(30);
 
-                    col.Item().Table(table =>
+                page.Header()
+                    .Column(header =>
                     {
-                        table.ColumnsDefinition(columns =>
-                        {
-                            foreach (var _ in props)
-                                columns.RelativeColumn();
-                        });
-                        table.Header(header =>
-                        {
-                            foreach (var prop in props)
-                                header.Cell().Text(prop.Name).Bold();
-                        });
-                        foreach (var row in data)
-                        {
-                            foreach (var prop in props)
-                            {
-                                table.Cell().Text(prop.GetValue(row)?.ToString() ?? "");
-                            }
-                        }
+                        header.Item()
+                            .Text($"{title} Report")
+                            .FontSize(22)
+                            .Bold();
+
+                        header.Item()
+                            .Text($"Generated {DateTime.Now:g}")
+                            .FontSize(9)
+                            .FontColor(Colors.Grey.Medium);
                     });
-                });
+
+                page.Content()
+                    .Column(col =>
+                    {
+                        col.Spacing(15);
+
+                        if (props == null || data.Count == 0)
+                        {
+                            col.Item()
+                                .Text("No data available for this report.")
+                                .FontSize(12);
+
+                            return;
+                        }
+
+                        // Trend graph
+                        if (trends.Count > 0 && trendDateField != null)
+                        {
+                            col.Item()
+                                .Text($"{title} Trends")
+                                .FontSize(15)
+                                .Bold();
+
+                            col.Item()
+                                .Text(
+                                    $"{trendDateField} by month" +
+                                    (trendAmountField != null
+                                        ? $", count & {trendAmountField}"
+                                        : ", count"))
+                                .FontSize(9)
+                                .FontColor(Colors.Grey.Medium);
+
+                            col.Item()
+                                .Svg(CreateTrendChartSvg(
+                                    trends,
+                                    trendAmountField));
+                        }
+
+                        // Data table
+                        col.Item()
+                            .Text($"Data {title}")
+                            .FontSize(15)
+                            .Bold();
+
+                        col.Item()
+                            .Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    foreach (var prop in props)
+                                    {
+                                        columns.RelativeColumn();
+                                    }
+                                });
+
+                                table.Header(header =>
+                                {
+                                    foreach (var prop in props)
+                                    {
+                                        header.Cell()
+                                            .Element(HeaderCellStyle)
+                                            .Text(prop.Name);
+                                    }
+                                });
+
+                                for (var rowIndex = 0; rowIndex < data.Count; rowIndex++)
+                                {
+                                    var row = data[rowIndex];
+
+                                    foreach (var prop in props)
+                                    {
+                                        var value = prop.GetValue(row);
+
+                                        table.Cell()
+                                            .Element(container =>
+                                                BodyCellStyle(container, rowIndex))
+                                            .Text(FormatReportValue(value))
+                                            .FontSize(7);
+                                    }
+                                }
+                            });
+                    });
+
+                page.Footer()
+                    .AlignCenter()
+                    .Text(text =>
+                    {
+                        text.Span($"{title} Report  •  ");
+                        text.CurrentPageNumber();
+                        text.Span(" / ");
+                        text.TotalPages();
+                    });
             });
         }).GeneratePdf();
+
+        static IContainer HeaderCellStyle(IContainer container)
+        {
+            return container
+                .Background(Colors.Blue.Darken2)
+                .DefaultTextStyle(x =>
+                    x.FontColor(Colors.White)
+                    .Bold()
+                    .FontSize(9))
+                .PaddingVertical(7)
+                .PaddingHorizontal(5);
+        }
+
+        static IContainer BodyCellStyle(IContainer container, int rowIndex)
+        {
+            return container
+                .Background(
+                    rowIndex % 2 == 0
+                        ? Colors.Grey.Lighten5
+                        : Colors.White)
+                .DefaultTextStyle(x => x.FontSize(8))
+                .PaddingVertical(5)
+                .PaddingHorizontal(5)
+                .BorderBottom(0.5f)
+                .BorderColor(Colors.Grey.Lighten2);
+        }
+
+        static string FormatReportValue(object? value)
+        {
+            if (value == null)
+                return "";
+
+            return value switch
+            {
+                DateTime date => date.ToString("yyyy-MM-dd HH:mm"),
+                decimal money => money.ToString("C"),
+                double number => number.ToString("N2"),
+                float number => number.ToString("N2"),
+                _ => value.ToString() ?? ""
+            };
+        }
     }
 
     private static string ToCsv(List<object> data)

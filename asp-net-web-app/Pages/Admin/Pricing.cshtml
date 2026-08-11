@@ -6,29 +6,67 @@
 }
 
 <h2>Pricing</h2>
-<div class="card">
+<div class="card p-3">
     <form method="post">
+        <h4 class="mb-3 text-secondary">Base Rates</h4>
         <div class="mb-3">
-            <label class="form-label" asp-for="BaseRate">Base Nightly Rate</label>
+            <label class="form-label" asp-for="BaseNightlyRate">Base Nightly Rate</label>
             <div class="input-group">
                 <span class="input-group-text">$</span>
-                <input class="form-control" asp-for="BaseRate" asp-format="{0:F2}" type="number" step="0.01" />
+                <input class="form-control" asp-for="BaseNightlyRate" asp-format="{0:F2}" type="number" step="0.01" />
             </div>
         </div>
         <div class="mb-3">
-            <label class="form-label" asp-for="SeasonMult">Season Multiplier</label>
-            <input class="form-control" asp-for="SeasonMult" type="number" step="0.1" />
+            <label class="form-label" asp-for="BaseMonthlyRateStorage">Base Monthly Storage Rate</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" asp-for="BaseMonthlyRateStorage" asp-format="{0:F2}" type="number" step="0.01" />
+            </div>
+        </div>
+
+        <h4 class="mt-4 mb-3 text-secondary">Multipliers</h4>
+        <div class="mb-3">
+            <label class="form-label" asp-for="SeasonMultiplier">Season Multiplier</label>
+            <input class="form-control" asp-for="SeasonMultiplier" type="number" step="0.01" />
         </div>
         <div class="mb-3">
-            <label class="form-label" asp-for="LargeSiteMult">Large Site Multiplier</label>
-            <input class="form-control" asp-for="LargeSiteMult" type="number" step="0.1" />
+            <label class="form-label" asp-for="LargeSiteMultiplier">Large Site Multiplier</label>
+            <input class="form-control" asp-for="LargeSiteMultiplier" type="number" step="0.01" />
         </div>
         <div class="mb-3">
-            <label class="form-label" asp-for="UtilMult">Utility Multiplier</label>
-            <input class="form-control" asp-for="UtilMult" type="number" step="0.1" />
+            <label class="form-label" asp-for="UtilityMultiplier">Utility Multiplier</label>
+            <input class="form-control" asp-for="UtilityMultiplier" type="number" step="0.01" />
         </div>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <div class="mb-3">
+            <label class="form-label" asp-for="SpecialEventMultiplier">Special Event Multiplier</label>
+            <input class="form-control" asp-for="SpecialEventMultiplier" type="number" step="0.01" />
+        </div>
+
+        <h4 class="mt-4 mb-3 text-secondary">Fees</h4>
+        <div class="mb-3">
+            <label class="form-label" asp-for="CancellationFee">Cancellation Fee</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" asp-for="CancellationFee" asp-format="{0:F2}" type="number" step="0.01" />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" asp-for="EarlyCheckInFee">Early Check-In Fee</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" asp-for="EarlyCheckInFee" asp-format="{0:F2}" type="number" step="0.01" />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" asp-for="LateCheckOutFee">Late Check-Out Fee</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" asp-for="LateCheckOutFee" asp-format="{0:F2}" type="number" step="0.01" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Save</button>
     </form>
 
-    <p class="card-footnote">Updated @Model.UpdatedAt.ToString("MMM d, yyyy 'at' h:mm tt")</p>
+    <p class="card-footnote mt-3">Updated @Model.LastUpdated.ToString("MMM d, yyyy 'at' h:mm tt")</p>
 </div>

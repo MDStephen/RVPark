@@ -147,5 +147,7 @@ app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
 
+QuestPDF.Settings.EnableDebugging = true; // debugging, remove before pushing to server
+
 QuestPDF.Settings.License = LicenseType.Community;
 app.Run();

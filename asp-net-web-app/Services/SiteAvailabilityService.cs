@@ -17,7 +17,10 @@ public record SiteSearchResult(
     string Category,
     decimal EstimatedTotal,
     int Nights,
-    bool FullyAvailable);
+    bool FullyAvailable)
+{
+    public List<string> PhotoUrls { get; init; } = [];
+}
 
 public class SiteAvailabilityService
 {
@@ -45,6 +48,17 @@ public class SiteAvailabilityService
         AvailabilityFilter filter = AvailabilityFilter.EntireRange)
     {
         var sites = await _db.Sites.AsNoTracking().ToListAsync();
+
+        var photos = await _db.SitePhotos
+            .AsNoTracking()
+            .ToListAsync();
+
+        var photosBySite = photos
+            .GroupBy(p => p.DbSiteId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(p => p.PhotoUrl).ToList());
+
         if (!string.IsNullOrWhiteSpace(category))
         {
             sites = sites.Where(s =>
@@ -54,7 +68,17 @@ public class SiteAvailabilityService
         if (!checkIn.HasValue || !checkOut.HasValue || checkOut <= checkIn)
         {
             return sites.Select(s => new SiteSearchResult(
-                s.Id, s.SiteNumber, s.Category, 0, 0, s.IsAvailable)).ToList();
+                s.Id,
+                s.SiteNumber,
+                s.Category,
+                0,
+                0,
+                s.IsAvailable)
+            {
+                PhotoUrls = photosBySite.TryGetValue(s.Id, out var sitePhotos)
+                    ? sitePhotos
+                    : []
+            }).ToList();
         }
 
         var activeReservations = await _db.Reservations
@@ -86,7 +110,17 @@ public class SiteAvailabilityService
 
             var total = await CalculateTotalCostAsync(site.Id, checkIn.Value, checkOut.Value);
             results.Add(new SiteSearchResult(
-                site.Id, site.SiteNumber, site.Category, total, nights, fullyAvailable));
+                site.Id,
+                site.SiteNumber,
+                site.Category,
+                total,
+                nights,
+                fullyAvailable)
+            {
+                PhotoUrls = photosBySite.TryGetValue(site.Id, out var sitePhotos)
+                    ? sitePhotos
+                    : []
+            });
         }
 
         return results.OrderBy(r => r.SiteNumber).ToList();

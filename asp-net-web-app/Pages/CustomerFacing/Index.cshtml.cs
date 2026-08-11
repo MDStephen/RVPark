@@ -16,13 +16,26 @@ public class IndexModel : PageModel
 
     public int TotalSites { get; set; }
     public int AvailableSitesToday { get; set; }
-    public Pricing? Pricing { get; set; }
     public List<DbSite> FeaturedSites { get; set; } = [];
+
+    // Loaded once in OnGetAsync (Pricing is a single-row table) - the rate
+    // properties below all derive from this instead of the old PricingStore.
+    private Pricing? _pricing;
+
+    public decimal nightlyRate =>
+        _pricing?.baseNightlyRate ?? 0m;
+
+    public decimal nightlyRateDuringHighSeason =>
+        (_pricing?.baseNightlyRate ?? 0m) * (_pricing?.seasonMultiplier ?? 1m);
+
+    public decimal nightlyRatePlusUtilities =>
+        (_pricing?.baseNightlyRate ?? 0m) * (_pricing?.utilityMultiplier ?? 1m);
+
+    public decimal nightlyRateLargeSite =>
+        (_pricing?.baseNightlyRate ?? 0m) * (_pricing?.largeSiteMultiplier ?? 1m);
 
     public async Task OnGetAsync()
     {
-        Pricing = await _db.Pricing
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
+        _pricing = await _db.Pricing.FirstOrDefaultAsync();
     }
 }
