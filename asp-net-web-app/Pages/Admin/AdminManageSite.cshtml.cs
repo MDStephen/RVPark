@@ -100,13 +100,66 @@ namespace asp_net_web_app.Pages
             return RedirectToPage();
         }
 
-        public IActionResult OnPostAddPhoto(int siteId, string url)
+        [BindProperty]
+        public IFormFile PhotoFile { get; set; } = null!;
+
+        public IActionResult OnPostAddPhoto(int siteId)
         {
-            DbSitePhoto newPhoto = new DbSitePhoto { DbSiteId = siteId, PhotoUrl = url };
-            _context.SitePhotos.Add(newPhoto);
-            _context.SaveChanges();
+            if (PhotoFile != null && PhotoFile.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(PhotoFile.FileName);
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    PhotoFile.CopyTo(fileStream);
+                }
+
+                string relativeWebPath = "/uploads/" + uniqueFileName;
+
+                DbSitePhoto newPhoto = new DbSitePhoto { DbSiteId = siteId, PhotoUrl = relativeWebPath };
+                _context.SitePhotos.Add(newPhoto);
+                _context.SaveChanges();
+            }
+
             return RedirectToPage(new { handler = "ManagePhotos", id = siteId });
         }
+
+
+        public IActionResult OnPostDeletePhoto(int photoId, int siteId)
+        {
+            var photo = _context.SitePhotos.Find(photoId);
+    
+            if (photo != null)
+            {
+                string relativePath = photo.PhotoUrl.TrimStart('/');
+                string physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath);
+
+                try
+                {
+                    if (System.IO.File.Exists(physicalPath))
+                    {
+                        System.IO.File.Delete(physicalPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    
+                }
+                _context.SitePhotos.Remove(photo);
+                _context.SaveChanges();
+            }   
+
+            return RedirectToPage(new { handler = "ManagePhotos", id = siteId });
+        }
+
 
         public IActionResult OnPostAddPrice(int siteId, decimal cost, DateTime start, DateTime end)
         {
