@@ -74,7 +74,15 @@ public class UserLoginPageModel : PageModel
             //     return Page();
             // }
 
-            await SignInAsync(account.Username, "Customer", account.UserId);
+            // Pull their profile row so we can put a first name in the cookie
+            // (used by the nav bar's "Welcome, ___" indicator).
+            // Note: filtering with .OfType<Customer>() here doesn't translate against
+            // this TPH set - EF throws InvalidOperationException. Filtering on the base
+            // Users set does translate, so match on userId there and cast after.
+            var customer = await _db.Users
+                .FirstOrDefaultAsync(u => u.userId == account.UserId) as Customer;
+
+            await SignInAsync(account.Username, "Customer", account.UserId, customer?.firstName);
             return RedirectToPage("/CustomerFacing/Index");
         }
 
@@ -83,8 +91,9 @@ public class UserLoginPageModel : PageModel
         return Page();
     }
 
-    // Builds the login cookie: who they are (Name) and their role.
-    private async Task SignInAsync(string username, string role, int? userId = null)
+    // Builds the login cookie: who they are (Name), their role, and (for customers)
+    // their first name for display purposes.
+    private async Task SignInAsync(string username, string role, int? userId = null, string? firstName = null)
     {
         var claims = new List<Claim>
         {
@@ -97,6 +106,13 @@ public class UserLoginPageModel : PageModel
         if (userId.HasValue)
         {
             claims.Add(new Claim("UserId", userId.Value.ToString()));
+        }
+
+        // Drives "Welcome, John" in the nav bar. Falls back to Username in the
+        // layout if this isn't present (e.g. staff logins don't set it).
+        if (!string.IsNullOrWhiteSpace(firstName))
+        {
+            claims.Add(new Claim(ClaimTypes.GivenName, firstName));
         }
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

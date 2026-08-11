@@ -34,8 +34,8 @@
     {
         <hr class="my-4" />
         <h5 class="mb-3">
-            Monthly Trends
-            <span class="fw-normal">
+            @Model.SelectedTable Trends
+            <span class="fw-normal text-muted">
                 (@Model.TrendDateField by month@(Model.TrendAmountField != null ? $", count & {Model.TrendAmountField}" : ", count"))
             </span>
         </h5>
@@ -73,11 +73,38 @@
                     ]
                 },
                 options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '@Model.SelectedTable Trends'
+                        }
+                    },
                     scales: {
-                        y: { type: 'linear', position: 'left', beginAtZero: true, title: { display: true, text: 'Count' } }
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Count'
+                            }
+                        }
                         @if (Model.TrendAmountField != null)
                         {
-                            <text>,y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { display: true, text: '@Model.TrendAmountField' } }</text>
+                            <text>
+                            ,y1: {
+                                type: 'linear',
+                                position: 'right',
+                                beginAtZero: true,
+                                grid: {
+                                    drawOnChartArea: false
+                                },
+                                title: {
+                                    display: true,
+                                    text: '@Model.TrendAmountField'
+                                }
+                            }
+                            </text>
                         }
                     }
                 }

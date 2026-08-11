@@ -24,8 +24,35 @@
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/CustomerFacing/Index">Home</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Campsites/Index">Browse Sites</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/CustomerFacing/UserManageReservation">My Reservations</a></li>
-                            <a class="btn btn-primary text-white fw-semibold ms-lg-2" asp-area="" asp-page="/CustomerFacing/UserLoginPage">Log In</a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            // Prefer their first name; if it's not on the cookie (e.g. staff),
+                            // fall back to the username with anything from "@" onward stripped,
+                            // so an email-as-username still reads like a name ("john.smith", not
+                            // "john.smith@example.com").
+                            var displayName = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value;
+                            if (string.IsNullOrEmpty(displayName))
+                            {
+                                var rawName = User.Identity.Name ?? "";
+                                var atIndex = rawName.IndexOf('@');
+                                displayName = atIndex > 0 ? rawName.Substring(0, atIndex) : rawName;
+                            }
+
+                            <li class="nav-item d-flex align-items-center gap-2 ms-lg-2">
+                                <span class="navbar-text text-white fw-semibold">
+                                    Welcome, @displayName
+                                </span>
+                                <form method="post" asp-page="/CustomerFacing/Logout">
+                                    <button type="submit" class="btn btn-outline-light btn-sm rounded-pill">Log Out</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-primary text-white fw-semibold ms-lg-2" asp-area="" asp-page="/CustomerFacing/UserLoginPage">Log In</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
