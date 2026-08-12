@@ -185,6 +185,14 @@
 
                                     <td class="text-end pe-4 text-nowrap">
 
+                                        <button
+                                            type="button"
+                                            onclick="showReservationDetails(@r.Id)"
+                                            class="btn btn-sm btn-outline-secondary me-1">
+
+                                            View
+                                        </button>
+
                                         <a
                                             asp-page-handler="CreateReservation"
                                             asp-route-id="@r.Id"
@@ -281,6 +289,148 @@
 
             <div class="card-body p-3 p-md-4">
 
+                @if (Model.SelectedCustomer == null)
+                {
+                    <!-- Step 1: Find or Create Customer -->
+                    <h2 class="small text-secondary text-uppercase fw-semibold mb-3">
+                        Step 1 &ndash; Find or Create Customer
+                    </h2>
+
+                    <form method="get" class="mb-3">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-12 col-md">
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">
+                                    Search Customers
+                                </label>
+
+                                <input
+                                    name="custQ"
+                                    value="@Model.CustomerQuery"
+                                    class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                    placeholder="Name, email, or phone" />
+                            </div>
+
+                            <div class="col-12 col-md-auto">
+                                <button type="submit" class="btn btn-primary w-100">Search</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.CustomerQuery))
+                    {
+                        @if (Model.CustomerMatches.Any())
+                        {
+                            <div class="list-group mb-4">
+                                @foreach (var c in Model.CustomerMatches)
+                                {
+                                    <div class="list-group-item bg-dark text-light border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <div class="fw-semibold text-light">@c.FullName</div>
+                                            <div class="small text-secondary">@c.Email &middot; @c.Phone</div>
+                                        </div>
+
+                                        <a
+                                            asp-page-handler="CreateReservation"
+                                            asp-route-id="@(Model.CurrentAction == "Edit" ? (int?)Model.ActiveId : null)"
+                                            asp-route-custId="@c.Id"
+                                            class="btn btn-sm btn-outline-primary">
+
+                                            Select
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-secondary small mb-4">No matching customers found for "@Model.CustomerQuery".</p>
+                        }
+                    }
+
+                    @if (Model.CustomerErrors.Any())
+                    {
+                        <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 text-danger mb-4">
+                            @foreach (var err in Model.CustomerErrors)
+                            {
+                                <p class="mb-1">@err</p>
+                            }
+
+                            @if (Model.DuplicateEmailCustomer != null)
+                            {
+                                <a
+                                    asp-page-handler="CreateReservation"
+                                    asp-route-id="@(Model.CurrentAction == "Edit" ? (int?)Model.ActiveId : null)"
+                                    asp-route-custId="@Model.DuplicateEmailCustomer.Id"
+                                    class="btn btn-sm btn-outline-light mt-2">
+
+                                    Use existing customer: @Model.DuplicateEmailCustomer.FullName
+                                </a>
+                            }
+                        </div>
+                    }
+
+                    <h2 class="small text-secondary text-uppercase fw-semibold mb-3">Or Create New Customer</h2>
+
+                    <form method="post" asp-page-handler="CreateCustomer">
+                        <input type="hidden" name="reservationId" value="@Model.ActiveId" />
+                        <input type="hidden" name="custQ" value="@Model.CustomerQuery" />
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">First Name</label>
+                                <input type="text" name="firstName" value="@Model.NewCustomerFirstName" class="form-control bg-dark text-light border-secondary border-opacity-25" required />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">Last Name</label>
+                                <input type="text" name="lastName" value="@Model.NewCustomerLastName" class="form-control bg-dark text-light border-secondary border-opacity-25" required />
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">Email Address</label>
+                                <input type="email" name="email" value="@Model.NewCustomerEmail" class="form-control bg-dark text-light border-secondary border-opacity-25" required />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">Phone Number</label>
+                                <input type="tel" name="phone" value="@Model.NewCustomerPhone" placeholder="(555) 123-4567" class="form-control bg-dark text-light border-secondary border-opacity-25" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary text-uppercase fw-semibold">Address</label>
+                            <input type="text" name="address" value="@Model.NewCustomerAddress" class="form-control bg-dark text-light border-secondary border-opacity-25" />
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 border-top border-secondary border-opacity-25 pt-3 mt-4">
+                            <button type="submit" class="btn btn-success">Create Customer</button>
+                            <a asp-page="" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <!-- Selected customer summary -->
+                    <div class="mb-4">
+                        <label class="form-label small text-secondary text-uppercase fw-semibold">Customer</label>
+
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 bg-black bg-opacity-25 border border-secondary border-opacity-25 rounded p-3">
+                            <div>
+                                <div class="fw-semibold text-light">@Model.SelectedCustomer.FullName</div>
+                                <div class="small text-secondary">@Model.SelectedCustomer.Email &middot; @Model.SelectedCustomer.Phone</div>
+                            </div>
+
+                            <a
+                                asp-page-handler="CreateReservation"
+                                asp-route-id="@(Model.CurrentAction == "Edit" ? (int?)Model.ActiveId : null)"
+                                asp-route-changeCustomer="true"
+                                class="btn btn-sm btn-outline-secondary">
+
+                                Change Customer
+                            </a>
+                        </div>
+                    </div>
+
                 <form
                     method="post"
                     asp-page-handler="@(Model.CurrentAction == "Edit"
@@ -292,31 +442,10 @@
                         name="reservationId"
                         value="@Model.ActiveId" />
 
-                    <!-- Customer -->
-                    <div class="mb-3">
-
-                        <label class="form-label small text-secondary text-uppercase fw-semibold">
-                            Customer
-                        </label>
-
-                        <select
-                            name="userId"
-                            class="form-select bg-dark text-light border-secondary border-opacity-25">
-
-                            @foreach (var u in Model.AllUsers)
-                            {
-                                <option
-                                    value="@u.userId"
-                                    selected="@(u.userId == Model.ActiveUserId)">
-
-                                    @u.firstName @u.lastName (#@u.userId)
-
-                                </option>
-                            }
-
-                        </select>
-
-                    </div>
+                    <input
+                        type="hidden"
+                        name="userId"
+                        value="@Model.SelectedCustomer.Id" />
 
                     <!-- Site -->
                     <div class="mb-3">
@@ -443,6 +572,7 @@
                     </div>
 
                 </form>
+                }
 
             </div>
 
@@ -450,3 +580,238 @@
     }
 
 </div>
+
+<div class="modal fade" id="reservationDetailsModal" tabindex="-1" aria-labelledby="reservationDetailsTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark border-secondary border-opacity-25 text-light">
+            <div class="modal-header border-secondary border-opacity-25">
+                <h5 class="modal-title" id="reservationDetailsTitle">Reservation Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div id="reservationDetailsLoading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <div id="reservationDetailsError" class="text-danger py-3" style="display:none;"></div>
+
+                <div id="reservationDetailsContent" style="display:none;">
+
+                    <h2 class="small text-secondary text-uppercase fw-semibold mb-3">Customer</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-4">
+                            <div class="small text-secondary text-uppercase">Name</div>
+                            <div class="fw-semibold text-light" id="rdCustomerName"></div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="small text-secondary text-uppercase">Email</div>
+                            <div class="fw-semibold text-light" id="rdCustomerEmail"></div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="small text-secondary text-uppercase">Phone</div>
+                            <div class="fw-semibold text-light" id="rdCustomerPhone"></div>
+                        </div>
+                    </div>
+
+                    <h2 class="small text-secondary text-uppercase fw-semibold mb-3">Stay</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-4">
+                            <div class="small text-secondary text-uppercase">Site</div>
+                            <div class="fw-semibold text-light" id="rdSiteNumber"></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-secondary text-uppercase">Site Type</div>
+                            <div class="fw-semibold text-light" id="rdSiteType"></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-secondary text-uppercase">Status</div>
+                            <div class="fw-semibold text-light" id="rdStatus"></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-secondary text-uppercase">Check-in</div>
+                            <div class="fw-semibold text-light" id="rdCheckIn"></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-secondary text-uppercase">Check-out</div>
+                            <div class="fw-semibold text-light" id="rdCheckOut"></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-secondary text-uppercase">Nights</div>
+                            <div class="fw-semibold text-light" id="rdNights"></div>
+                        </div>
+                    </div>
+
+                    <h2 class="small text-secondary text-uppercase fw-semibold mb-3">Rate Breakdown</h2>
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-4">
+                            <div class="small text-secondary text-uppercase">Rate / Night</div>
+                            <div class="fw-semibold text-light" id="rdRatePerNight"></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-secondary text-uppercase">Nights</div>
+                            <div class="fw-semibold text-light" id="rdRateNights"></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="small text-secondary text-uppercase">Total Cost</div>
+                            <div class="fw-semibold text-light" id="rdTotalCost"></div>
+                        </div>
+                    </div>
+
+                    <h2 class="small text-secondary text-uppercase fw-semibold mb-3">Payments</h2>
+
+                    <div class="table-responsive mb-2">
+                        <table class="table table-dark table-hover align-middle mb-0" id="rdPaymentsTable">
+                            <thead>
+                                <tr class="text-secondary small text-uppercase">
+                                    <th class="py-2">Date</th>
+                                    <th class="py-2">Amount</th>
+                                    <th class="py-2">Status</th>
+                                    <th class="py-2">Reference</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rdPaymentsBody"></tbody>
+                        </table>
+                    </div>
+                    <p id="rdNoPayments" class="text-secondary small" style="display:none;">No payments recorded.</p>
+
+                    <div class="row g-3 mt-2 border-top border-secondary border-opacity-25 pt-3">
+                        <div class="col-6">
+                            <div class="small text-secondary text-uppercase">Amount Paid</div>
+                            <div class="fw-semibold text-light" id="rdAmountPaid"></div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-secondary text-uppercase">Balance Owed</div>
+                            <div class="fw-semibold text-light" id="rdBalanceOwed"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer border-secondary border-opacity-25">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let reservationDetailsModalInstance = null;
+
+        function getReservationDetailsModal() {
+            if (!reservationDetailsModalInstance) {
+                reservationDetailsModalInstance = new bootstrap.Modal(document.getElementById('reservationDetailsModal'));
+            }
+            return reservationDetailsModalInstance;
+        }
+
+        function formatCurrency(value) {
+            const num = Number(value) || 0;
+            return '$' + num.toFixed(2);
+        }
+
+        function formatDate(value) {
+            const d = new Date(value);
+            if (isNaN(d.getTime())) return '';
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function setText(id, text) {
+            document.getElementById(id).textContent = text;
+        }
+
+        async function showReservationDetails(id) {
+            const loadingEl = document.getElementById('reservationDetailsLoading');
+            const errorEl = document.getElementById('reservationDetailsError');
+            const contentEl = document.getElementById('reservationDetailsContent');
+            const titleEl = document.getElementById('reservationDetailsTitle');
+
+            titleEl.textContent = 'Reservation #' + id;
+            loadingEl.style.display = '';
+            errorEl.style.display = 'none';
+            contentEl.style.display = 'none';
+            errorEl.textContent = '';
+
+            getReservationDetailsModal().show();
+
+            try {
+                const response = await fetch('?handler=Details&id=' + encodeURIComponent(id), {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed with status ' + response.status);
+                }
+
+                const data = await response.json();
+                populateReservationDetails(data);
+
+                loadingEl.style.display = 'none';
+                contentEl.style.display = '';
+            } catch (err) {
+                loadingEl.style.display = 'none';
+                errorEl.textContent = 'Unable to load reservation details. Please try again.';
+                errorEl.style.display = '';
+            }
+        }
+
+        function populateReservationDetails(d) {
+            document.getElementById('reservationDetailsTitle').textContent = 'Reservation #' + d.id + ' – ' + d.customerName;
+
+            setText('rdCustomerName', d.customerFound ? d.customerName : 'Unknown');
+            setText('rdCustomerEmail', d.customerFound && d.customerEmail ? d.customerEmail : '—');
+            setText('rdCustomerPhone', d.customerFound && d.customerPhone ? d.customerPhone : '—');
+
+            setText('rdSiteNumber', d.siteNumber);
+            setText('rdSiteType', d.siteType || '—');
+            setText('rdStatus', d.status);
+            setText('rdCheckIn', formatDate(d.startDate));
+            setText('rdCheckOut', formatDate(d.endDate));
+            setText('rdNights', d.nights);
+
+            setText('rdRatePerNight', formatCurrency(d.ratePerNight));
+            setText('rdRateNights', d.nights);
+            setText('rdTotalCost', formatCurrency(d.totalCost));
+
+            const paymentsBody = document.getElementById('rdPaymentsBody');
+            const paymentsTable = document.getElementById('rdPaymentsTable');
+            const noPayments = document.getElementById('rdNoPayments');
+            paymentsBody.innerHTML = '';
+
+            if (d.payments && d.payments.length > 0) {
+                paymentsTable.style.display = '';
+                noPayments.style.display = 'none';
+                d.payments.forEach(p => {
+                    const row = document.createElement('tr');
+
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = formatDate(p.paidAt);
+                    row.appendChild(dateCell);
+
+                    const amountCell = document.createElement('td');
+                    amountCell.textContent = formatCurrency(p.amount);
+                    row.appendChild(amountCell);
+
+                    const statusCell = document.createElement('td');
+                    statusCell.textContent = p.status;
+                    row.appendChild(statusCell);
+
+                    const refCell = document.createElement('td');
+                    refCell.textContent = p.reference || '—';
+                    row.appendChild(refCell);
+
+                    paymentsBody.appendChild(row);
+                });
+            } else {
+                paymentsTable.style.display = 'none';
+                noPayments.style.display = '';
+            }
+
+            setText('rdAmountPaid', formatCurrency(d.amountPaid));
+            setText('rdBalanceOwed', formatCurrency(d.balanceOwed));
+        }
+    </script>
+}

@@ -19,6 +19,7 @@
     .btn-grid-action { background: #262626; color: #d4d4d4; border: 1px solid #404040; padding: 0.4rem 0.75rem; border-radius: 0.375rem; text-decoration: none; font-size: 0.75rem; cursor: pointer; }
     .btn-grid-action:hover { background: #404040; color: white; }
     .badge-status { padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; background-color: #262626; color: #d4d4d4; }
+    .validation-summary-errors ul { margin: 0; padding-left: 1.25rem; color: #f87171; }
 </style>
 
 <div class="container">
@@ -27,56 +28,82 @@
         Employee Payment Entry
     </h1>
 
+    @if (ModelState.ContainsKey("") && ModelState[""]!.Errors.Count > 0)
+    {
+        <div class="data-card" style="border-color:#ef4444; max-width:500px;">
+            <div asp-validation-summary="ModelOnly"></div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="data-card" style="border-color:#34d399; max-width:500px;">
+            <p style="color:#34d399; margin:0;">@Model.Message</p>
+        </div>
+    }
+
     <div class="data-card" style="max-width:500px;">
         <form method="post">
             <div class="form-group">
                 <label class="form-label">Reservation ID</label>
-                <input type="number" name="ReservationId" class="form-input-field" required />
+                <input type="number" name="ReservationId" class="form-input-field" value="@(Model.ReservationId == 0 ? "" : Model.ReservationId.ToString())" required />
             </div>
             <!-- Payment Type -->
             <div class="form-group">
                 <label class="form-label">Payment Method</label>
                 <select name="paymentType" id="paymentType" class="form-input-field" onchange="updateFields()">
                     <option value="">Select Method</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Check">Check</option>
-                    <option value="ManualCard">Manual Credit Card Entry</option>
+                    <option value="Cash" selected="@(Model.PaymentType == "Cash")">Cash</option>
+                    <option value="Check" selected="@(Model.PaymentType == "Check")">Check</option>
+                    <option value="ManualCard" selected="@(Model.PaymentType == "ManualCard")">Manual Credit Card Entry</option>
                 </select>
+            </div>
+
+            <!-- Amount (applies to every payment method) -->
+            <div class="form-group">
+                <label class="form-label">Payment Amount ($)</label>
+                <input type="number" step="0.01" name="amount" id="amount" class="form-input-field" value="@(Model.Amount == 0 ? "" : Model.Amount.ToString("F2"))" oninput="calculateChange()" required />
             </div>
 
             <!-- Check Number -->
             <div class="form-group" id="checkNumberGroup" style="display:none;">
                 <label class="form-label">Check Number</label>
-                <input type="text" name="checkNumber" class="form-input-field" />
+                <input type="text" name="checkNumber" class="form-input-field" value="@Model.CheckNumber" />
             </div>
 
-            <!-- Cash Amount -->
+            <!-- Cash tender / change -->
             <div id="cashFields" style="display:none;">
                 <div class="form-group">
-                    <label class="form-label">Amount Due ($)</label>
-                    <input type="number" step="0.01" name="amountDue" id="amountDue" class="form-input-field" />
-                </div>
-
-                <div class="form-group">
                     <label class="form-label">Amount Received ($)</label>
-                    <input type="number" step="0.01" name="amountReceived" id="amountReceived" class="form-input-field" oninput="calculateChange()" />
+                    <input type="number" step="0.01" name="amountReceived" id="amountReceived" class="form-input-field" value="@((Model.AmountReceived ?? 0) == 0 ? "" : (Model.AmountReceived ?? 0).ToString("F2"))" oninput="calculateChange()" />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Change Owed ($)</label>
-                    <input type="number" step="0.01" name="changeOwed" id="changeOwed" class="form-input-field" readonly />
+                    <input type="number" step="0.01" name="changeOwed" id="changeOwed" class="form-input-field" value="@Model.ChangeOwed.ToString("F2")" readonly />
                 </div>
             </div>
 
             <!-- Manual Credit Card -->
-            <div class="form-group" id="manualCardRedirect" style="display:none;">
-                <p style="color:#a3a3a3; margin-bottom:0.5rem;">
-                    Manual credit card entry requires secure processing.
+            <div id="manualCardFields" style="display:none;">
+                <p style="color:#a3a3a3; margin-bottom:0.75rem; font-size:0.8rem;">
+                    Only the last 4 digits and a reference/auth number are recorded &mdash; never the full card number or CVV.
                 </p>
-                <a asp-page="/Employee/ManualCardEntry" class="btn-primary">Go to Manual Card Entry</a>
+                <div class="form-group">
+                    <label class="form-label">Card Last 4 Digits</label>
+                    <input type="text" name="cardLast4" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" class="form-input-field" value="@Model.CardLast4" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reference / Auth Number</label>
+                    <input type="text" name="cardAuthReference" class="form-input-field" value="@Model.CardAuthReference" />
+                </div>
             </div>
 
+<<<<<<< HEAD
             <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Submit Payment</button>
+=======
+            <button type="submit" class="btn-custom-primary" style="margin-top:1rem;">Submit Payment</button>
+>>>>>>> main
         </form>
     </div>
 </div>
@@ -87,14 +114,19 @@
 
         document.getElementById("checkNumberGroup").style.display = (type === "Check") ? "block" : "none";
         document.getElementById("cashFields").style.display = (type === "Cash") ? "block" : "none";
-        document.getElementById("manualCardRedirect").style.display = (type === "ManualCard") ? "block" : "none";
+        document.getElementById("manualCardFields").style.display = (type === "ManualCard") ? "block" : "none";
     }
 
     function calculateChange() {
-        const due = parseFloat(document.getElementById("amountDue").value) || 0;
+        const amount = parseFloat(document.getElementById("amount").value) || 0;
         const received = parseFloat(document.getElementById("amountReceived").value) || 0;
-        const change = received - due;
+        const change = received - amount;
 
         document.getElementById("changeOwed").value = change.toFixed(2);
     }
+<<<<<<< HEAD
+=======
+
+    updateFields();
+>>>>>>> main
 </script>
