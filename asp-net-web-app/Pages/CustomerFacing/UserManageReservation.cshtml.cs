@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using asp_net_web_app.Data;
 
@@ -26,6 +27,7 @@ namespace asp_net_web_app.Pages
 
         public List<ReservationDisplay> UserReservations { get; set; } = new();
         public string SearchTerm { get; set; } = "";
+        public string StatusMessage { get; set; } = "";
 
         private int GetCurrentUserId()
         {
@@ -37,10 +39,33 @@ namespace asp_net_web_app.Pages
             return 0;
         }
 
-        public void OnGet(string? search)
+        public void OnGet(string? search, string? status)
         {
             SearchTerm = search ?? "";
+            StatusMessage = status ?? "";
             LoadUserReservations(SearchTerm);
+        }
+
+        public IActionResult OnPostCancel(int id, string? search)
+        {
+            int currentUserId = GetCurrentUserId();
+            var reservation = _db.Reservations.Find(id);
+
+            // Ownership check: a user may only cancel their own reservation.
+            if (reservation == null || reservation.UserId != currentUserId)
+            {
+                return RedirectToPage(new { search, status = "Could not cancel: reservation not found." });
+            }
+
+            if (reservation.Status == "Cancelled" || reservation.Status == "Completed")
+            {
+                return RedirectToPage(new { search, status = $"Reservation #{id} can no longer be cancelled." });
+            }
+
+            reservation.Status = "Cancelled";
+            _db.SaveChanges();
+
+            return RedirectToPage(new { search, status = $"Reservation #{id} has been cancelled." });
         }
 
         private void LoadUserReservations(string search)
