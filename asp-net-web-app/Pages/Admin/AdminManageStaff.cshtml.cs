@@ -16,14 +16,23 @@ public class AdminManageStaffModel : PageModel
     public Employee? Selected { get; set; }
     public string StatusMessage { get; set; } = "";
 
+    // True when Selected is a blank, not-yet-saved employee (id=0 sentinel)
+    public bool IsNew { get; set; }
+
     // ---------- GET: load the page ----------
     // /AdminManageStaff        -> list, nothing selected
     // /AdminManageStaff?id=3   -> employee 3 selected for editing
+    // /AdminManageStaff?id=0   -> blank, editable "create new" form
     public void OnGet(int? id, string? status)
     {
         Employees = _logic.GetAllEmployees();
 
-        if (id != null)
+        if (id == 0)
+        {
+            Selected = new Employee { role = "Employee" };
+            IsNew = true;
+        }
+        else if (id != null)
         {
             Selected = _logic.GetEmployee(id.Value);
         }
@@ -37,12 +46,23 @@ public class AdminManageStaffModel : PageModel
     }
 
     // ---------- POST: Save Changes button ----------
-    public IActionResult OnPostSave(int id, string firstName, string lastName, DateTime dateOfBirth, string role)
+    public IActionResult OnPostSave(int id, string firstName, string lastName, DateTime dateOfBirth, string role, string? username, string? password)
     {
-        var result = _logic.UpdateEmployee(id, firstName, lastName, dateOfBirth, role);
+        string result;
+        int redirectId = id;
+
+        if (id == 0)
+        {
+            result = _logic.CreateEmployeeWithCredentials(firstName, lastName, dateOfBirth, role, username, password, out int newId);
+            redirectId = newId;
+        }
+        else
+        {
+            result = _logic.UpdateEmployee(id, firstName, lastName, dateOfBirth, role);
+        }
 
         var message = result == "success" ? "Changes saved." : "Could not save: " + result;
-        return RedirectToPage(new { id, status = message });
+        return RedirectToPage(new { id = redirectId, status = message });
     }
 
     // ---------- POST: Lock User button ----------
@@ -62,6 +82,12 @@ public class AdminManageStaffModel : PageModel
     // ---------- POST: Delete User button ----------
     public IActionResult OnPostDelete(int id)
     {
+        if (id == 0)
+        {
+            // Nothing was ever saved - just discard the blank "create" form.
+            return RedirectToPage(new { status = "New staff member discarded." });
+        }
+
         _logic.DeleteEmployee(id);
         return RedirectToPage(new { status = "Staff member deleted." });
     }

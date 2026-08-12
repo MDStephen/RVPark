@@ -38,13 +38,16 @@ public class SeedTestDataModel : PageModel
             await _db.SaveChangesAsync();
 
             // Seed Users
+            // CreatedAt/LastModifiedAt are staggered so the "created" / "last modified"
+            // display in User Management doesn't look suspiciously identical for everyone.
+            var seedNow = DateTime.Now;
             var users = new List<Users>
             {
-                new() { userId = 1, firstName = "John", lastName = "Smith", emailAddress = "john.smith@example.com", phoneNumber = "555-0101", address = "123 Main St, Ogden, UT"},
-                new() { userId = 2, firstName = "Jane", lastName = "Doe", emailAddress = "jane.doe@example.com", phoneNumber = "555-0102", address = "456 Oak Ave, Layton, UT"},
-                new() { userId = 3, firstName = "Robert", lastName = "Johnson", emailAddress = "robert.j@example.com", phoneNumber = "555-0103", address = "789 Pine Rd, Clearfield, UT"},
-                new() { userId = 4, firstName = "Emily", lastName = "Davis", emailAddress = "emily.d@example.com", phoneNumber = "555-0104", address = "321 Elm St, Roy, UT"},
-                new() { userId = 5, firstName = "Michael", lastName = "Wilson", emailAddress = "michael.w@example.com", phoneNumber = "555-0105", address = "654 Maple Dr, Syracuse, UT"}
+                new() { userId = 1, firstName = "John", lastName = "Smith", emailAddress = "john.smith@example.com", phoneNumber = "555-0101", address = "123 Main St, Ogden, UT", CreatedAt = seedNow.AddMonths(-6), LastModifiedAt = seedNow.AddDays(-14) },
+                new() { userId = 2, firstName = "Jane", lastName = "Doe", emailAddress = "jane.doe@example.com", phoneNumber = "555-0102", address = "456 Oak Ave, Layton, UT", CreatedAt = seedNow.AddMonths(-4), LastModifiedAt = seedNow.AddDays(-2) },
+                new() { userId = 3, firstName = "Robert", lastName = "Johnson", emailAddress = "robert.j@example.com", phoneNumber = "555-0103", address = "789 Pine Rd, Clearfield, UT", CreatedAt = seedNow.AddMonths(-3), LastModifiedAt = seedNow.AddMonths(-3) },
+                new() { userId = 4, firstName = "Emily", lastName = "Davis", emailAddress = "emily.d@example.com", phoneNumber = "555-0104", address = "321 Elm St, Roy, UT", CreatedAt = seedNow.AddMonths(-1), LastModifiedAt = seedNow.AddDays(-1) },
+                new() { userId = 5, firstName = "Michael", lastName = "Wilson", emailAddress = "michael.w@example.com", phoneNumber = "555-0105", address = "654 Maple Dr, Syracuse, UT", CreatedAt = seedNow.AddDays(-10), LastModifiedAt = seedNow.AddDays(-10) }
             };
             _db.Users.AddRange(users);
 
@@ -70,8 +73,8 @@ public class SeedTestDataModel : PageModel
             // can't store (valid range starts 1753-01-01). This was the actual seeding failure.
             var employees = new List<Employee>
             {
-                new() { employeeId = 1, firstName = "Admin", lastName = "User", dateOfBirth = new DateTime(1985, 3, 14), username = "admin", password = "admin123", role = "Admin" },
-                new() { employeeId = 2, firstName = "Staff", lastName = "Member", dateOfBirth = new DateTime(1992, 7, 22), username = "staff", password = "staff123", role = "Staff" }
+                new() { employeeId = 1, firstName = "Admin", lastName = "User", dateOfBirth = new DateTime(1985, 3, 14), username = "admin", password = "admin123", role = "Admin", CreatedAt = seedNow.AddYears(-1), LastModifiedAt = seedNow.AddMonths(-1) },
+                new() { employeeId = 2, firstName = "Staff", lastName = "Member", dateOfBirth = new DateTime(1992, 7, 22), username = "staff", password = "staff123", role = "Staff", CreatedAt = seedNow.AddMonths(-8), LastModifiedAt = seedNow.AddDays(-5) }
             };
             _db.Employees.AddRange(employees);
 

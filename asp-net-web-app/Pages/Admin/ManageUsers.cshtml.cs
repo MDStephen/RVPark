@@ -25,15 +25,34 @@ namespace asp_net_web_app.Pages.Admin
         [BindProperty(SupportsGet = true)]
         public int? SelectedId { get; set; }
 
+        // Only used while creating a new customer (SelectedId == 0); the login
+        // credentials live in UserAccounts, not on the Users model itself.
+        [BindProperty]
+        public string? NewUsername { get; set; }
+
+        [BindProperty]
+        public string? NewPassword { get; set; }
+
         public string? StatusMessage { get; set; }
         public bool IsError { get; set; }
 
+        // True when SelectedUser is a blank, not-yet-saved customer (selectedId=0 sentinel)
+        public bool IsNew { get; set; }
+
         // ── GET ───────────────────────────────────────────────────────
+        // /ManageUsers               -> list, auto-selects first customer
+        // /ManageUsers?selectedId=7  -> customer 7 selected for editing
+        // /ManageUsers?selectedId=0  -> blank, editable "create new" form
         public async Task OnGetAsync()
         {
             Customers = await _userRepo.GetAllCustomersAsync();
 
-            if (SelectedId.HasValue)
+            if (SelectedId == 0)
+            {
+                SelectedUser = new Customer();
+                IsNew = true;
+            }
+            else if (SelectedId.HasValue)
                 SelectedUser = await _userRepo.GetByIdAsync(SelectedId.Value);
             else if (Customers.Any())
             {
@@ -49,6 +68,8 @@ namespace asp_net_web_app.Pages.Admin
             if (SelectedUser == null)
                 return RedirectToPage();
 
+            IsNew = SelectedUser.userId == 0;
+
             // Re-load list for redisplay on validation failure
             Customers = await _userRepo.GetAllCustomersAsync();
 
@@ -57,6 +78,20 @@ namespace asp_net_web_app.Pages.Admin
                 IsError = true;
                 StatusMessage = "Please correct the highlighted fields.";
                 return Page();
+            }
+
+            if (IsNew)
+            {
+                var (success, message, newId) = await _userRepo.CreateAsync(SelectedUser, NewUsername, NewPassword);
+                if (!success)
+                {
+                    IsError = true;
+                    StatusMessage = message;
+                    return Page();
+                }
+
+                TempData["StatusMessage"] = "Customer created.";
+                return RedirectToPage(new { selectedId = newId });
             }
 
             await _userRepo.UpdateAsync(SelectedUser);
@@ -70,6 +105,13 @@ namespace asp_net_web_app.Pages.Admin
         {
             if (SelectedUser == null)
                 return RedirectToPage();
+
+            if (SelectedUser.userId == 0)
+            {
+                // Nothing was ever saved - just discard the blank "create" form.
+                TempData["StatusMessage"] = "New customer discarded.";
+                return RedirectToPage();
+            }
 
             await _userRepo.DeleteAsync(SelectedUser.userId);
 
