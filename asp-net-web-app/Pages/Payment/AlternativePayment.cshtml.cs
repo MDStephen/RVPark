@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -37,6 +38,34 @@ namespace asp_net_web_app.Pages.Payment
 
         public void OnGet()
         {
+        }
+
+        // Looks up the customer name and remaining balance for a reservation ID,
+        // so staff don't have to go find the amount due themselves.
+        public async Task<IActionResult> OnGetBalanceAsync(int id)
+        {
+            var reservation = await _db.Reservations.FindAsync(id);
+            if (reservation == null)
+            {
+                return new JsonResult(new { found = false });
+            }
+
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.userId == reservation.UserId);
+            var alreadyPaid = await _db.Payments
+                .Where(p => p.ReservationId == reservation.Id)
+                .SumAsync(p => p.amount);
+            var rawRemainingBalance = reservation.TotalCost - alreadyPaid;
+
+            var dto = new
+            {
+                found = true,
+                customerName = user != null ? $"{user.firstName} {user.lastName}" : "Unknown",
+                totalCost = reservation.TotalCost,
+                remainingBalance = Math.Max(rawRemainingBalance, 0),
+                isPaidInFull = rawRemainingBalance <= 0
+            };
+
+            return new JsonResult(dto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         }
 
         public async Task<IActionResult> OnPostAsync()

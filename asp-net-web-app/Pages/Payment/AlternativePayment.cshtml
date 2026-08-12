@@ -24,9 +24,15 @@
 
 <div class="container">
 
-    <h1 style="font-size:1.5rem; font-weight:600; color:white; margin-bottom:1.5rem;">
-        Employee Payment Entry
-    </h1>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h1 style="font-size:1.5rem; font-weight:600; color:white; margin:0;">
+            Employee Payment Entry
+        </h1>
+
+        <a asp-page="/Admin/AdminManageReservations" class="btn btn-outline-secondary">
+            &larr; Back to Reservations
+        </a>
+    </div>
 
     @if (ModelState.ContainsKey("") && ModelState[""]!.Errors.Count > 0)
     {
@@ -46,7 +52,16 @@
         <form method="post">
             <div class="form-group">
                 <label class="form-label">Reservation ID</label>
-                <input type="number" name="ReservationId" class="form-input-field" value="@(Model.ReservationId == 0 ? "" : Model.ReservationId.ToString())" required />
+                <input
+                    type="number"
+                    name="ReservationId"
+                    id="reservationId"
+                    class="form-input-field"
+                    value="@(Model.ReservationId == 0 ? "" : Model.ReservationId.ToString())"
+                    oninput="lookupBalance()"
+                    required />
+
+                <p id="balanceStatus" style="margin:0.5rem 0 0; font-size:0.8rem;"></p>
             </div>
             <!-- Payment Type -->
             <div class="form-group">
@@ -99,11 +114,7 @@
                 </div>
             </div>
 
-<<<<<<< HEAD
             <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Submit Payment</button>
-=======
-            <button type="submit" class="btn-custom-primary" style="margin-top:1rem;">Submit Payment</button>
->>>>>>> main
         </form>
     </div>
 </div>
@@ -124,9 +135,62 @@
 
         document.getElementById("changeOwed").value = change.toFixed(2);
     }
-<<<<<<< HEAD
-=======
+
+    let balanceLookupTimer = null;
+    function lookupBalance() {
+        clearTimeout(balanceLookupTimer);
+        balanceLookupTimer = setTimeout(fetchBalance, 350);
+    }
+
+    async function fetchBalance() {
+        const idField = document.getElementById("reservationId");
+        const statusEl = document.getElementById("balanceStatus");
+        const amountField = document.getElementById("amount");
+        const id = idField.value.trim();
+
+        if (!id) {
+            statusEl.textContent = "";
+            return;
+        }
+
+        statusEl.style.color = "#a3a3a3";
+        statusEl.textContent = "Looking up reservation...";
+
+        try {
+            const response = await fetch("?handler=Balance&id=" + encodeURIComponent(id), {
+                headers: { "Accept": "application/json" }
+            });
+            const data = await response.json();
+
+            if (!data.found) {
+                statusEl.style.color = "#f87171";
+                statusEl.textContent = "No reservation found with that ID.";
+                return;
+            }
+
+            if (data.isPaidInFull) {
+                statusEl.style.color = "#f59e0b";
+                statusEl.textContent = data.customerName + " \u2014 this reservation is already paid in full.";
+                amountField.value = "";
+                return;
+            }
+
+            statusEl.style.color = "#34d399";
+            statusEl.textContent = data.customerName + " \u2014 balance due: $" + data.remainingBalance.toFixed(2);
+            if (!amountField.value) {
+                amountField.value = data.remainingBalance.toFixed(2);
+            }
+            calculateChange();
+        } catch (err) {
+            statusEl.style.color = "#f87171";
+            statusEl.textContent = "Couldn't look up that reservation. Please try again.";
+        }
+    }
 
     updateFields();
->>>>>>> main
+
+    @if (Model.ReservationId != 0)
+    {
+        <text>fetchBalance();</text>
+    }
 </script>
