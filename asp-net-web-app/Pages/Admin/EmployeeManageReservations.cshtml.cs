@@ -39,6 +39,16 @@ namespace asp_net_web_app.Pages
             public int Children { get; set; }
             public int Pets { get; set; }
             public string Notes { get; set; } = "";
+            public List<PaymentRecord> Payments { get; set; } = new();
+        }
+
+        public class PaymentRecord
+        {
+            public int Id { get; set; }
+            public decimal Amount { get; set; }
+            public DateTime PaidAt { get; set; }
+            public string StripeId { get; set; } = "";
+            public string Status { get; set; } = "";
         }
 
         public class CustomerMatch
@@ -72,7 +82,12 @@ namespace asp_net_web_app.Pages
         {
             SearchTerm = search ?? "";
             StatusMessage = status ?? "";
-            Mode = mode == "walkin" ? "walkin" : "list";
+            Mode = mode switch
+            {
+                "walkin" => "walkin",
+                "details" => "details",
+                _ => "list"
+            };
             LoadList(SearchTerm);
 
             if (Mode == "walkin")
@@ -119,6 +134,10 @@ namespace asp_net_web_app.Pages
             {
                 Selected = BuildDetail(id.Value);
                 InvalidId = Selected == null;
+            }
+            else if (Mode == "details")
+            {
+                InvalidId = true;
             }
         }
 
@@ -304,6 +323,18 @@ namespace asp_net_web_app.Pages
             var user = _context.Users.FirstOrDefault(u => u.userId == res.UserId);
             var site = _context.Sites.FirstOrDefault(s => s.Id == res.SiteId);
             var nights = (res.EndDate - res.StartDate).Days;
+            var payments = _context.Payments
+                .Where(p => p.ReservationId == res.Id)
+                .OrderBy(p => p.paidAt)
+                .Select(p => new PaymentRecord
+                {
+                    Id = p.paymentId,
+                    Amount = p.amount,
+                    PaidAt = p.paidAt,
+                    StripeId = p.stripeId,
+                    Status = p.paymentStatus
+                })
+                .ToList();
 
             return new ReservationDetail
             {
@@ -321,7 +352,8 @@ namespace asp_net_web_app.Pages
                 Adults = res.Adults,
                 Children = res.Children,
                 Pets = res.Pets,
-                Notes = res.Notes
+                Notes = res.Notes,
+                Payments = payments
             };
         }
     }

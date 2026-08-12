@@ -1,7 +1,8 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using asp_net_web_app.Data;
-
 
 namespace asp_net_web_app.Pages.Payment
 {
@@ -13,101 +14,163 @@ namespace asp_net_web_app.Pages.Payment
         {
             _db = db;
         }
+
         // Bound properties from the form
         [BindProperty]
         public int ReservationId { get; set; }
         [BindProperty]
-        public string PaymentType { get; set; } = "";
+        public string? PaymentType { get; set; }
         [BindProperty]
-        public decimal AmountDue { get; set; }
+        public decimal Amount { get; set; }
         [BindProperty]
-        public decimal AmountReceived { get; set; }
+        public decimal? AmountReceived { get; set; }
         [BindProperty]
         public decimal ChangeOwed { get; set; }
         [BindProperty]
-        public string CheckNumber { get; set; } = "";
+        public string? CheckNumber { get; set; }
+        [BindProperty]
+        public string? CardLast4 { get; set; }
+        [BindProperty]
+        public string? CardAuthReference { get; set; }
+
         public string Message { get; set; } = "";
+
         public void OnGet()
         {
-
         }
-        public IActionResult OnPost()
+
+        public async Task<IActionResult> OnPostAsync()
         {
-            // Validate reservation exists
-            var reservation = _db.Reservations.Find(ReservationId);
+            var reservation = await _db.Reservations.FindAsync(ReservationId);
             if (reservation == null)
             {
                 ModelState.AddModelError("", "Reservation ID not found.");
                 return Page();
             }
-            if (string.IsNullOrWhiteSpace(PaymentType))
+
+            var username = User.Identity?.Name;
+            var employee = username != null
+                ? await _db.Employees.FirstOrDefaultAsync(e => e.username == username)
+                : null;
+            if (employee == null)
+            {
+                ModelState.AddModelError("", "You must be logged in as staff to record a payment.");
+                return Page();
+            }
+
+            if (PaymentType != "Cash" && PaymentType != "Check" && PaymentType != "ManualCard")
             {
                 ModelState.AddModelError("", "Please select a payment method.");
                 return Page();
             }
-            // Handle Check Payments
-            if (PaymentType == "Check")
+            var paymentType = PaymentType!; // narrowed to one of "Cash"/"Check"/"ManualCard" by the check above
+
+            if (paymentType == "Check" && string.IsNullOrWhiteSpace(CheckNumber))
             {
-                if (string.IsNullOrWhiteSpace(CheckNumber))
-                {
-                    ModelState.AddModelError("", "Check number is required for check payments.");
-                    return Page();
-                }
-
-                CreatePaymentRecord(reservation, reservation.TotalCost, CheckNumber);
-
-                Message = $"Check payment recorded. Check #: {CheckNumber}";
+                ModelState.AddModelError("", "Check number is required for check payments.");
                 return Page();
             }
-            // Handle Cash Payments
-            if (PaymentType == "Cash")
+
+            string? cardLast4 = null;
+            string? cardAuthReference = null;
+            if (paymentType == "ManualCard")
             {
-                if (AmountDue <= 0)
+                cardLast4 = (CardLast4 ?? "").Trim();
+                cardAuthReference = (CardAuthReference ?? "").Trim();
+
+                if (!Regex.IsMatch(cardLast4, "^[0-9]{4}$"))
                 {
-                    ModelState.AddModelError("", "Amount due must be greater than zero.");
+                    ModelState.AddModelError("", "Enter exactly the last 4 digits of the card.");
                     return Page();
                 }
-                if (AmountReceived <= 0)
+                if (string.IsNullOrWhiteSpace(cardAuthReference))
                 {
-                    ModelState.AddModelError("", "Amount received must be greater than zero.");
+                    ModelState.AddModelError("", "A reference/auth number is required for manual card entry.");
                     return Page();
                 }
-                ChangeOwed = AmountReceived - AmountDue;
-                if (ChangeOwed < 0)
-                {
-                    ModelState.AddModelError("", "Amount received is less than amount due.");
-                    return Page();
-                }
-                CreatePaymentRecord(reservation, AmountDue, "");
-                Message = $"Cash payment recorded. Change owed: ${ChangeOwed:F2}";
+            }
+
+            if (Amount <= 0)
+            {
+                ModelState.AddModelError("", "Payment amount must be greater than zero.");
                 return Page();
             }
-            // Handle Manual Credit Card Entry
-            if (PaymentType == "ManualCard")
+
+            var alreadyPaid = await _db.Payments
+                .Where(p => p.ReservationId == reservation.Id)
+                .SumAsync(p => p.amount);
+            var remainingBalance = reservation.TotalCost - alreadyPaid;
+
+            if (remainingBalance <= 0)
             {
-                // Redirect to secure manual card entry page
-                return RedirectToPage("Payment/Success");   //
+                ModelState.AddModelError("", "This reservation is already paid in full.");
+                return Page();
             }
-            ModelState.AddModelError("", "Unknown payment type.");
-            return Page();
-        }
-        private asp_net_web_app.Data.Payment CreatePaymentRecord(Reservations reservations, decimal amount, string paymentID, string status = "Paid")
-        {
+            if (Amount > remainingBalance)
+            {
+                ModelState.AddModelError("", $"Amount cannot exceed the remaining balance of ${remainingBalance:F2} for this reservation.");
+                return Page();
+            }
+
+            var checkNumber = (CheckNumber ?? "").Trim();
+            if (paymentType == "Cash")
+            {
+                var amountReceived = AmountReceived ?? 0;
+                if (amountReceived < Amount)
+                {
+                    ModelState.AddModelError("", "Amount received is less than the payment amount.");
+                    return Page();
+                }
+                AmountReceived = amountReceived;
+                ChangeOwed = amountReceived - Amount;
+            }
+
             var payment = new asp_net_web_app.Data.Payment
             {
-                amount = amount,
-                paidAt = DateTime.Now,
-                stripeId = paymentID,
-                paymentStatus = status,
-                ReservationId = reservations.Id
+                amount = Amount,
+                paidAt = DateTime.UtcNow,
+                stripeId = "",
+                paymentStatus = "paid",
+                ReservationId = reservation.Id,
+                PaymentSource = "Manual",
+                PaymentMethod = paymentType,
+                RecordedByEmployeeId = employee.employeeId,
+                CheckNumber = paymentType == "Check" ? checkNumber : null,
+                CardLast4 = cardLast4,
+                CardAuthReference = cardAuthReference
+            };
+            _db.Payments.Add(payment);
+            await _db.SaveChangesAsync();
+
+            var newRemainingBalance = remainingBalance - Amount;
+            if (newRemainingBalance <= 0)
+            {
+                reservation.Status = "Confirmed";
+                await _db.SaveChangesAsync();
+            }
+
+            var methodLabel = paymentType switch
+            {
+                "Cash" => "Cash",
+                "Check" => $"Check (#{checkNumber})",
+                "ManualCard" => $"Manual card entry (ending {cardLast4})",
+                _ => paymentType
             };
 
-            _db.Payments.Add(payment);
+            Message = $"{methodLabel} payment of ${Amount:F2} recorded by {employee.firstName} {employee.lastName}. " +
+                      $"Remaining balance: ${Math.Max(newRemainingBalance, 0):F2}.";
 
-            ///reservation.Status = "Paid";   // sshould we have a paid status?
-            _db.SaveChanges();
+            // Clear the form for the next entry now that the payment succeeded.
+            ReservationId = 0;
+            PaymentType = "";
+            Amount = 0;
+            AmountReceived = 0;
+            ChangeOwed = 0;
+            CheckNumber = "";
+            CardLast4 = "";
+            CardAuthReference = "";
 
-            return payment;
+            return Page();
         }
     }
 }

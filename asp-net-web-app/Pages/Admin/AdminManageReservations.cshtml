@@ -21,6 +21,16 @@
     .btn-grid-action { background: #262626; color: #d4d4d4; border: 1px solid #404040; padding: 0.4rem 0.75rem; border-radius: 0.375rem; text-decoration: none; font-size: 0.75rem; cursor: pointer; }
     .btn-grid-action:hover { background: #404040; color: white; }
     .badge-status { padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; background-color: #262626; color: #d4d4d4; }
+    .detail-section-title { font-size: 0.8rem; font-weight: 600; color: white; text-transform: uppercase; letter-spacing: 0.04em; margin: 1.25rem 0 0.75rem 0; }
+    .detail-section-title:first-child { margin-top: 0; }
+    .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .detail-label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #a3a3a3; margin-bottom: 0.25rem; }
+    .detail-value { font-size: 0.9rem; color: white; font-weight: 500; }
+    .detail-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .detail-table th { padding: 0.5rem 0.75rem; border-bottom: 1px solid #262626; color: #a3a3a3; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .detail-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #262626; font-size: 0.8rem; color: #e5e5e5; }
+    #reservationDetailsModal .modal-content { background-color: #171717; color: #e5e5e5; border: 1px solid #262626; }
+    #reservationDetailsModal .modal-header, #reservationDetailsModal .modal-footer { border-color: #262626; }
 </style>
 
 <div class="admin-container">
@@ -92,6 +102,7 @@
                                 <td>@r.Status</td>
                                 <td>$@r.TotalCost.ToString("F2")</td>
                                 <td style="text-align:right; padding-right:1.5rem;">
+                                    <button type="button" class="btn-grid-action" style="color:#38bdf8;" onclick="showReservationDetails(@r.Id)">View</button>
                                     <a asp-page-handler="CreateReservation" asp-route-id="@r.Id" class="btn-grid-action" style="color:#6366f1;">Edit</a>
                                     @if (r.Status != "Cancelled")
                                     {
@@ -125,61 +136,340 @@
         </div>
 
         <div class="data-card" style="max-width: 500px;">
-            <form method="post" asp-page-handler="@(Model.CurrentAction == "Edit" ? "UpdateReservation" : "CreateReservation")">
-                <input type="hidden" name="reservationId" value="@Model.ActiveId" />
+            @if (Model.SelectedCustomer == null)
+            {
+                <h2 style="font-size: 1rem; font-weight: 600; color: white; margin: 0 0 1rem 0;">Step 1 &ndash; Find or Create Customer</h2>
 
+                <form method="get" style="margin-bottom: 1.25rem;">
+                    <div style="display:flex; gap:0.75rem; align-items:end;">
+                        <div style="flex:1;">
+                            <label class="form-label">Search Customers</label>
+                            <input name="custQ" class="form-input-field" value="@Model.CustomerQuery" placeholder="Name, email, or phone" />
+                        </div>
+                        <button type="submit" class="btn-custom-primary">Search</button>
+                    </div>
+                </form>
+
+                @if (!string.IsNullOrWhiteSpace(Model.CustomerQuery))
+                {
+                    @if (Model.CustomerMatches.Any())
+                    {
+                        <div style="margin-bottom: 1.25rem;">
+                            @foreach (var c in Model.CustomerMatches)
+                            {
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0; border-bottom:1px solid #262626;">
+                                    <div>
+                                        <div style="color:white; font-weight:500; font-size:0.875rem;">@c.FullName</div>
+                                        <div style="color:#a3a3a3; font-size:0.75rem;">@c.Email &middot; @c.Phone</div>
+                                    </div>
+                                    <a asp-page-handler="CreateReservation"
+                                       asp-route-id="@(Model.CurrentAction == "Edit" ? (int?)Model.ActiveId : null)"
+                                       asp-route-custId="@c.Id" class="btn-grid-action">Select</a>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p style="color:#a3a3a3; font-size:0.875rem;">No matching customers found for "@Model.CustomerQuery".</p>
+                    }
+                }
+
+                @if (Model.CustomerErrors.Any())
+                {
+                    <div class="data-card" style="border-color:#ef4444; padding:0.75rem 1rem; margin-bottom:1.25rem;">
+                        @foreach (var err in Model.CustomerErrors)
+                        {
+                            <p style="margin:0; color:#f87171; font-size:0.8rem;">@err</p>
+                        }
+                        @if (Model.DuplicateEmailCustomer != null)
+                        {
+                            <a asp-page-handler="CreateReservation"
+                               asp-route-id="@(Model.CurrentAction == "Edit" ? (int?)Model.ActiveId : null)"
+                               asp-route-custId="@Model.DuplicateEmailCustomer.Id" class="btn-grid-action" style="display:inline-block; margin-top:0.5rem;">
+                                Use existing customer: @Model.DuplicateEmailCustomer.FullName
+                            </a>
+                        }
+                    </div>
+                }
+
+                <h2 style="font-size: 1rem; font-weight: 600; color: white; margin: 1.5rem 0 1rem 0;">Or Create New Customer</h2>
+                <form method="post" asp-page-handler="CreateCustomer">
+                    <input type="hidden" name="reservationId" value="@Model.ActiveId" />
+                    <input type="hidden" name="custQ" value="@Model.CustomerQuery" />
+
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" name="firstName" class="form-input-field" value="@Model.NewCustomerFirstName" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" name="lastName" class="form-input-field" value="@Model.NewCustomerLastName" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-input-field" value="@Model.NewCustomerEmail" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" name="phone" class="form-input-field" value="@Model.NewCustomerPhone" placeholder="(555) 123-4567" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <input type="text" name="address" class="form-input-field" value="@Model.NewCustomerAddress" />
+                    </div>
+
+                    <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #262626;">
+                        <button type="submit" class="btn-custom-primary">Create Customer</button>
+                        <a asp-page="" class="btn-grid-action" style="padding: 0.6rem 1.2rem; font-size: 0.875rem; border-radius: 0.5rem;">Cancel</a>
+                    </div>
+                </form>
+            }
+            else
+            {
                 <div class="form-group">
                     <label class="form-label">Customer</label>
-                    <select name="userId" class="form-input-field">
-                        @foreach (var u in Model.AllUsers)
-                        {
-                            <option value="@u.userId" selected="@(u.userId == Model.ActiveUserId)">@u.firstName @u.lastName (#@u.userId)</option>
-                        }
-                    </select>
+                    <div class="data-card" style="padding:0.75rem 1rem; margin-bottom:0.5rem;">
+                        <div style="color:white; font-weight:600; font-size:0.9rem;">@Model.SelectedCustomer.FullName</div>
+                        <div style="color:#a3a3a3; font-size:0.8rem;">@Model.SelectedCustomer.Email &middot; @Model.SelectedCustomer.Phone</div>
+                    </div>
+                    <a asp-page-handler="CreateReservation"
+                       asp-route-id="@(Model.CurrentAction == "Edit" ? (int?)Model.ActiveId : null)"
+                       asp-route-changeCustomer="true" class="btn-grid-action">Change Customer</a>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Site</label>
-                    <select name="siteId" class="form-input-field">
-                        @foreach (var s in Model.AllSites)
-                        {
-                            <option value="@s.Id" selected="@(s.Id == Model.ActiveSiteId)">@s.SiteNumber (@s.Category)</option>
-                        }
-                    </select>
-                </div>
+                <form method="post" asp-page-handler="@(Model.CurrentAction == "Edit" ? "UpdateReservation" : "CreateReservation")">
+                    <input type="hidden" name="reservationId" value="@Model.ActiveId" />
+                    <input type="hidden" name="userId" value="@Model.SelectedCustomer.Id" />
 
-                <div class="form-group">
-                    <label class="form-label">Start Date</label>
-                    <input type="date" name="startDate" class="form-input-field" value="@Model.ActiveStartDate.ToString("yyyy-MM-dd")" required />
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Site</label>
+                        <select name="siteId" class="form-input-field">
+                            @foreach (var s in Model.AllSites)
+                            {
+                                <option value="@s.Id" selected="@(s.Id == Model.ActiveSiteId)">@s.SiteNumber (@s.Category)</option>
+                            }
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">End Date</label>
-                    <input type="date" name="endDate" class="form-input-field" value="@Model.ActiveEndDate.ToString("yyyy-MM-dd")" required />
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="startDate" class="form-input-field" value="@Model.ActiveStartDate.ToString("yyyy-MM-dd")" required />
+                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-input-field">
-                        @foreach (var opt in new[] { "Upcoming", "In Progress", "Completed", "Cancelled" })
-                        {
-                            <option value="@opt" selected="@(opt == Model.ActiveStatus)">@opt</option>
-                        }
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="endDate" class="form-input-field" value="@Model.ActiveEndDate.ToString("yyyy-MM-dd")" required />
+                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">Total Cost ($)</label>
-                    <input type="number" step="0.01" name="totalCost" class="form-input-field" value="@Model.ActiveCost" required />
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-input-field">
+                            @foreach (var opt in new[] { "Upcoming", "In Progress", "Completed", "Cancelled" })
+                            {
+                                <option value="@opt" selected="@(opt == Model.ActiveStatus)">@opt</option>
+                            }
+                        </select>
+                    </div>
 
-                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #262626;">
-                    <button type="submit" class="btn-custom-primary" style="background-color: #10b981;">
-                        @(Model.CurrentAction == "Edit" ? "Update Reservation" : "Create Reservation")
-                    </button>
-                    <a asp-page="" class="btn-grid-action" style="padding: 0.6rem 1.2rem; font-size: 0.875rem; border-radius: 0.5rem;">Cancel</a>
-                </div>
-            </form>
+                    <div class="form-group">
+                        <label class="form-label">Total Cost ($)</label>
+                        <input type="number" step="0.01" name="totalCost" class="form-input-field" value="@Model.ActiveCost" required />
+                    </div>
+
+                    <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #262626;">
+                        <button type="submit" class="btn-custom-primary" style="background-color: #10b981;">
+                            @(Model.CurrentAction == "Edit" ? "Update Reservation" : "Create Reservation")
+                        </button>
+                        <a asp-page="" class="btn-grid-action" style="padding: 0.6rem 1.2rem; font-size: 0.875rem; border-radius: 0.5rem;">Cancel</a>
+                    </div>
+                </form>
+            }
         </div>
     }
 </div>
+
+<div class="modal fade" id="reservationDetailsModal" tabindex="-1" aria-labelledby="reservationDetailsTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservationDetailsTitle">Reservation Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="reservationDetailsLoading" style="text-align:center; padding:2rem;">
+                    <div class="spinner-border" role="status" style="color:#4f46e5;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div id="reservationDetailsError" style="display:none; color:#f87171; padding:1rem 0;"></div>
+                <div id="reservationDetailsContent" style="display:none;">
+                    <div class="detail-section-title">Customer</div>
+                    <div class="detail-grid">
+                        <div><span class="detail-label">Name</span><span class="detail-value" id="rdCustomerName"></span></div>
+                        <div><span class="detail-label">Email</span><span class="detail-value" id="rdCustomerEmail"></span></div>
+                        <div><span class="detail-label">Phone</span><span class="detail-value" id="rdCustomerPhone"></span></div>
+                    </div>
+
+                    <div class="detail-section-title">Stay</div>
+                    <div class="detail-grid">
+                        <div><span class="detail-label">Site</span><span class="detail-value" id="rdSiteNumber"></span></div>
+                        <div><span class="detail-label">Site Type</span><span class="detail-value" id="rdSiteType"></span></div>
+                        <div><span class="detail-label">Status</span><span class="badge-status" id="rdStatus"></span></div>
+                        <div><span class="detail-label">Check-in</span><span class="detail-value" id="rdCheckIn"></span></div>
+                        <div><span class="detail-label">Check-out</span><span class="detail-value" id="rdCheckOut"></span></div>
+                        <div><span class="detail-label">Nights</span><span class="detail-value" id="rdNights"></span></div>
+                    </div>
+
+                    <div class="detail-section-title">Rate Breakdown</div>
+                    <div class="detail-grid">
+                        <div><span class="detail-label">Rate / Night</span><span class="detail-value" id="rdRatePerNight"></span></div>
+                        <div><span class="detail-label">Nights</span><span class="detail-value" id="rdRateNights"></span></div>
+                        <div><span class="detail-label">Total Cost</span><span class="detail-value" id="rdTotalCost"></span></div>
+                    </div>
+
+                    <div class="detail-section-title">Payments</div>
+                    <table class="detail-table" id="rdPaymentsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rdPaymentsBody"></tbody>
+                    </table>
+                    <p id="rdNoPayments" style="display:none; color:#737373; font-size:0.8rem; padding:0.5rem 0;">No payments recorded.</p>
+
+                    <div class="detail-grid" style="margin-top:1rem;">
+                        <div><span class="detail-label">Amount Paid</span><span class="detail-value" id="rdAmountPaid"></span></div>
+                        <div><span class="detail-label">Balance Owed</span><span class="detail-value" id="rdBalanceOwed"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-grid-action" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let reservationDetailsModalInstance = null;
+
+        function getReservationDetailsModal() {
+            if (!reservationDetailsModalInstance) {
+                reservationDetailsModalInstance = new bootstrap.Modal(document.getElementById('reservationDetailsModal'));
+            }
+            return reservationDetailsModalInstance;
+        }
+
+        function formatCurrency(value) {
+            const num = Number(value) || 0;
+            return '$' + num.toFixed(2);
+        }
+
+        function formatDate(value) {
+            const d = new Date(value);
+            if (isNaN(d.getTime())) return '';
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function setText(id, text) {
+            document.getElementById(id).textContent = text;
+        }
+
+        async function showReservationDetails(id) {
+            const loadingEl = document.getElementById('reservationDetailsLoading');
+            const errorEl = document.getElementById('reservationDetailsError');
+            const contentEl = document.getElementById('reservationDetailsContent');
+            const titleEl = document.getElementById('reservationDetailsTitle');
+
+            titleEl.textContent = 'Reservation #' + id;
+            loadingEl.style.display = '';
+            errorEl.style.display = 'none';
+            contentEl.style.display = 'none';
+            errorEl.textContent = '';
+
+            getReservationDetailsModal().show();
+
+            try {
+                const response = await fetch('?handler=Details&id=' + encodeURIComponent(id), {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed with status ' + response.status);
+                }
+
+                const data = await response.json();
+                populateReservationDetails(data);
+
+                loadingEl.style.display = 'none';
+                contentEl.style.display = '';
+            } catch (err) {
+                loadingEl.style.display = 'none';
+                errorEl.textContent = 'Unable to load reservation details. Please try again.';
+                errorEl.style.display = '';
+            }
+        }
+
+        function populateReservationDetails(d) {
+            document.getElementById('reservationDetailsTitle').textContent = 'Reservation #' + d.id + ' – ' + d.customerName;
+
+            setText('rdCustomerName', d.customerFound ? d.customerName : 'Unknown');
+            setText('rdCustomerEmail', d.customerFound && d.customerEmail ? d.customerEmail : '—');
+            setText('rdCustomerPhone', d.customerFound && d.customerPhone ? d.customerPhone : '—');
+
+            setText('rdSiteNumber', d.siteNumber);
+            setText('rdSiteType', d.siteType || '—');
+            setText('rdStatus', d.status);
+            setText('rdCheckIn', formatDate(d.startDate));
+            setText('rdCheckOut', formatDate(d.endDate));
+            setText('rdNights', d.nights);
+
+            setText('rdRatePerNight', formatCurrency(d.ratePerNight));
+            setText('rdRateNights', d.nights);
+            setText('rdTotalCost', formatCurrency(d.totalCost));
+
+            const paymentsBody = document.getElementById('rdPaymentsBody');
+            const paymentsTable = document.getElementById('rdPaymentsTable');
+            const noPayments = document.getElementById('rdNoPayments');
+            paymentsBody.innerHTML = '';
+
+            if (d.payments && d.payments.length > 0) {
+                paymentsTable.style.display = '';
+                noPayments.style.display = 'none';
+                d.payments.forEach(p => {
+                    const row = document.createElement('tr');
+
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = formatDate(p.paidAt);
+                    row.appendChild(dateCell);
+
+                    const amountCell = document.createElement('td');
+                    amountCell.textContent = formatCurrency(p.amount);
+                    row.appendChild(amountCell);
+
+                    const statusCell = document.createElement('td');
+                    statusCell.textContent = p.status;
+                    row.appendChild(statusCell);
+
+                    const refCell = document.createElement('td');
+                    refCell.textContent = p.reference || '—';
+                    row.appendChild(refCell);
+
+                    paymentsBody.appendChild(row);
+                });
+            } else {
+                paymentsTable.style.display = 'none';
+                noPayments.style.display = '';
+            }
+
+            setText('rdAmountPaid', formatCurrency(d.amountPaid));
+            setText('rdBalanceOwed', formatCurrency(d.balanceOwed));
+        }
+    </script>
+}
