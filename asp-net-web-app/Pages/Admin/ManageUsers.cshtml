@@ -115,10 +115,25 @@
 
     /* ── Right panel  edit form ──────────────────────────── */
     .um-form-card {
+        position: relative;
         background: var(--bg-card);
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
-        padding: 24px 28px;
+        padding: 24px 28px 46px;
+    }
+
+    /* Created / last-modified timestamps — read-only, tucked in the corner */
+    .um-meta {
+        position: absolute;
+        bottom: 14px;
+        right: 20px;
+        text-align: right;
+        font-style: italic;
+        opacity: 0.55;
+        font-size: 11px;
+        line-height: 1.5;
+        color: var(--text-secondary);
+        pointer-events: none;
     }
 
     .um-form-top {
@@ -276,6 +291,7 @@
         <div class="um-panel-header">
             <span class="um-panel-title">Customer Users</span>
             <div class="um-panel-actions">
+                <a class="um-icon-btn" title="Create User" href="/Admin/ManageUsers?selectedId=0"><i class="bi bi-person-plus"></i></a>
                 <button class="um-icon-btn" title="Filter"><i class="bi bi-funnel"></i></button>
                 <button class="um-icon-btn" title="Refresh" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i></button>
             </div>
@@ -310,8 +326,16 @@
             <div class="um-form-top">
                 <div class="um-form-avatar"><i class="bi bi-person-circle"></i></div>
                 <div>
-                    <div class="um-form-name">@Model.SelectedUser.firstName @Model.SelectedUser.lastName</div>
-                    <div class="um-form-email">@Model.SelectedUser.emailAddress</div>
+                    @if (Model.IsNew)
+                    {
+                        <div class="um-form-name">New Customer</div>
+                        <div class="um-form-email">Not yet created</div>
+                    }
+                    else
+                    {
+                        <div class="um-form-name">@Model.SelectedUser.firstName @Model.SelectedUser.lastName</div>
+                        <div class="um-form-email">@Model.SelectedUser.emailAddress</div>
+                    }
                 </div>
             </div>
 
@@ -364,19 +388,48 @@
                     </div>
                 </div>
 
+                @if (Model.IsNew)
+                {
+                    <!-- Row 4: Username | Password — only asked for when creating the account;
+                         these become the customer's login (mirrors public sign-up). -->
+                    <div class="um-field-row cols-2b">
+                        <div class="um-field">
+                            <label>Username</label>
+                            <input asp-for="NewUsername" placeholder="Username" required />
+                        </div>
+                        <div class="um-field">
+                            <label>Password</label>
+                            <input asp-for="NewPassword" type="password" placeholder="Password" required />
+                        </div>
+                    </div>
+                }
+
                 <div class="um-form-actions">
                     <button type="submit" class="btn-save">Save Changes</button>
                 </div>
             </form>
 
+            @{
+                var deleteLabel = Model.IsNew
+                    ? "Discard this new customer? Nothing has been saved yet."
+                    : $"Delete {Model.SelectedUser.firstName} {Model.SelectedUser.lastName}? This cannot be undone.";
+            }
             <!-- Separate delete form to avoid accidental submits -->
             <form method="post" asp-page-handler="Delete"
-                  onsubmit="return confirm('Delete @Model.SelectedUser.firstName @Model.SelectedUser.lastName? This cannot be undone.');">
+                  onsubmit="return confirm('@deleteLabel');">
                 <input type="hidden" asp-for="SelectedUser.userId" />
                 <div class="um-form-actions" style="margin-top:10px;">
                     <button type="submit" class="btn-delete">Delete User</button>
                 </div>
             </form>
+
+            @if (!Model.IsNew)
+            {
+                <div class="um-meta">
+                    <div>Created @Model.SelectedUser.CreatedAt.ToString("MMM d, yyyy 'at' h:mm tt")</div>
+                    <div>Last modified @Model.SelectedUser.LastModifiedAt.ToString("MMM d, yyyy 'at' h:mm tt")</div>
+                </div>
+            }
 
         </div>
     }

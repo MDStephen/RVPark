@@ -46,10 +46,11 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
     if (!db.Users.Any())
     {
+        var seedNow = DateTime.Now;
         db.Users.AddRange(
-            new Users { firstName = "Jane", lastName = "Doe", emailAddress = "jane@example.com", phoneNumber = "555 555-1234", address = "123 Main St" },
-            new Users { firstName = "John", lastName = "Smith", emailAddress = "john@example.com", phoneNumber = "555 555-5678", address = "456 Oak Ave" },
-            new Users { firstName = "Bob", lastName = "Johnson", emailAddress = "bob@example.com", phoneNumber = "555 555-2468", address = "987 Center St" }
+            new Users { firstName = "Jane", lastName = "Doe", emailAddress = "jane@example.com", phoneNumber = "555 555-1234", address = "123 Main St", CreatedAt = seedNow, LastModifiedAt = seedNow },
+            new Users { firstName = "John", lastName = "Smith", emailAddress = "john@example.com", phoneNumber = "555 555-5678", address = "456 Oak Ave", CreatedAt = seedNow, LastModifiedAt = seedNow },
+            new Users { firstName = "Bob", lastName = "Johnson", emailAddress = "bob@example.com", phoneNumber = "555 555-2468", address = "987 Center St", CreatedAt = seedNow, LastModifiedAt = seedNow }
         );
         db.SaveChanges();
     }
