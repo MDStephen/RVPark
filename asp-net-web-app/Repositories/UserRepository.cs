@@ -25,6 +25,32 @@ namespace asp_net_web_app.Repositories
             return await _db.Users.FindAsync(id);
         }
 
+        public async Task<Users?> GetByEmailAsync(string email)
+        {
+            var all = await _db.Users.ToListAsync();
+            return all.FirstOrDefault(u => string.Equals(u.emailAddress, email, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public async Task<List<Users>> SearchAsync(string query)
+        {
+            var q = query.Trim();
+            var all = await _db.Users.ToListAsync();
+            return all.Where(u =>
+                    $"{u.firstName} {u.lastName}".Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                    (u.emailAddress != null && u.emailAddress.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                    (u.phoneNumber != null && u.phoneNumber.Contains(q, StringComparison.OrdinalIgnoreCase)))
+                .OrderBy(u => u.lastName)
+                .ThenBy(u => u.firstName)
+                .ToList();
+        }
+
+        public async Task<Users> CreateAsync(Users user)
+        {
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+            return user;
+        }
+
         public async Task UpdateAsync(Users user)
         {
             var existing = await _db.Users.FindAsync(user.userId);

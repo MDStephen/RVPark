@@ -106,7 +106,9 @@ public class StripePaymentService : IPaymentService
             paidAt = DateTime.UtcNow,
             stripeId = session.PaymentIntentId ?? session.Id,
             paymentStatus = "paid",
-            ReservationId = reservationId
+            ReservationId = reservationId,
+            PaymentSource = "Stripe",
+            PaymentMethod = "Stripe"
         };
 
         _db.Payments.Add(payment);

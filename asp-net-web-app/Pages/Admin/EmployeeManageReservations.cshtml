@@ -306,7 +306,7 @@
                             }
                         </div>
                     </form>
-                    <a asp-page="/EmployeeManageReservations" asp-route-mode="walkin" class="btn-save"
+                    <a asp-page="" asp-route-mode="walkin" class="btn-save"
                        style="display:block; margin-top:10px;">
                         + New Walk-In Reservation
                     </a>
@@ -318,7 +318,7 @@
                         @foreach (var r in Model.AllReservations)
                         {
                             <a class="emp-list-item @(Model.Selected != null && Model.Selected.Id == r.Id ? "selected" : "")"
-                               asp-page="/EmployeeManageReservations" asp-route-id="@r.Id">
+                               asp-page="" asp-route-mode="details" asp-route-id="@r.Id">
                                 <span class="res-id">#@r.Id</span>@r.CustomerName
                                 <span class="badge-status @BadgeClass(r.Status)">@r.Status</span>
                                 <span class="res-dates">@r.StartDate.ToString("MMM d, yyyy") &ndash; @r.EndDate.ToString("MMM d, yyyy")</span>
@@ -342,7 +342,7 @@
                 {
                     <div class="emp-detail-header">
                         <h3>New Walk-In Reservation</h3>
-                        <a asp-page="/EmployeeManageReservations" class="btn-save" style="background-color:#3a4048;">Cancel</a>
+                        <a asp-page="" class="btn-save" style="background-color:#3a4048;">Cancel</a>
                     </div>
 
                     @if (Model.SelectedWalkInCustomer == null)
@@ -372,7 +372,7 @@
                                                 <div class="value" style="color:#fff;">@c.FullName</div>
                                                 <div class="res-dates">@c.Email &middot; @c.Phone</div>
                                             </div>
-                                            <a asp-page="/EmployeeManageReservations" asp-route-mode="walkin" asp-route-custId="@c.Id" class="btn-save">Select</a>
+                                            <a asp-page="" asp-route-mode="walkin" asp-route-custId="@c.Id" class="btn-save">Select</a>
                                         </div>
                                     }
                                 </div>
@@ -485,7 +485,7 @@
 
                             <div class="mt-4">
                                 <button type="submit" class="btn-save">Create Reservation</button>
-                                <a asp-page="/EmployeeManageReservations" asp-route-mode="walkin" class="btn-save" style="background-color:#3a4048;">Back to Customer Search</a>
+                                <a asp-page="" asp-route-mode="walkin" class="btn-save" style="background-color:#3a4048;">Back to Customer Search</a>
                             </div>
                         </form>
                     }
@@ -493,6 +493,117 @@
                 else if (Model.InvalidId)
                 {
                     <p class="hint-text">We couldn't find that reservation. It may have been removed &mdash; try selecting one from the list.</p>
+                }
+                else if (Model.Mode == "details" && Model.Selected != null)
+                {
+                    var d = Model.Selected;
+                    <div class="emp-detail-header">
+                        <h3>Reservation #@d.Id &ndash; @d.CustomerName</h3>
+                        <span class="badge-status @BadgeClass(d.Status)">@d.Status</span>
+                    </div>
+
+                    @if (d.Status == "Cancelled")
+                    {
+                        <div class="cancelled-banner">
+                            <span>This reservation has been cancelled.</span>
+                        </div>
+                    }
+
+                    <h5 style="color:#ffffff; font-size:0.95rem; margin-bottom:12px;">Customer</h5>
+                    <div class="emp-info-grid" style="margin-bottom:20px;">
+                        <div class="emp-info-item">
+                            <label>Name</label>
+                            <div class="value">@d.CustomerName</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>Email</label>
+                            <div class="value">@(d.CustomerFound ? d.CustomerEmail : "Not found")</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>Phone</label>
+                            <div class="value">@(d.CustomerFound ? d.CustomerPhone : "—")</div>
+                        </div>
+                    </div>
+
+                    <h5 style="color:#ffffff; font-size:0.95rem; margin-bottom:12px;">Stay Details</h5>
+                    <div class="emp-info-grid" style="margin-bottom:20px;">
+                        <div class="emp-info-item">
+                            <label>Site</label>
+                            <div class="value">@d.SiteNumber</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>Check-in</label>
+                            <div class="value">@d.StartDate.ToString("MMM d, yyyy")</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>Check-out</label>
+                            <div class="value">@d.EndDate.ToString("MMM d, yyyy")</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>Nights</label>
+                            <div class="value">@d.Nights</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>Adults</label>
+                            <div class="value">@d.Adults</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>Children</label>
+                            <div class="value">@d.Children</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>Pets</label>
+                            <div class="value">@d.Pets</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>RV Length</label>
+                            <div class="value">Not recorded</div>
+                        </div>
+                        <div class="emp-info-item">
+                            <label>Total Cost</label>
+                            <div class="value">@d.TotalCost.ToString("C")</div>
+                        </div>
+                    </div>
+
+                    <h5 style="color:#ffffff; font-size:0.95rem; margin-bottom:12px;">Special Requests / Notes</h5>
+                    <p class="hint-text" style="padding:0 0 8px 0;">@(string.IsNullOrWhiteSpace(d.Notes) ? "None" : d.Notes)</p>
+
+                    <h5 style="color:#ffffff; font-size:0.95rem; margin:20px 0 12px 0;">Payment Records</h5>
+                    @if (d.Payments.Any())
+                    {
+                        <div class="emp-card" style="margin-top:0; padding:0; overflow:hidden;">
+                            <table style="width:100%; border-collapse:collapse;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left; padding:10px 16px; border-bottom:1px solid #3a4048; color:#9aa2ad; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em;">Date</th>
+                                        <th style="text-align:left; padding:10px 16px; border-bottom:1px solid #3a4048; color:#9aa2ad; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em;">Amount</th>
+                                        <th style="text-align:left; padding:10px 16px; border-bottom:1px solid #3a4048; color:#9aa2ad; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em;">Status</th>
+                                        <th style="text-align:left; padding:10px 16px; border-bottom:1px solid #3a4048; color:#9aa2ad; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em;">Reference</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in d.Payments)
+                                    {
+                                        <tr>
+                                            <td style="padding:10px 16px; border-bottom:1px solid #262b31; color:#e4e6eb;">@p.PaidAt.ToString("MMM d, yyyy")</td>
+                                            <td style="padding:10px 16px; border-bottom:1px solid #262b31; color:#e4e6eb;">@p.Amount.ToString("C")</td>
+                                            <td style="padding:10px 16px; border-bottom:1px solid #262b31; color:#e4e6eb;">@p.Status</td>
+                                            <td style="padding:10px 16px; border-bottom:1px solid #262b31; color:#9aa2ad;">@p.StripeId</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="hint-text" style="padding:0 0 8px 0;">No payment records found for this reservation.</p>
+                    }
+
+                    <div class="mt-4">
+                        <a asp-page="" asp-route-id="@d.Id" class="btn-save">Edit Reservation</a>
+                        <a asp-page="" class="btn-save" style="background-color:#3a4048;">Back to List</a>
+                    </div>
                 }
                 else if (Model.Selected != null)
                 {
@@ -592,6 +703,7 @@
 
                         <div class="mt-4">
                             <button type="submit" class="btn-save">Save Changes</button>
+                            <a asp-page="" asp-route-mode="details" asp-route-id="@d.Id" class="btn-save" style="background-color:#3a4048;">View Details</a>
 
                             @if (d.Status != "Cancelled")
                             {
