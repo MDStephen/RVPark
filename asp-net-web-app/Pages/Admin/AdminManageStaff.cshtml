@@ -84,6 +84,15 @@
 
                     <div class="d-flex gap-1">
 
+                        <a
+                            href="/AdminManageStaff?id=0"
+                            class="btn btn-sm btn-outline-secondary border-0"
+                            title="Create User">
+
+                            <i class="bi bi-person-plus"></i>
+
+                        </a>
+
                         <button
                             type="button"
                             class="btn btn-sm btn-outline-secondary border-0"
@@ -178,13 +187,26 @@
 
                             <div class="min-w-0">
 
-                                <div class="fs-5 fw-semibold text-light text-truncate">
-                                    @Model.Selected.firstName @Model.Selected.lastName
-                                </div>
+                                @if (Model.IsNew)
+                                {
+                                    <div class="fs-5 fw-semibold text-light text-truncate">
+                                        New Staff Member
+                                    </div>
 
-                                <div class="small text-secondary">
-                                    @Model.Selected.role@(Model.Selected.isLocked ? " · Locked" : "")
-                                </div>
+                                    <div class="small text-secondary">
+                                        Not yet created
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="fs-5 fw-semibold text-light text-truncate">
+                                        @Model.Selected.firstName @Model.Selected.lastName
+                                    </div>
+
+                                    <div class="small text-secondary">
+                                        @Model.Selected.role@(Model.Selected.isLocked ? " · Locked" : "")
+                                    </div>
+                                }
 
                             </div>
 
@@ -213,7 +235,8 @@
                                         name="firstName"
                                         value="@Model.Selected.firstName"
                                         class="form-control bg-dark text-light border-secondary border-opacity-25"
-                                        placeholder="First name" />
+                                        placeholder="First name"
+                                        required />
 
                                 </div>
 
@@ -229,7 +252,8 @@
                                         name="lastName"
                                         value="@Model.Selected.lastName"
                                         class="form-control bg-dark text-light border-secondary border-opacity-25"
-                                        placeholder="Last name" />
+                                        placeholder="Last name"
+                                        required />
 
                                 </div>
 
@@ -249,8 +273,9 @@
                                     <input
                                         type="date"
                                         name="dateOfBirth"
-                                        value="@Model.Selected.dateOfBirth.ToString("yyyy-MM-dd")"
-                                        class="form-control bg-dark text-light border-secondary border-opacity-25" />
+                                        value="@(Model.Selected.dateOfBirth == default ? "" : Model.Selected.dateOfBirth.ToString("yyyy-MM-dd"))"
+                                        class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                        required />
 
                                 </div>
 
@@ -295,10 +320,22 @@
                                         Username
                                     </label>
 
-                                    <input
-                                        value="@Model.Selected.username"
-                                        class="form-control bg-dark text-secondary border-secondary border-opacity-25"
-                                        disabled />
+                                    @if (Model.IsNew)
+                                    {
+                                        <input
+                                            name="username"
+                                            value="@Model.Selected.username"
+                                            class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                            placeholder="Username"
+                                            required />
+                                    }
+                                    else
+                                    {
+                                        <input
+                                            value="@Model.Selected.username"
+                                            class="form-control bg-dark text-secondary border-secondary border-opacity-25"
+                                            disabled />
+                                    }
 
                                 </div>
 
@@ -310,9 +347,23 @@
                                         Password
                                     </label>
 
-                                    <input
-                                        class="form-control bg-dark text-secondary border-secondary border-opacity-25"
-                                        disabled />
+                                    @if (Model.IsNew)
+                                    {
+                                        <input
+                                            name="password"
+                                            type="password"
+                                            value="@Model.Selected.password"
+                                            class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                            placeholder="Password"
+                                            required />
+                                    }
+                                    else
+                                    {
+                                        <input
+                                            value="@Model.Selected.password"
+                                            class="form-control bg-dark text-secondary border-secondary border-opacity-25"
+                                            disabled />
+                                    }
 
                                 </div>
 
@@ -335,7 +386,8 @@
                                     <button
                                         type="submit"
                                         asp-page-handler="Unlock"
-                                        class="btn btn-outline-light px-4">
+                                        class="btn btn-outline-light px-4"
+                                        disabled="@Model.IsNew">
 
                                         Unlock User
 
@@ -346,7 +398,9 @@
                                     <button
                                         type="submit"
                                         asp-page-handler="Lock"
-                                        class="btn btn-outline-light px-4">
+                                        class="btn btn-outline-light px-4"
+                                        disabled="@Model.IsNew"
+                                        title="@(Model.IsNew ? "Save this user before locking their access" : null)">
 
                                         Lock User
 
@@ -358,10 +412,15 @@
                         </form>
 
                         <!-- Delete Form -->
+                        @{
+                            var deleteLabel = Model.IsNew
+                                ? "Discard this new staff member? Nothing has been saved yet."
+                                : $"Delete {Model.Selected.firstName} {Model.Selected.lastName}? This cannot be undone.";
+                        }
                         <form
                             method="post"
                             asp-page-handler="Delete"
-                            onsubmit="return confirm('Delete @Model.Selected.firstName @Model.Selected.lastName? This cannot be undone.');">
+                            onsubmit="return confirm('@deleteLabel');">
 
                             <input
                                 type="hidden"
@@ -401,6 +460,14 @@
 
                     </div>
 
+                </div>
+            }
+
+            @if (!Model.IsNew)
+            {
+                <div class="text-end text-secondary small fst-italic opacity-75 mt-2">
+                    <div>Created @Model.Selected.CreatedAt.ToString("MMM d, yyyy 'at' h:mm tt")</div>
+                    <div>Last modified @Model.Selected.LastModifiedAt.ToString("MMM d, yyyy 'at' h:mm tt")</div>
                 </div>
             }
 

@@ -77,6 +77,14 @@
 
                     <div class="d-flex gap-1">
 
+                        <a
+                            href="/Admin/ManageUsers?selectedId=0"
+                            class="btn btn-sm btn-outline-secondary border-0"
+                            title="Create User">
+
+                            <i class="bi bi-person-plus"></i>
+                        </a>
+
                         <button
                             type="button"
                             class="btn btn-sm btn-outline-secondary border-0"
@@ -156,13 +164,26 @@
 
                             <div class="min-w-0">
 
-                                <div class="fs-5 fw-semibold text-light text-truncate">
-                                    @Model.SelectedUser.firstName @Model.SelectedUser.lastName
-                                </div>
+                                @if (Model.IsNew)
+                                {
+                                    <div class="fs-5 fw-semibold text-light text-truncate">
+                                        New Customer
+                                    </div>
 
-                                <div class="small text-secondary text-break">
-                                    @Model.SelectedUser.emailAddress
-                                </div>
+                                    <div class="small text-secondary">
+                                        Not yet created
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="fs-5 fw-semibold text-light text-truncate">
+                                        @Model.SelectedUser.firstName @Model.SelectedUser.lastName
+                                    </div>
+
+                                    <div class="small text-secondary text-break">
+                                        @Model.SelectedUser.emailAddress
+                                    </div>
+                                }
 
                             </div>
 
@@ -329,6 +350,50 @@
 
                             </div>
 
+                            @if (Model.IsNew)
+                            {
+                                <!-- Username / Password — only asked for when creating the account;
+                                     these become the customer's login (mirrors public sign-up). -->
+                                <div class="row g-3 mt-0">
+
+                                    <div class="col-12 col-md-6">
+
+                                        <label
+                                            asp-for="NewUsername"
+                                            class="form-label small text-secondary fw-semibold text-uppercase">
+
+                                            Username
+                                        </label>
+
+                                        <input
+                                            asp-for="NewUsername"
+                                            class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                            placeholder="Username"
+                                            required />
+
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+
+                                        <label
+                                            asp-for="NewPassword"
+                                            class="form-label small text-secondary fw-semibold text-uppercase">
+
+                                            Password
+                                        </label>
+
+                                        <input
+                                            asp-for="NewPassword"
+                                            type="password"
+                                            class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                            placeholder="Password"
+                                            required />
+
+                                    </div>
+
+                                </div>
+                            }
+
                             <!-- Save Button -->
                             <div class="d-flex flex-wrap gap-2 mt-4">
 
@@ -344,10 +409,15 @@
                         </form>
 
                         <!-- Delete Form -->
+                        @{
+                            var deleteLabel = Model.IsNew
+                                ? "Discard this new customer? Nothing has been saved yet."
+                                : $"Delete {Model.SelectedUser.firstName} {Model.SelectedUser.lastName}? This cannot be undone.";
+                        }
                         <form
                             method="post"
                             asp-page-handler="Delete"
-                            onsubmit="return confirm('Delete @Model.SelectedUser.firstName @Model.SelectedUser.lastName? This cannot be undone.');">
+                            onsubmit="return confirm('@deleteLabel');">
 
                             <input
                                 type="hidden"
@@ -365,6 +435,14 @@
                             </div>
 
                         </form>
+
+                        @if (!Model.IsNew)
+                        {
+                            <div class="text-end text-secondary small fst-italic opacity-75 mt-2">
+                                <div>Created @Model.SelectedUser.CreatedAt.ToString("MMM d, yyyy 'at' h:mm tt")</div>
+                                <div>Last modified @Model.SelectedUser.LastModifiedAt.ToString("MMM d, yyyy 'at' h:mm tt")</div>
+                            </div>
+                        }
 
                     </div>
 

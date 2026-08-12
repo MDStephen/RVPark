@@ -74,13 +74,16 @@ public class UserCreateAccountPageModel : PageModel
         }
 
         // 1) Create the person's profile row in the Users table (as a Customer).
+        var now = DateTime.Now;
         var customer = new Customer
         {
             firstName    = FirstName,
             lastName     = LastName,
             emailAddress = Email,
             phoneNumber  = PhoneNumber,
-            address      = Address
+            address      = Address,
+            CreatedAt      = now,
+            LastModifiedAt = now
         };
         _db.Users.Add(customer);
         await _db.SaveChangesAsync();   // after this, the database fills in customer.userId

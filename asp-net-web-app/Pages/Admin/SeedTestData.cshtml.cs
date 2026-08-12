@@ -46,8 +46,11 @@ public class SeedTestDataModel : PageModel
                 lastName = "Smith",
                 emailAddress = "johnsmith@example.com",
                 phoneNumber = "555-0101",
-                address = "123 Main St, Ogden, UT"
+                address = "123 Main St, Ogden, UT",
+                CreatedAt = DateTime.UtcNow,
+                LastModifiedAt = DateTime.UtcNow
             };
+
             _db.Users.Add(seedCustomer);
 
             const string testPassword = "password123";
@@ -66,8 +69,8 @@ public class SeedTestDataModel : PageModel
             // can't store (valid range starts 1753-01-01). This was the actual seeding failure.
             var employees = new List<Employee>
             {
-                new() { employeeId = 1, firstName = "Admin", lastName = "User", dateOfBirth = new DateTime(1985, 3, 14), username = "admin", password = "admin123", role = "Admin" },
-                new() { employeeId = 2, firstName = "Staff", lastName = "Member", dateOfBirth = new DateTime(1992, 7, 22), username = "staff", password = "staff123", role = "Staff" }
+                new() { employeeId = 1, firstName = "Admin", lastName = "User", dateOfBirth = new DateTime(1985, 3, 14), username = "admin", password = "admin123", role = "Admin", CreatedAt = DateTime.UtcNow, LastModifiedAt = DateTime.UtcNow },
+                new() { employeeId = 2, firstName = "Staff", lastName = "Member", dateOfBirth = new DateTime(1992, 7, 22), username = "staff", password = "staff123", role = "Staff", CreatedAt = DateTime.UtcNow, LastModifiedAt = DateTime.UtcNow }
             };
             _db.Employees.AddRange(employees);
 

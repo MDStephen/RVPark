@@ -26,5 +26,11 @@ namespace asp_net_web_app.Data
         public string address { get; set; }
 
         public string? aptSuite { get; set; }
+
+        // Set once, at creation, and never touched again.
+        public DateTime CreatedAt { get; set; }
+
+        // Bumped on every change to this record.
+        public DateTime LastModifiedAt { get; set; }
     }
 }
