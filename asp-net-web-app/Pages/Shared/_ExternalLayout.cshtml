@@ -1,5 +1,8 @@
 @{
     Layout = null;
+
+    string PageKey(string page) =>
+        ViewContext.RouteData.Values["page"]?.ToString() == page ? "active" : "";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -8,28 +11,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - RVPark</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        .rvpark-navbar {
+            background-color: #212529;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .rvpark-navbar .navbar-brand {
+            letter-spacing: 0.06em;
+        }
+
+        .rvpark-navbar .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 500;
+            padding: 0.5rem 0.9rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .rvpark-navbar .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .rvpark-navbar .nav-link.active {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .rvpark-navbar .nav-divider {
+            width: 1px;
+            align-self: stretch;
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+    </style>
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="d-flex flex-column min-vh-100 bg-dark">
     <!-- Navigation Bar -->
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary" style="--bs-bg-opacity: .25;">
+        <nav class="navbar navbar-expand-lg navbar-dark rvpark-navbar sticky-top shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-bold" asp-area="" asp-page="/CustomerFacing/Index">RVPARK</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#extNav">
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2" asp-area="" asp-page="/CustomerFacing/Index">
+                    <img src="~/images/fighter-jet.png" alt="" width="32" height="32" class="rounded-circle" style="filter: invert(1);"/>
+                    RVPARK
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#extNav" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="extNav">
-                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/CustomerFacing/Index">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/Campsites/Index">Browse Sites</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-page="/CustomerFacing/UserManageReservation">My Reservations</a></li>
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                        <li class="nav-item"><a class="nav-link @PageKey("/CustomerFacing/Index")" asp-area="" asp-page="/CustomerFacing/Index">Home</a></li>
+                        <li class="nav-item"><a class="nav-link @PageKey("/Campsites/Index")" asp-area="" asp-page="/Campsites/Index">Browse Sites</a></li>
+                        <li class="nav-item"><a class="nav-link @PageKey("/CustomerFacing/UserManageReservation")" asp-area="" asp-page="/CustomerFacing/UserManageReservation">My Reservations</a></li>
+
+                        @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-page="/Admin/Dashboard">
+                                    Admin Dashboard
+                                </a>
+                            </li>
+                        }
+
+                        <li class="nav-item my-2 my-lg-0 mx-lg-2">
+                            <span class="nav-divider d-none d-lg-block"></span>
+                        </li>
+
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            // Prefer their first name; if it's not on the cookie (e.g. staff),
-                            // fall back to the username with anything from "@" onward stripped,
-                            // so an email-as-username still reads like a name ("john.smith", not
-                            // "john.smith@example.com").
                             var displayName = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value;
                             if (string.IsNullOrEmpty(displayName))
                             {
@@ -38,19 +88,19 @@
                                 displayName = atIndex > 0 ? rawName.Substring(0, atIndex) : rawName;
                             }
 
-                            <li class="nav-item d-flex align-items-center gap-2 ms-lg-2">
+                            <li class="nav-item d-flex align-items-center gap-2 flex-wrap">
                                 <span class="navbar-text text-white fw-semibold">
                                     Welcome, @displayName
                                 </span>
-                                <form method="post" asp-page="/CustomerFacing/Logout">
-                                    <button type="submit" class="btn btn-outline-light btn-sm rounded-pill">Log Out</button>
+                                <form method="post" asp-page="/CustomerFacing/Logout" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3">Log Out</button>
                                 </form>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="btn btn-primary text-white fw-semibold ms-lg-2" asp-area="" asp-page="/CustomerFacing/UserLoginPage">Log In</a>
+                                <a class="btn btn-primary btn-sm rounded-pill fw-semibold px-3" asp-area="" asp-page="/CustomerFacing/UserLoginPage">Log In</a>
                             </li>
                         }
                     </ul>
@@ -71,11 +121,11 @@
             <div class="row gy-3">
                 <div class="col-md-4">
                     <h5>RVPARK</h5>
-                    <p class="mb-0">address<br />City, UT area_code</p>
+                    <p class="mb-0">7981 Georgia St<br/>Hill AFB, UT 84056</p>
                 </div>
                 <div class="col-md-4">
                     <h5>Contact</h5>
-                    <p class="mb-0">phone number<br />email</p>
+                    <p class="mb-0">(801) 777-1844<br/>support@hafb-rvpark.com</p>
                 </div>
             </div>
         </div>

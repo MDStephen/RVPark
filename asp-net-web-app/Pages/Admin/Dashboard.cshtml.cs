@@ -20,7 +20,20 @@ public class DashboardModel : PageModel
         var now = DateTime.Now;
         InitialServerTime = now.ToString("yyyy-MM-ddTHH:mm:ss");
         TimeZoneName = TimeZoneInfo.Local.IsDaylightSavingTime(now) 
-            ? TimeZoneInfo.Local.DaylightName 
+            ? TimeZoneInfo.Local.DaylightName
             : TimeZoneInfo.Local.StandardName;
+
+        
+        /* // Just for debugging authorization
+        Console.WriteLine("----------------------------------------------------------------");
+        foreach (var claim in User.Claims)
+        {
+            Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
+        }
+
+        Console.WriteLine($"IsAuthenticated: {User.Identity?.IsAuthenticated}");
+        Console.WriteLine($"IsAdmin: {User.IsInRole("Admin")}");
+        Console.WriteLine($"IsEmployee: {User.IsInRole("Employee")}");
+        */
     }
 }

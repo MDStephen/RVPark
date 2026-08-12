@@ -52,6 +52,7 @@ public class UserLoginPageModel : PageModel
                 // Their real role ("Admin"/"Staff") goes in the cookie so we can
                 // check it later. Either way they're not a customer, so they go
                 // to the dashboard.
+                // Console.WriteLine($"LOGIN: {employee.username}, ROLE: '{employee.role}'"); checking to see why authorization is failing on admin and staff
                 await SignInAsync(employee.username, employee.role);
                 return RedirectToPage("/Admin/Dashboard");
             }

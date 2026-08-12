@@ -39,6 +39,11 @@ body.app-shell {
 }
 
 /* ── Sidebar ──────────────────────────────────────────────────── */
+/* No position:fixed here anymore - Bootstrap's .offcanvas-lg classes
+   (see _InternalLayout.cshtml) handle that responsively: fixed/hidden
+   drawer below the lg breakpoint, normal in-flow flex column at lg+.
+   That's also why .main-content no longer needs margin-left below -
+   flexbox on body.app-shell places them side by side automatically. */
 body.app-shell .sidebar {
     width: var(--sidebar-w);
     background: var(--bg-sidebar);
@@ -46,8 +51,29 @@ body.app-shell .sidebar {
     flex-direction: column;
     flex-shrink: 0;
     border-right: 1px solid var(--border);
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
+}
+
+/* Force the offcanvas drawer mechanics off at lg+ regardless of exact
+   Bootstrap internals, so the sidebar reliably sits in normal flow. */
+@media (min-width: 992px) {
+    body.app-shell .sidebar {
+        position: static !important;
+        transform: none !important;
+        visibility: visible !important;
+        height: auto !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Below lg: theme the slide-in drawer to match the sidebar instead of
+   Bootstrap's default white offcanvas background/width. */
+@media (max-width: 991.98px) {
+    body.app-shell .sidebar {
+        --bs-offcanvas-width: 260px;
+        --bs-offcanvas-bg: var(--bg-sidebar);
+        --bs-offcanvas-color: var(--text-primary);
+        --bs-offcanvas-border-color: var(--border);
+    }
 }
 
 body.app-shell .sidebar-brand {
@@ -127,12 +153,33 @@ body.app-shell .avatar-circle {
     color: var(--text-secondary);
 }
 
+/* ── Mobile top bar (below lg only) ──────────────────────────────── */
+body.app-shell .mobile-topbar {
+    display: none;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+@media (max-width: 991.98px) {
+    body.app-shell .mobile-topbar { display: flex; }
+}
+
 /* ── Main content ─────────────────────────────────────────────── */
 body.app-shell .main-content {
-    margin-left: var(--sidebar-w);
     flex: 1;
     padding: 32px 36px;
     min-height: 100vh;
+    min-width: 0; /* lets flex children shrink below content width instead of overflowing */
+}
+
+@media (max-width: 991.98px) {
+    body.app-shell .main-content {
+        padding: 20px 16px;
+    }
 }
 
 body.app-shell .page-header { margin-bottom: 22px; }

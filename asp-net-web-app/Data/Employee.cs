@@ -17,7 +17,7 @@ namespace asp_net_web_app.Data
         // team convention: initial password = employee ID (prototype only)
         public string password { get; set; }
 
-        // access level: "Admin" or "Employee"
+        // access level: "Admin" or "Staff"
         public string role { get; set; }
 
         // true = locked out of the system

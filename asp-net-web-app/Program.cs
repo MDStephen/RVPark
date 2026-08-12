@@ -16,18 +16,30 @@ builder.Services.AddScoped<EmployeeLogic>();
 builder.Services.AddScoped<SiteAvailabilityService>();
 builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
 builder.Services.AddScoped<IPaymentService, StripePaymentService>();
-builder.Services.AddRazorPages();
 builder.Services.AddScoped<IEmailSender, DevEmailSender>();
 
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AuthorizeFolder("/Admin", "EmployeeOnly");
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EmployeeOnly", policy =>
+    {
+        policy.RequireRole("Admin", "Staff", "admin", "staff");
+    });
+});
+
 // Cookie authentication: after a successful login we drop a cookie in the
-// browser, and it's sent back on every request — that's what keeps someone
-// "logged in" from page to page without signing in again each time.
+// browser, and it's sent back on every request that's what keeps someone
+// logged in from page to page without signing in again each time.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         // Where to send people who need to log in.
         options.LoginPath = "/CustomerFacing/UserLoginPage";
-        options.AccessDeniedPath = "/CustomerFacing/UserLoginPage";
+        options.AccessDeniedPath = "/CustomerFacing/AccessDenied";
     });
 
 var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];

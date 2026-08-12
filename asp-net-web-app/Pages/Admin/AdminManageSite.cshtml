@@ -1,273 +1,689 @@
 @page "{handler?}/{id?}"
 @model asp_net_web_app.Pages.AdminManageSiteModel
 @{
-    ViewData["Title"] = "Admin - Manage Sites";
+ViewData["Title"] = "Admin - Manage Sites";
 }
 
-<style>
-    .admin-container { padding: 2.5rem 3rem; color: #e5e5e5; background-color: transparent; min-height: 100vh; }
-    .flex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .btn-custom-primary { background-color: #4f46e5; color: white; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 500; text-decoration: none; border: none; cursor: pointer; }
-    .btn-custom-primary:hover { background-color: #4338ca; }
-    .data-card { background-color: #171717; border: 1px solid #262626; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); margin-bottom: 2rem; }
-    .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
-    .admin-table th { padding: 1rem; border-bottom: 1px solid #262626; color: #a3a3a3; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    .admin-table td { padding: 1rem; border-bottom: 1px solid #262626; font-size: 0.875rem; }
-    .form-group { margin-bottom: 1.25rem; }
-    .form-label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #a3a3a3; margin-bottom: 0.5rem; }
-    .form-input-field { width: 100%; background-color: #0a0a0a; color: white; border: 1px solid #262626; border-radius: 0.5rem; padding: 0.6rem 0.75rem; outline: none; font-size: 0.875rem; }
-    .form-input-field:focus { border-color: #4f46e5; }
-    .btn-grid-action { background: #262626; color: #d4d4d4; border: 1px solid #404040; padding: 0.4rem 0.75rem; border-radius: 0.375rem; text-decoration: none; font-size: 0.75rem; cursor: pointer; }
-    .btn-grid-action:hover { background: #404040; color: white; }
-    .badge-status { padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; background-color: #262626; color: #d4d4d4; }
-</style>
+<div data-bs-theme="dark" class="text-light px-3 px-md-4 py-3 py-md-4">
+<div class="container-fluid p-0">
 
-<div class="admin-container">
-
-    <!--________________ View 1: Main Page ________________-->
+    <!-- View 1: Main Page -->
     @if (Model.CurrentAction == "List")
     {
-        <div class="flex-header">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+
             <div>
-                <h1 style="font-size: 1.5rem; font-weight: 600; color: white; margin: 0;">Site Inventory Management</h1>
-                <p style="font-size: 0.875rem; color: #a3a3a3; margin: 0.25rem 0 0 0;">Configure park locations, photo portfolios, and dynamic price windows.</p>
-            </div>
-            <a asp-page-handler="CreateSite" class="btn-custom-primary">+ Add Property Site</a>
-        </div>
+                <h1 class="h4 fw-semibold text-light mb-1">
+                    Site Inventory Management
+                </h1>
 
-        <div class="data-card" style="padding: 0; overflow: hidden;">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th style="padding-left: 1.5rem;">Site Identifier</th>
-                        <th>Classification Category</th>
-                        <th>Operational Status</th>
-                        <th style="text-align: right; padding-right: 1.5rem;">Management Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.AllSites != null && Model.AllSites.Any())
-                    {
-                        @foreach (var site in Model.AllSites)
-                        {
-                            <tr>
-                                <td style="padding-left: 1.5rem; font-weight: 600; color: white;">@site.SiteNumber</td>
-                                <td><span class="badge-status">@site.Category</span></td>
-                                <td>
-                                    @if (site.IsAvailable)
-                                    {
-                                        <span style="padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.35);">
-                                            Available
-                                        </span>
-                                    }
-                                    else
-                                        {
-                                        <span style="padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: rgba(239,68,68,0.1); color: #f87171; border: 1px solid #ef4444; box-shadow: 0 0 4px rgba(239,68,68,0.25);">
-                                            In Use
-                                        </span>
-                                    }
-                                </td>
-
-                                <td style="text-align: right; padding-right: 1.5rem;">
-                                    <a asp-page-handler="CreateSite" asp-route-id="@site.Id" class="btn-grid-action" style="color: #6366f1;">Edit</a>
-                                    <a asp-page-handler="ManagePhotos" asp-route-id="@site.Id" class="btn-grid-action" style="color: #818cf8;">Photos</a>
-                                    <a asp-page-handler="ManagePrices" asp-route-id="@site.Id" class="btn-grid-action" style="color: #fbbf24;">Rates</a>
-                                    <form method="post" asp-page-handler="DeleteSite" asp-route-siteId="@site.Id" style="display: inline;" onclick="return confirm('Delete this site permanently?');">
-                                        <button type="submit" class="btn-grid-action" style="color: #f87171;">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #737373; padding: 2rem;">No property sites available. Click "+ Add Property Site" to create one.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
-
-        <!--________________ View 2: Site Creator/Manager ________________-->
-    @if (Model.CurrentAction == "Create" || Model.CurrentAction == "Edit")
-    {
-        <div style="margin-bottom: 1.5rem;">
-            <a asp-page="" style="font-size: 0.75rem; color: #a3a3a3; text-decoration: none;">← Back to Site Control Hub</a>
-            <h1 style="font-size: 1.25rem; font-weight: 600; color: white; margin-top: 0.5rem;">
-                @(Model.CurrentAction == "Create" ? "Provision New Site Location" : $"Modify Configuration for Site {Model.ActiveSiteNumber}")
-            </h1>
-        </div>
-
-        <div class="data-card" style="max-width: 500px;">
-            <form method="post" asp-page-handler="@(Model.CurrentAction == "Edit" ? "UpdateSite" : "CreateSite")">
-                <input type="hidden" name="siteId" value="@Model.ActiveSiteId" />
-                
-                <div class="form-group">
-                    <label class="form-label">Site Designation / Number</label>
-                    <input name="siteNum" class="form-input-field" value="@(Model.CurrentAction == "Edit" ? Model.ActiveSiteNumber : "")" placeholder="e.g., Premium-RV-40" required />
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Classification Category Type</label>
-                    <select name="category" class="form-input-field">
-                        <option value="Tent Site">Tent Site</option>
-                        <option value="RV Hookup">RV Hookup</option>
-                        <option value="RV Parking">RV Parking</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Operational Status</label>
-                    <select name="isAvailable" class="form-input-field">
-                        @if (Model.ActiveSiteStatus == true)
-                        {
-                            <option value="true" selected>Available</option>
-                            <option value="false">In Use</option>
-                        }
-                        else
-                        {
-                            <option value="true">Available</option>
-                            <option value="false" selected>In Use</option>
-                        }
-                    </select>
-                </div>
-
-                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #262626;">
-                    <button type="submit" class="btn-custom-primary" style="background-color: #10b981;">
-                        @(Model.CurrentAction == "Edit" ? "Update Details" : "Commit Settings")
-                    </button>
-                    <a asp-page="" class="btn-grid-action" style="padding: 0.6rem 1.2rem; font-size: 0.875rem; border-radius: 0.5rem;">Cancel</a>
-                </div>
-            </form>
-        </div>
-    }
-
-
-    <!--________________ View 3: Photo Manager ________________-->
-    @if (Model.CurrentAction == "Photos")
-    {
-        <div style="margin-bottom: 1.5rem;">
-            <a asp-page="" style="font-size: 0.75rem; color: #a3a3a3; text-decoration: none;">← Save and Return to Inventory</a>
-            <h1 style="font-size: 1.25rem; font-weight: 600; color: white; margin-top: 0.5rem;">Photo Portfolio Management <span style="color:#737373; font-size:1rem;">(Site @Model.ActiveSiteNumber)</span></h1>
-        </div>
-
-        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
-            <div class="data-card" style="flex: 1; min-width: 280px; max-width: 400px; height: fit-content;">
-                <h5 class="form-label" style="font-weight: 700; margin-bottom: 1rem;">Attach New Asset</h5>
-                <form method="post" asp-page-handler="AddPhoto" enctype="multipart/form-data">
-                    <input type="hidden" name="siteId" value="@Model.ActiveSiteId" />
-                    <div class="form-group">
-                        <label class="form-label">Select Image File</label>
-                        <input type="file" name="PhotoFile" accept="image/*" class="form-input-field" required />
-                    </div>
-                    <button type="submit" class="btn-custom-primary" style="width: 100%;">Upload Asset</button>
-                </form>
-            </div>
-        
-        <div class="data-card" style="flex: 2; min-width: 320px;">
-            <h5 class="form-label" style="font-weight: 700; margin-bottom: 1rem;">Active Portfolio Items</h5>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;">
-                @if (Model.SelectedPhotos.Any())
-                {
-                    @foreach (var photo in Model.SelectedPhotos)
-                    {
-                        <div style="position: relative; background-color: #0a0a0a; border: 1px solid #262626; border-radius: 0.5rem; overflow: hidden; height: 120px;">
-                            <div style="width: 100%; height: 100%; background-image: url('@photo.PhotoUrl'); background-size: cover; background-position: center;"></div>
-                            
-                            <form method="post" asp-page-handler="DeletePhoto" style="position: absolute; top: 0.5rem; right: 0.5rem; margin: 0;">
-                                <input type="hidden" name="photoId" value="@photo.Id" />
-                                <input type="hidden" name="siteId" value="@Model.ActiveSiteId" />
-                                <button type="submit" style="background: rgba(220, 38, 38, 0.85); color: white; border: none; border-radius: 0.25rem; width: 24px; height: 24px; font-size: 0.85rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='rgba(220, 38, 38, 0.85)'" title="Delete Photo">
-                                    &times;
-                                </button>
-                            </form>
-
-                            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0.25rem; background: rgba(0,0,0,0.8); text-align: center; font-size: 0.65rem; font-family: monospace; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; color: #d4d4d4;">
-                                @photo.PhotoUrl
-                            </div>
-                        </div>
-                    }
-                }
-                else
-                {
-                    <p style="color:#737373; font-size:0.875rem;">No photos uploaded for this site yet.</p>
-                }
-                </div>
-            </div>
-        </div>
-    }
-
-
-
-    <!--________________ SCREEN 4: Rates & Price Manager ________________-->
-    @if (Model.CurrentAction == "Prices")
-    {
-        <div style="margin-bottom: 1.5rem;">
-            <a asp-page="" style="font-size: 0.75rem; color: #a3a3a3; text-decoration: none;">← Save and Return to Inventory</a>
-            <h1 style="font-size: 1.25rem; font-weight: 600; color: white; margin-top: 0.5rem;">Dynamic Seasonal Pricing <span style="color:#737373; font-size:1rem;">(Site @Model.ActiveSiteNumber)</span></h1>
-        </div>
-
-        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
-            <div class="data-card" style="flex: 1; min-width: 280px; max-width: 400px; height: fit-content;">
-                <h5 class="form-label" style="font-weight: 700; margin-bottom: 1rem;">Create Active Price Window</h5>
-                <form method="post" asp-page-handler="AddPrice">
-                    <input type="hidden" name="siteId" value="@Model.ActiveSiteId" />
-                    <div class="form-group">
-                        <label class="form-label">Daily Rate ($)</label>
-                        <input name="cost" type="number" step="0.01" class="form-input-field" required />
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Effective Activation Date</label>
-                        <input name="start" type="date" class="form-input-field" value="2026-07-09" required />
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Deactivation Expiry Date</label>
-                        <input name="end" type="date" class="form-input-field" value="2026-07-16" required />
-                    </div>
-                    <button type="submit" class="btn-custom-primary" style="width: 100%; background-color: #f59e0b; color: #0a0a0a; font-weight: 600;">Apply Rate Rule</button>
-                </form>
+                <p class="small text-secondary mb-0">
+                    Configure park locations, photo portfolios, and dynamic price windows.
+                </p>
             </div>
 
-            <div class="data-card" style="flex: 2; min-width: 320px; padding: 0; overflow: hidden;">
-                <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #262626;">
-                    <h5 class="form-label" style="font-weight: 700; margin: 0;">Active Price Schedules</h5>
-                </div>
-                <table class="admin-table">
+            <a
+                asp-page-handler="CreateSite"
+                class="btn btn-primary">
+
+                + Add Property Site
+            </a>
+
+        </div>
+
+        <div class="card bg-dark border-secondary border-opacity-25 overflow-hidden">
+
+            <div class="table-responsive">
+
+                <table class="table table-dark table-hover align-middle mb-0">
+
                     <thead>
-                        <tr>
-                            <th style="padding-left: 1.5rem;">Price (Per Night)</th>
-                            <th>Effective Start</th>
-                            <th>Effective End</th>
-                            <th style="text-align: right; padding-right: 1.5rem;">Actions</th>
+                        <tr class="text-secondary small text-uppercase">
+
+                            <th class="ps-4 py-3">
+                                Site Identifier
+                            </th>
+
+                            <th class="py-3">
+                                Classification Category
+                            </th>
+
+                            <th class="py-3">
+                                Operational Status
+                            </th>
+
+                            <th class="text-end pe-4 py-3">
+                                Management Actions
+                            </th>
+
                         </tr>
                     </thead>
+
                     <tbody>
-                        @if (Model.SelectedPrices.Any())
+
+                        @if (Model.AllSites != null && Model.AllSites.Any())
                         {
-                            @foreach(var price in Model.SelectedPrices) {
+                            @foreach (var site in Model.AllSites)
+                            {
                                 <tr>
-                                    <td style="padding-left: 1.5rem; color: #fbbf24; font-weight: 600;">$@price.Cost.ToString("F2")</td>
-                                    <td style="color: #d4d4d4;">@price.Start.ToShortDateString()</td>
-                                    <td style="color: #d4d4d4;">@price.End.ToShortDateString()</td>
-                                    <td style="text-align: right; padding-right: 1.5rem;">
-                                        <form method="post" asp-page-handler="DeletePrice" asp-route-priceId="@price.Id" asp-route-siteId="@Model.ActiveSiteId" style="display: inline;">
-                                            <button type="submit" class="btn-grid-action" style="color: #f87171;">Remove</button>
-                                        </form>
+
+                                    <td class="ps-4 fw-semibold text-light">
+                                        @site.SiteNumber
                                     </td>
+
+                                    <td>
+                                        <span class="badge text-bg-secondary">
+                                            @site.Category
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        @if (site.IsAvailable)
+                                        {
+                                            <span class="badge rounded-pill text-success bg-success bg-opacity-10 border border-success border-opacity-25">
+                                                Available
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill text-danger bg-danger bg-opacity-10 border border-danger border-opacity-25">
+                                                In Use
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="text-end pe-4 text-nowrap">
+
+                                        <a
+                                            asp-page-handler="CreateSite"
+                                            asp-route-id="@site.Id"
+                                            class="btn btn-sm btn-outline-primary me-1">
+
+                                            Edit
+                                        </a>
+
+                                        <a
+                                            asp-page-handler="ManagePhotos"
+                                            asp-route-id="@site.Id"
+                                            class="btn btn-sm btn-outline-primary me-1">
+
+                                            Photos
+                                        </a>
+
+                                        <a
+                                            asp-page-handler="ManagePrices"
+                                            asp-route-id="@site.Id"
+                                            class="btn btn-sm btn-outline-warning me-1">
+
+                                            Rates
+                                        </a>
+
+                                        <form
+                                            method="post"
+                                            asp-page-handler="DeleteSite"
+                                            asp-route-siteId="@site.Id"
+                                            class="d-inline"
+                                            onclick="return confirm('Delete this site permanently?');">
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-outline-danger">
+
+                                                Delete
+                                            </button>
+
+                                        </form>
+
+                                    </td>
+
                                 </tr>
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="4" style="text-align: center; color: #737373; padding: 2rem;">No dynamic rates configured for this site.</td>
+                                <td
+                                    colspan="4"
+                                    class="text-center text-secondary py-5">
+
+                                    No property sites available. Click "+ Add Property Site" to create one.
+
+                                </td>
                             </tr>
                         }
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </div>
     }
+
+    <!-- View 2: Site Creator/Manager -->
+    @if (Model.CurrentAction == "Create" || Model.CurrentAction == "Edit")
+    {
+        <div class="mb-4">
+
+            <a
+                asp-page=""
+                class="small text-secondary text-decoration-none">
+
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to Site Control Hub
+            </a>
+
+            <h1 class="h5 fw-semibold text-light mt-2 mb-0">
+                @(Model.CurrentAction == "Create"
+                    ? "Provision New Site Location"
+                    : $"Modify Configuration for Site {Model.ActiveSiteNumber}")
+            </h1>
+
+        </div>
+
+        <div class="card bg-dark border-secondary border-opacity-25 w-100">
+
+            <div class="card-body p-3 p-md-4">
+
+                <form
+                    method="post"
+                    asp-page-handler="@(Model.CurrentAction == "Edit" ? "UpdateSite" : "CreateSite")">
+
+                    <input
+                        type="hidden"
+                        name="siteId"
+                        value="@Model.ActiveSiteId" />
+
+                    <div class="mb-3">
+
+                        <label class="form-label small text-secondary text-uppercase fw-semibold">
+                            Site Designation / Number
+                        </label>
+
+                        <input
+                            name="siteNum"
+                            class="form-control bg-dark text-light border-secondary border-opacity-25"
+                            value="@(Model.CurrentAction == "Edit" ? Model.ActiveSiteNumber : "")"
+                            placeholder="e.g., Premium-RV-40"
+                            required />
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label small text-secondary text-uppercase fw-semibold">
+                            Classification Category Type
+                        </label>
+
+                        <select
+                            name="category"
+                            class="form-select bg-dark text-light border-secondary border-opacity-25">
+
+                            <option value="Tent Site">
+                                Tent Site
+                            </option>
+
+                            <option value="RV Hookup">
+                                RV Hookup
+                            </option>
+
+                            <option value="RV Parking">
+                                RV Parking
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label small text-secondary text-uppercase fw-semibold">
+                            Operational Status
+                        </label>
+
+                        <select
+                            name="isAvailable"
+                            class="form-select bg-dark text-light border-secondary border-opacity-25">
+
+                            @if (Model.ActiveSiteStatus == true)
+                            {
+                                <option value="true" selected>
+                                    Available
+                                </option>
+
+                                <option value="false">
+                                    In Use
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="true">
+                                    Available
+                                </option>
+
+                                <option value="false" selected>
+                                    In Use
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 border-top border-secondary border-opacity-25 pt-3 mt-4">
+
+                        <button
+                            type="submit"
+                            class="btn btn-success">
+
+                            @(Model.CurrentAction == "Edit"
+                                ? "Update Details"
+                                : "Commit Settings")
+
+                        </button>
+
+                        <a
+                            asp-page=""
+                            class="btn btn-outline-secondary">
+
+                            Cancel
+
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    }
+
+    <!-- View 3: Photo Manager -->
+    @if (Model.CurrentAction == "Photos")
+    {
+        <div class="mb-4">
+
+            <a
+                asp-page=""
+                class="small text-secondary text-decoration-none">
+
+                <i class="bi bi-arrow-left me-1"></i>
+                Save and Return to Inventory
+            </a>
+
+            <h1 class="h5 fw-semibold text-light mt-2 mb-0">
+                Photo Portfolio Management
+
+                <span class="small text-secondary">
+                    (Site @Model.ActiveSiteNumber)
+                </span>
+            </h1>
+
+        </div>
+
+        <div class="row g-3 g-lg-4 align-items-start">
+
+            <!-- Upload -->
+            <div class="col-12 col-lg-4">
+
+                <div class="card bg-dark border-secondary border-opacity-25">
+
+                    <div class="card-body p-3 p-md-4">
+
+                        <h5 class="small text-secondary text-uppercase fw-semibold mb-3">
+                            Attach New Asset
+                        </h5>
+
+                        <form
+                            method="post"
+                            asp-page-handler="AddPhoto"
+                            enctype="multipart/form-data">
+
+                            <input
+                                type="hidden"
+                                name="siteId"
+                                value="@Model.ActiveSiteId" />
+
+                            <div class="mb-3">
+
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">
+                                    Select Image File
+                                </label>
+
+                                <input
+                                    type="file"
+                                    name="PhotoFile"
+                                    accept="image/*"
+                                    class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                    required />
+
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary w-100">
+
+                                Upload Asset
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Portfolio -->
+            <div class="col-12 col-lg-8">
+
+                <div class="card bg-dark border-secondary border-opacity-25">
+
+                    <div class="card-body p-3 p-md-4">
+
+                        <h5 class="small text-secondary text-uppercase fw-semibold mb-3">
+                            Active Portfolio Items
+                        </h5>
+
+                        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
+
+                            @if (Model.SelectedPhotos.Any())
+                            {
+                                @foreach (var photo in Model.SelectedPhotos)
+                                {
+                                    <div class="col">
+
+                                        <div
+                                            class="position-relative bg-dark border border-secondary border-opacity-25 rounded overflow-hidden"
+                                            style="height:120px;">
+
+                                            <div
+                                                class="w-100 h-100"
+                                                style="background-image:url('@photo.PhotoUrl'); background-size:cover; background-position:center;">
+                                            </div>
+
+                                            <form
+                                                method="post"
+                                                asp-page-handler="DeletePhoto"
+                                                class="position-absolute top-0 end-0 m-2">
+
+                                                <input
+                                                    type="hidden"
+                                                    name="photoId"
+                                                    value="@photo.Id" />
+
+                                                <input
+                                                    type="hidden"
+                                                    name="siteId"
+                                                    value="@Model.ActiveSiteId" />
+
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-sm btn-danger p-0 d-flex align-items-center justify-content-center"
+                                                    style="width:24px;height:24px;"
+                                                    title="Delete Photo">
+
+                                                    &times;
+
+                                                </button>
+
+                                            </form>
+
+                                            <div
+                                                class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-center text-secondary px-1 py-1 small text-truncate"
+                                                style="font-family:monospace; font-size:.65rem;">
+
+                                                @photo.PhotoUrl
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12">
+
+                                    <p class="text-secondary small mb-0">
+                                        No photos uploaded for this site yet.
+                                    </p>
+
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+    <!-- View 4: Rates & Price Manager -->
+    @if (Model.CurrentAction == "Prices")
+    {
+        <div class="mb-4">
+
+            <a
+                asp-page=""
+                class="small text-secondary text-decoration-none">
+
+                <i class="bi bi-arrow-left me-1"></i>
+                Save and Return to Inventory
+            </a>
+
+            <h1 class="h5 fw-semibold text-light mt-2 mb-0">
+
+                Dynamic Seasonal Pricing
+
+                <span class="small text-secondary">
+                    (Site @Model.ActiveSiteNumber)
+                </span>
+
+            </h1>
+
+        </div>
+
+        <div class="row g-3 g-lg-4 align-items-start">
+
+            <!-- Add Price -->
+            <div class="col-12 col-lg-4">
+
+                <div class="card bg-dark border-secondary border-opacity-25">
+
+                    <div class="card-body p-3 p-md-4">
+
+                        <h5 class="small text-secondary text-uppercase fw-semibold mb-3">
+                            Create Active Price Window
+                        </h5>
+
+                        <form
+                            method="post"
+                            asp-page-handler="AddPrice">
+
+                            <input
+                                type="hidden"
+                                name="siteId"
+                                value="@Model.ActiveSiteId" />
+
+                            <div class="mb-3">
+
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">
+                                    Daily Rate ($)
+                                </label>
+
+                                <input
+                                    name="cost"
+                                    type="number"
+                                    step="0.01"
+                                    class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                    required />
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">
+                                    Effective Activation Date
+                                </label>
+
+                                <input
+                                    name="start"
+                                    type="date"
+                                    class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                    value="2026-07-09"
+                                    required />
+
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">
+                                    Deactivation Expiry Date
+                                </label>
+
+                                <input
+                                    name="end"
+                                    type="date"
+                                    class="form-control bg-dark text-light border-secondary border-opacity-25"
+                                    value="2026-07-16"
+                                    required />
+
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="btn btn-warning w-100">
+
+                                Apply Rate Rule
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Price Schedule -->
+            <div class="col-12 col-lg-8">
+
+                <div class="card bg-dark border-secondary border-opacity-25 overflow-hidden">
+
+                    <div class="card-header bg-dark border-secondary border-opacity-25 px-3 px-md-4 py-3">
+
+                        <h5 class="small text-secondary text-uppercase fw-semibold mb-0">
+                            Active Price Schedules
+                        </h5>
+
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table class="table table-dark table-hover align-middle mb-0">
+
+                            <thead>
+                                <tr class="text-secondary small text-uppercase">
+
+                                    <th class="ps-4 py-3">
+                                        Price (Per Night)
+                                    </th>
+
+                                    <th class="py-3">
+                                        Effective Start
+                                    </th>
+
+                                    <th class="py-3">
+                                        Effective End
+                                    </th>
+
+                                    <th class="text-end pe-4 py-3">
+                                        Actions
+                                    </th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @if (Model.SelectedPrices.Any())
+                                {
+                                    @foreach (var price in Model.SelectedPrices)
+                                    {
+                                        <tr>
+
+                                            <td class="ps-4 fw-semibold text-warning">
+                                                $@price.Cost.ToString("F2")
+                                            </td>
+
+                                            <td class="text-light">
+                                                @price.Start.ToShortDateString()
+                                            </td>
+
+                                            <td class="text-light">
+                                                @price.End.ToShortDateString()
+                                            </td>
+
+                                            <td class="text-end pe-4">
+
+                                                <form
+                                                    method="post"
+                                                    asp-page-handler="DeletePrice"
+                                                    asp-route-priceId="@price.Id"
+                                                    asp-route-siteId="@Model.ActiveSiteId"
+                                                    class="d-inline">
+
+                                                    <button
+                                                        type="submit"
+                                                        class="btn btn-sm btn-outline-danger">
+
+                                                        Remove
+
+                                                    </button>
+
+                                                </form>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+
+                                        <td
+                                            colspan="4"
+                                            class="text-center text-secondary py-5">
+
+                                            No dynamic rates configured for this site.
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
 </div>

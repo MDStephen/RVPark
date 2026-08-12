@@ -25,7 +25,7 @@ public class SeedTestDataModel : PageModel
     {
         try
         {
-            // Clear existing data
+            // Clean the database of any non-essential data before reseeding.
             _db.Payments.RemoveRange(_db.Payments);
             _db.Reservations.RemoveRange(_db.Reservations);
             _db.SitePhotos.RemoveRange(_db.SitePhotos);
@@ -37,35 +37,31 @@ public class SeedTestDataModel : PageModel
             _db.Users.RemoveRange(_db.Users);
             await _db.SaveChangesAsync();
 
-            // Seed Users
-            var users = new List<Users>
+            // Seed the seed customer. Every pre-seeded reservation below books
+            // under this single user, per the demo setup requirements.
+            var seedCustomer = new Users
             {
-                new() { userId = 1, firstName = "John", lastName = "Smith", emailAddress = "john.smith@example.com", phoneNumber = "555-0101", address = "123 Main St, Ogden, UT"},
-                new() { userId = 2, firstName = "Jane", lastName = "Doe", emailAddress = "jane.doe@example.com", phoneNumber = "555-0102", address = "456 Oak Ave, Layton, UT"},
-                new() { userId = 3, firstName = "Robert", lastName = "Johnson", emailAddress = "robert.j@example.com", phoneNumber = "555-0103", address = "789 Pine Rd, Clearfield, UT"},
-                new() { userId = 4, firstName = "Emily", lastName = "Davis", emailAddress = "emily.d@example.com", phoneNumber = "555-0104", address = "321 Elm St, Roy, UT"},
-                new() { userId = 5, firstName = "Michael", lastName = "Wilson", emailAddress = "michael.w@example.com", phoneNumber = "555-0105", address = "654 Maple Dr, Syracuse, UT"}
+                userId = 1,
+                firstName = "John",
+                lastName = "Smith",
+                emailAddress = "johnsmith@example.com",
+                phoneNumber = "555-0101",
+                address = "123 Main St, Ogden, UT"
             };
-            _db.Users.AddRange(users);
+            _db.Users.Add(seedCustomer);
 
-            // Seed UserAccounts (customer logins) matching the Users above.
-            // All share ONE known test password so the team can pass credentials
-            // around. Passwords are BCrypt-hashed, exactly like real sign-ups, and
-            // IsEmailVerified is true so these accounts work even if the login page
-            // ever starts requiring a verified email.
             const string testPassword = "password123";
-            var userAccounts = new List<UserAccount>
+            var seedCustomerAccount = new UserAccount
             {
-                new() { UserId = 1, Username = "john.smith@example.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true },
-                new() { UserId = 2, Username = "jane.doe@example.com",   PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true },
-                new() { UserId = 3, Username = "robert.j@example.com",   PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true },
-                new() { UserId = 4, Username = "emily.d@example.com",    PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true },
-                new() { UserId = 5, Username = "michael.w@example.com",  PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword), IsEmailVerified = true }
+                UserId = seedCustomer.userId,
+                Username = seedCustomer.emailAddress,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(testPassword),
+                IsEmailVerified = true
             };
-            _db.UserAccounts.AddRange(userAccounts);
+            _db.UserAccounts.Add(seedCustomerAccount);
 
-            // Seed Employees
-            // NOTE: dateOfBirth is a non-nullable DateTime with no default set - leaving it
+            // One admin and one employee account.
+            // NOTE: dateOfBirth is a non-nullable DateTime with no default set leaving it
             // unset means DateTime.MinValue (0001-01-01), which SQL Server's `datetime` column
             // can't store (valid range starts 1753-01-01). This was the actual seeding failure.
             var employees = new List<Employee>
@@ -75,7 +71,7 @@ public class SeedTestDataModel : PageModel
             };
             _db.Employees.AddRange(employees);
 
-            // Seed Pricing
+            // Seed Pricing - all fees and multipliers in one row (single-row table).
             var pricing = new Pricing
             {
                 pricingId = 1,
@@ -92,21 +88,29 @@ public class SeedTestDataModel : PageModel
             };
             _db.Pricing.Add(pricing);
 
-            // Seed Sites
+            // Seed Sites - every site type represented, 2-3 sites each.
             var sites = new List<DbSite>
             {
+                // Full Hookup (3)
                 new() { SiteNumber = "A1", Category = "Full Hookup", IsAvailable = true },
                 new() { SiteNumber = "A2", Category = "Full Hookup", IsAvailable = true },
                 new() { SiteNumber = "A3", Category = "Full Hookup", IsAvailable = false },
+                // Standard (3)
                 new() { SiteNumber = "B1", Category = "Standard", IsAvailable = true },
                 new() { SiteNumber = "B2", Category = "Standard", IsAvailable = true },
                 new() { SiteNumber = "B3", Category = "Standard", IsAvailable = true },
+                // Premium (2)
                 new() { SiteNumber = "C1", Category = "Premium", IsAvailable = true },
                 new() { SiteNumber = "C2", Category = "Premium", IsAvailable = false },
+                // Tent (2)
                 new() { SiteNumber = "T1", Category = "Tent", IsAvailable = true },
                 new() { SiteNumber = "T2", Category = "Tent", IsAvailable = true },
+                // Overflow (2)
                 new() { SiteNumber = "O1", Category = "Overflow", IsAvailable = true },
-                new() { SiteNumber = "S1", Category = "Dry Storage", IsAvailable = true }
+                new() { SiteNumber = "O2", Category = "Overflow", IsAvailable = true },
+                // Dry Storage (2)
+                new() { SiteNumber = "S1", Category = "Dry Storage", IsAvailable = true },
+                new() { SiteNumber = "S2", Category = "Dry Storage", IsAvailable = true }
             };
             _db.Sites.AddRange(sites);
             await _db.SaveChangesAsync(); // sites now have real DB-generated Ids
@@ -116,8 +120,18 @@ public class SeedTestDataModel : PageModel
             {
                 new() { DbSiteId = sites[0].Id, PhotoUrl = "/images/site-a1.jpg" },
                 new() { DbSiteId = sites[1].Id, PhotoUrl = "/images/site-a2.jpg" },
+                new() { DbSiteId = sites[2].Id, PhotoUrl = "/images/site-a3.jpg" },
                 new() { DbSiteId = sites[3].Id, PhotoUrl = "/images/site-b1.jpg" },
-                new() { DbSiteId = sites[6].Id, PhotoUrl = "/images/site-c1.jpg" }
+                new() { DbSiteId = sites[4].Id, PhotoUrl = "/images/site-b2.jpg" },
+                new() { DbSiteId = sites[5].Id, PhotoUrl = "/images/site-b3.jpg" },
+                new() { DbSiteId = sites[6].Id, PhotoUrl = "/images/site-c1.jpg" },
+                new() { DbSiteId = sites[7].Id, PhotoUrl = "/images/site-c2.jpg" },
+                new() { DbSiteId = sites[8].Id, PhotoUrl = "/images/site-t1.jpg" },
+                new() { DbSiteId = sites[9].Id, PhotoUrl = "/images/site-t1.jpg" },
+                new() { DbSiteId = sites[10].Id, PhotoUrl = "/images/site-o1.jpg" },
+                new() { DbSiteId = sites[11].Id, PhotoUrl = "/images/site-o1.jpg" },
+                new() { DbSiteId = sites[12].Id, PhotoUrl = "/images/site-s1.jpg" },
+                new() { DbSiteId = sites[13].Id, PhotoUrl = "/images/site-s1.jpg" }
             };
             _db.SitePhotos.AddRange(photos);
 
@@ -125,45 +139,53 @@ public class SeedTestDataModel : PageModel
             var sitePrices = new List<DbSitePrice>
             {
                 new() { DbSiteId = sites[0].Id, Cost = 45.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
-                new() { DbSiteId = sites[1].Id, Cost = 45.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
                 new() { DbSiteId = sites[3].Id, Cost = 40.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
-                new() { DbSiteId = sites[6].Id, Cost = 55.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) }
+                new() { DbSiteId = sites[6].Id, Cost = 55.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
+                new() { DbSiteId = sites[8].Id, Cost = 30.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
+                new() { DbSiteId = sites[10].Id, Cost = 25.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) },
+                new() { DbSiteId = sites[12].Id, Cost = 60.00m, Start = DateTime.Today, End = DateTime.Today.AddMonths(6) }
             };
             _db.SitePrices.AddRange(sitePrices);
             await _db.SaveChangesAsync();
 
-            // Seed Reservations (uses the real generated User/Site Ids)
+            // Seed Reservations - 12, all under the single seed customer, spanning
+            // past/current/future dates across every status the filter system needs
+            // to demonstrate (Completed, Cancelled, Confirmed, Pending, Upcoming).
             var today = DateTime.Today;
+            var uid = seedCustomer.userId;
             var reservations = new List<Reservations>
             {
-                new() { UserId = users[0].userId, SiteId = sites[0].Id, StartDate = today.AddDays(5), EndDate = today.AddDays(7), Status = "Confirmed", TotalCost = 90.00m, Adults = 2, Children = 0, Pets = 1, Notes = "Early arrival requested" },
-                new() { UserId = users[1].userId, SiteId = sites[3].Id, StartDate = today.AddDays(10), EndDate = today.AddDays(12), Status = "Pending", TotalCost = 80.00m, Adults = 1, Children = 2, Pets = 0, Notes = "" },
-                new() { UserId = users[2].userId, SiteId = sites[4].Id, StartDate = today.AddDays(-2), EndDate = today.AddDays(2), Status = "Confirmed", TotalCost = 160.00m, Adults = 2, Children = 1, Pets = 2, Notes = "Extended stay" },
-                new() { UserId = users[3].userId, SiteId = sites[6].Id, StartDate = today.AddDays(15), EndDate = today.AddDays(17), Status = "Upcoming", TotalCost = 110.00m, Adults = 1, Children = 0, Pets = 0, Notes = "" },
-                new() { UserId = users[4].userId, SiteId = sites[1].Id, StartDate = today.AddDays(20), EndDate = today.AddDays(25), Status = "Upcoming", TotalCost = 225.00m, Adults = 3, Children = 2, Pets = 1, Notes = "Family reunion" }
+                new() { UserId = uid, SiteId = sites[0].Id,  StartDate = today.AddDays(-30), EndDate = today.AddDays(-28), Status = "Completed", TotalCost = 90.00m,  Adults = 2, Children = 0, Pets = 1, Notes = "Past stay" },
+                new() { UserId = uid, SiteId = sites[3].Id,  StartDate = today.AddDays(-20), EndDate = today.AddDays(-18), Status = "Completed", TotalCost = 80.00m,  Adults = 1, Children = 2, Pets = 0, Notes = "" },
+                new() { UserId = uid, SiteId = sites[8].Id,  StartDate = today.AddDays(-15), EndDate = today.AddDays(-13), Status = "Cancelled", TotalCost = 60.00m,  Adults = 2, Children = 0, Pets = 0, Notes = "Cancelled by guest" },
+                new() { UserId = uid, SiteId = sites[6].Id,  StartDate = today.AddDays(8),   EndDate = today.AddDays(10),  Status = "Cancelled", TotalCost = 110.00m, Adults = 2, Children = 1, Pets = 0, Notes = "Cancelled - schedule conflict" },
+                new() { UserId = uid, SiteId = sites[4].Id,  StartDate = today.AddDays(-2),  EndDate = today.AddDays(2),   Status = "Confirmed", TotalCost = 160.00m, Adults = 2, Children = 1, Pets = 2, Notes = "Extended stay" },
+                new() { UserId = uid, SiteId = sites[1].Id,  StartDate = today.AddDays(5),   EndDate = today.AddDays(7),   Status = "Confirmed", TotalCost = 90.00m,  Adults = 2, Children = 0, Pets = 1, Notes = "Early arrival requested" },
+                new() { UserId = uid, SiteId = sites[9].Id,  StartDate = today.AddDays(12),  EndDate = today.AddDays(14),  Status = "Confirmed", TotalCost = 60.00m,  Adults = 1, Children = 0, Pets = 0, Notes = "" },
+                new() { UserId = uid, SiteId = sites[10].Id, StartDate = today.AddDays(10),  EndDate = today.AddDays(12),  Status = "Pending",   TotalCost = 50.00m,  Adults = 1, Children = 2, Pets = 0, Notes = "" },
+                new() { UserId = uid, SiteId = sites[12].Id, StartDate = today.AddDays(25),  EndDate = today.AddDays(27),  Status = "Pending",   TotalCost = 120.00m, Adults = 1, Children = 0, Pets = 0, Notes = "Storage booking" },
+                new() { UserId = uid, SiteId = sites[7].Id,  StartDate = today.AddDays(15),  EndDate = today.AddDays(17),  Status = "Upcoming",  TotalCost = 110.00m, Adults = 1, Children = 0, Pets = 0, Notes = "" },
+                new() { UserId = uid, SiteId = sites[2].Id,  StartDate = today.AddDays(20),  EndDate = today.AddDays(25),  Status = "Upcoming",  TotalCost = 225.00m, Adults = 3, Children = 2, Pets = 1, Notes = "Family reunion" },
+                new() { UserId = uid, SiteId = sites[5].Id,  StartDate = today.AddDays(40),  EndDate = today.AddDays(45),  Status = "Upcoming",  TotalCost = 200.00m, Adults = 2, Children = 0, Pets = 0, Notes = "Booked far in advance" }
             };
             _db.Reservations.AddRange(reservations);
             await _db.SaveChangesAsync(); // reservations now have real generated Ids
 
-            // Seed Payments - linked to the ACTUAL generated Reservation Ids, not hardcoded
-            // guesses (1, 3). The hardcoded version silently pointed at the wrong reservations,
-            // or none at all, on every re-seed after the first.
             var payments = new List<asp_net_web_app.Data.Payment>
             {
-                new() { amount = 90.00m, paidAt = DateTime.UtcNow, stripeId = "pi_test_001", paymentStatus = "paid", ReservationId = reservations[0].Id },
-                new() { amount = 160.00m, paidAt = DateTime.UtcNow, stripeId = "pi_test_002", paymentStatus = "paid", ReservationId = reservations[2].Id }
+                new() { amount = 90.00m,  paidAt = DateTime.UtcNow, stripeId = "pi_test_001", paymentStatus = "paid", ReservationId = reservations[0].Id },
+                new() { amount = 160.00m, paidAt = DateTime.UtcNow, stripeId = "pi_test_002", paymentStatus = "paid", ReservationId = reservations[4].Id }
             };
             _db.Payments.AddRange(payments);
 
             await _db.SaveChangesAsync();
 
-            Message = $"Successfully seeded test data: {users.Count} users, {employees.Count} employees, {sites.Count} sites, {reservations.Count} reservations, {payments.Count} payments.";
+            Message = $"Successfully seeded test data: 1 admin, 1 employee, 1 seed customer, {sites.Count} sites, {reservations.Count} reservations, {payments.Count} payments.";
             Success = true;
         }
         catch (Exception ex)
         {
-            // ex.Message on a DbUpdateException is always the same generic string - the real
-            // cause (the actual SQL error) is in the inner exception chain.
+            // the actual SQL error is in the inner exception chain, if occurring
             var innermost = ex;
             while (innermost.InnerException != null)
                 innermost = innermost.InnerException;
