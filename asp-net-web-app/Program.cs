@@ -55,62 +55,21 @@ app.UseStaticFiles();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<DatabaseWrapper>();
-    db.Database.Migrate();
-    if (!db.Users.Any())
-    {
-        var seedNow = DateTime.Now;
-        db.Users.AddRange(
-            new Users { firstName = "Jane", lastName = "Doe", emailAddress = "jane@example.com", phoneNumber = "555 555-1234", address = "123 Main St", CreatedAt = seedNow, LastModifiedAt = seedNow },
-            new Users { firstName = "John", lastName = "Smith", emailAddress = "john@example.com", phoneNumber = "555 555-5678", address = "456 Oak Ave", CreatedAt = seedNow, LastModifiedAt = seedNow },
-            new Users { firstName = "Bob", lastName = "Johnson", emailAddress = "bob@example.com", phoneNumber = "555 555-2468", address = "987 Center St", CreatedAt = seedNow, LastModifiedAt = seedNow }
-        );
-        db.SaveChanges();
-    }
 
-    if (!db.Reservations.Any())
+    if (!db.Employees.Any(e => e.username == "admin"))
     {
-        if (!db.Sites.Any())
+        db.Employees.Add(new Employee
         {
-            db.Sites.AddRange(
-                new DbSite { SiteNumber = "A1", Category = "Standard", IsAvailable = true },
-                new DbSite { SiteNumber = "A2", Category = "Standard", IsAvailable = true },
-                new DbSite { SiteNumber = "B1", Category = "Premium", IsAvailable = true }
-            );
-            db.SaveChanges();
-        }
-
-        var seededSites = db.Sites.OrderBy(s => s.Id).Take(3).Select(s => s.Id).ToList();
-        var firstUserId = db.Users.OrderBy(u => u.userId).Select(u => u.userId).FirstOrDefault();
-
-        db.Reservations.AddRange(
-            new Reservations
-            {
-                UserId = firstUserId,
-                SiteId = seededSites.Count > 0 ? seededSites[0] : 1,
-                StartDate = DateTime.Today.AddDays(7),
-                EndDate = DateTime.Today.AddDays(10),
-                Status = "Upcoming",
-                TotalCost = 150.00m
-            },
-            new Reservations
-            {
-                UserId = firstUserId,
-                SiteId = seededSites.Count > 1 ? seededSites[1] : 2,
-                StartDate = DateTime.Today.AddDays(14),
-                EndDate = DateTime.Today.AddDays(16),
-                Status = "Upcoming",
-                TotalCost = 90.00m
-            },
-            new Reservations
-            {
-                UserId = firstUserId,
-                SiteId = seededSites.Count > 2 ? seededSites[2] : 3,
-                StartDate = DateTime.Today.AddDays(21),
-                EndDate = DateTime.Today.AddDays(25),
-                Status = "Upcoming",
-                TotalCost = 220.00m
-            }
-        );
+            firstName = "Admin",
+            lastName = "Account",
+            username = "admin",
+            password = "ChangeMe123!",   // see note below
+            role = "Admin",              // see note below
+            isLocked = false,
+            dateOfBirth = new DateTime(2000, 1, 1),
+            CreatedAt = DateTime.UtcNow,
+            LastModifiedAt = DateTime.UtcNow
+        });
         db.SaveChanges();
     }
 }
