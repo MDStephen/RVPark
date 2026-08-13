@@ -52,28 +52,6 @@ var app = builder.Build();
 
 app.UseStaticFiles();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<DatabaseWrapper>();
-
-    if (!db.Employees.Any(e => e.username == "admin"))
-    {
-        db.Employees.Add(new Employee
-        {
-            firstName = "Admin",
-            lastName = "Account",
-            username = "admin",
-            password = "admin123",
-            role = "Admin",
-            isLocked = false,
-            dateOfBirth = new DateTime(2000, 1, 1),
-            CreatedAt = DateTime.UtcNow,
-            LastModifiedAt = DateTime.UtcNow
-        });
-        db.SaveChanges();
-    }
-}
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -106,6 +84,28 @@ using (var scope = app.Services.CreateScope())
             lastUpdated = DateTime.Now
         });
 
+        db.SaveChanges();
+    }
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DatabaseWrapper>();
+
+    if (!db.Employees.Any(e => e.username == "admin"))
+    {
+        db.Employees.Add(new Employee
+        {
+            firstName = "Admin",
+            lastName = "Account",
+            username = "admin",
+            password = "admin123",
+            role = "Admin",
+            isLocked = false,
+            dateOfBirth = new DateTime(2000, 1, 1),
+            CreatedAt = DateTime.UtcNow,
+            LastModifiedAt = DateTime.UtcNow
+        });
         db.SaveChanges();
     }
 }
